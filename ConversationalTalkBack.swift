@@ -30,11 +30,20 @@ class ConversationalAvatarView: NSView {
     var isBeingDragged = false
     var dragStartPoint: NSPoint = NSPoint.zero
     
+    // Bouncing motion (zigzag pattern)
+    var isFloating = true
+    var floatingTimer: Timer?
+    var velocityX: CGFloat = 1.0  // Reduced from 2.0
+    var velocityY: CGFloat = 0.8  // Reduced from 1.5
+    var zigzagOffset: CGFloat = 0.0
+    var zigzagDirection: CGFloat = 1.0
+    var lastInteractionTime: Date?
+    
     // Audio recording
     var audioRecorder: AVAudioRecorder?
     var recordingURL: URL?
     
-    // APIs - REPLACE THESE WITH YOUR OWN API KEYS
+    // APIs - REPLACE WITH YOUR OWN API KEYS
     // Get OpenAI key from: https://platform.openai.com/account/api-keys
     // Get ElevenLabs key from: https://elevenlabs.io/
     let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
@@ -58,9 +67,12 @@ class ConversationalAvatarView: NSView {
         // Start activity monitoring
         self.startActivityMonitoring()
         
+        // Start floating motion
+        self.startFloating()
+        
         // Start initial message
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.askOpenAI(prompt: "Introduce yourself as TalkBack, the conversational AI companion. Be sassy and dramatic. Tell me to click and hold to talk to you.")
+            self.askOpenAI(prompt: "Introduce yourself as TalkBack, a floating AI balloon. Say you're just floating around and will respond if I bother you. Be sassy and short!")
         }
     }
     
@@ -340,8 +352,92 @@ class ConversationalAvatarView: NSView {
         }
     }
     
+    func startFloating() {
+        print("🎈 Starting floating motion...")
+        floatingTimer = Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { [weak self] _ in
+            self?.updateFloatingPosition()
+        }
+    }
+    
+    func stopFloating() {
+        print("🛑 Stopping floating motion...")
+        floatingTimer?.invalidate()
+        floatingTimer = nil
+        isFloating = false
+    }
+    
+    func resumeFloatingAfterDelay() {
+        // Resume floating 5 seconds after last interaction
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            guard let self = self else { return }
+            
+            if let lastTime = self.lastInteractionTime,
+               Date().timeIntervalSince(lastTime) >= 5.0 {
+                print("🎈 Resuming floating motion...")
+                self.isFloating = true
+                if self.floatingTimer == nil {
+                    self.startFloating()
+                }
+            }
+        }
+    }
+    
+    func updateFloatingPosition() {
+        guard isFloating, !isRecording, !isBeingDragged, let window = self.window else { return }
+        
+        // Get current position
+        var frame = window.frame
+        
+        // Get screen bounds
+        guard let screen = NSScreen.main else { return }
+        let screenFrame = screen.visibleFrame
+        
+        // Update zigzag offset (creates side-to-side motion) - slower and smoother
+        zigzagOffset += zigzagDirection * 0.15  // Reduced from 0.3
+        if abs(zigzagOffset) > 20 {  // Reduced amplitude from 30
+            zigzagDirection *= -1
+        }
+        
+        // Update position with zigzag pattern
+        frame.origin.x += velocityX + zigzagOffset * 0.08  // Reduced from 0.1
+        frame.origin.y += velocityY
+        
+        // Bounce off edges
+        if frame.origin.x <= screenFrame.minX {
+            frame.origin.x = screenFrame.minX
+            velocityX = abs(velocityX) + CGFloat.random(in: -0.5...0.5)
+            // Reverse zigzag on bounce
+            zigzagDirection *= -1
+        } else if frame.origin.x + frame.width >= screenFrame.maxX {
+            frame.origin.x = screenFrame.maxX - frame.width
+            velocityX = -abs(velocityX) + CGFloat.random(in: -0.5...0.5)
+            // Reverse zigzag on bounce
+            zigzagDirection *= -1
+        }
+        
+        if frame.origin.y <= screenFrame.minY {
+            frame.origin.y = screenFrame.minY
+            velocityY = abs(velocityY) + CGFloat.random(in: -0.5...0.5)
+        } else if frame.origin.y + frame.height >= screenFrame.maxY {
+            frame.origin.y = screenFrame.maxY - frame.height
+            velocityY = -abs(velocityY) + CGFloat.random(in: -0.5...0.5)
+        }
+        
+        // Keep velocity within reasonable bounds (slower limits)
+        velocityX = max(min(velocityX, 2.0), -2.0)  // Reduced from 4.0
+        velocityY = max(min(velocityY, 2.0), -2.0)  // Reduced from 4.0
+        
+        // Move window
+        window.setFrameOrigin(frame.origin)
+    }
+    
     func startRecording() {
         print("🎤 Starting recording...")
+        
+        // Stop floating while recording
+        isFloating = false
+        lastInteractionTime = Date()
+        
         isRecording = true
         isListening = true
         message = "Recording... Speak now! 🎤"
@@ -382,6 +478,9 @@ class ConversationalAvatarView: NSView {
         needsDisplay = true
         
         audioRecorder?.stop()
+        
+        // Resume floating after 5 seconds
+        resumeFloatingAfterDelay()
         
         // Send to ElevenLabs Speech-to-Text
         if let audioURL = recordingURL {
@@ -493,7 +592,7 @@ class ConversationalAvatarView: NSView {
             "\(msg["role"]!): \(msg["content"]!)"
         }.joined(separator: "\n")
         
-        let prompt = "User said: \(text)\n\nChat history:\n\(historyContext)\n\nRespond with sass and attitude! Keep it conversational!"
+        let prompt = "User said: \(text)\n\nChat history:\n\(historyContext)\n\nYou're a floating AI balloon and the user just disturbed you while you were floating around. Respond SHORT and annoyed like 'Why'd you disturb me? I was flying!' Be sassy and dramatic but keep it under 2 sentences!"
         
         askOpenAI(prompt: prompt)
     }
