@@ -1,0 +1,41 @@
+# Compiled files
+ConversationalTalkBack
+CustomIconTalkBack
+SimpleTrashTalkBack
+WorkingTrashTalkBack
+WhisperTalkBack
+MacOSTalkBack
+UltraSimpleTalkBack
+MinimalTalkBack
+BasicTalkBack
+VoiceTalkBack
+StepByStepTalkBack
+WorkingTalkBack
+*.o
+*.dSYM
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.swp
+*.tmp
+*~
+.*.sw[a-p]
+
+# API Keys (keep these secret!)
+*_keys.swift
+secrets.swift
+
+# Audio recordings
+*.m4a
+*.wav
+recording.*
+
