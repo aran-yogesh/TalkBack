@@ -15,7 +15,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Natural conversation flow with real-time transcription
 
 ### 🗣️ **Sassy AI Responses**
-- **OpenAI GPT-4o-mini** powered responses
+- **OpenAI GPT-4o** powered responses
 - **ElevenLabs Text-to-Speech** with Ivanna's voice
 - Attitude-filled, personality-driven replies
 - Short, snappy responses that pack a punch
@@ -37,15 +37,35 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Drop in trash to quit (the only way to close it!)
 - Adds a fun, mischievous interaction
 
+### 👁️ **Vision-Based Behavior Monitoring**
+- **Gemini 2.5 Flash** watches you through your webcam
+- Detects when you're:
+  - 👀 Looking away from the screen
+  - 😊😤😐 Your emotions (happy, frustrated, confused)
+  - 🧐 Focus level (distracted, working seriously)
+  - 📱 Using your phone
+- Delivers sassy roasts based on your behavior
+- Automatic analysis every 15 seconds
+
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+- **Watches your terminal for code execution results**
+- **Auto-roasts you when you mess up!**
+  - 🔥 **2+ errors**: Full savage roast mode
+  - 😏 **1 error**: Light sass and sarcasm
+  - 💅 **Success**: Sassy compliment with attitude
+- Integrates with Cursor IDE workflow
+- Real-time feedback via Ivanna's voice
+
 ## 🛠️ Tech Stack
 
 - **Language**: Swift 6.2
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
-  - [OpenAI GPT-4o-mini](https://platform.openai.com/) - Conversational AI
+  - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
+  - [Gemini 2.5 Flash](https://aistudio.google.com/) - Vision & behavior analysis
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
-- **Audio**: AVFoundation (NSSound, AVAudioRecorder)
+- **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
 
 ## 🚀 Quick Start
 
@@ -56,6 +76,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 3. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
+   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -67,12 +88,28 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 2. **Configure API Keys**:
    
-   Open `ConversationalTalkBack.swift` and replace the placeholder keys:
+   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
    ```swift
-   let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
-   let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
-   let elevenLabsVoiceID = "XB0fDUnXU5powFXDhCwa" // Ivanna's voice
+   struct Config {
+       static let openAIAPIKey: String = {
+           return "YOUR_OPENAI_API_KEY_HERE"
+       }()
+       
+       static let elevenLabsAPIKey: String = {
+           return "YOUR_ELEVENLABS_API_KEY_HERE"
+       }()
+       
+       static let elevenLabsVoiceID: String = {
+           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
+       }()
+       
+       static let geminiAPIKey: String = {
+           return "YOUR_GEMINI_API_KEY_HERE"
+       }()
+   }
    ```
+   
+   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
 
 3. **Compile the app**:
    ```bash
@@ -88,14 +125,52 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## 🎮 How to Use
 
+### Basic Usage
+
 1. **Start the App**: Run `./ConversationalTalkBack`
-2. **Talk to TalkBack**:
+2. **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
+3. **Talk to TalkBack**:
    - **Click and HOLD** the avatar
    - **Speak** your message
    - **Release** to send
-3. **Listen**: TalkBack responds with Ivanna's voice and attitude
-4. **Drag**: Move the avatar anywhere on your screen
-5. **Quit**: Drag avatar near the menu bar → drop in trash can
+4. **Listen**: TalkBack responds with Ivanna's voice and attitude
+5. **Get Roasted**: TalkBack monitors your behavior every 15 seconds:
+   - Looking away? → "HEY! Where are you going?"
+   - Using your phone? → "Seriously? TikTok is more important than me?"
+   - Looking stressed? → "Uh oh, code not compiling?"
+6. **Drag**: Move the avatar anywhere on your screen
+7. **Quit**: Drag avatar near the menu bar → drop in trash can
+
+### 🔥 MCP Code Monitoring (Cursor IDE Integration)
+
+TalkBack can watch your terminal and roast you when your code fails! Here's how:
+
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+
+2. **Run your code with the MCP tester**:
+   ```bash
+   # Test with a script that has errors (will trigger full roast 🔥)
+   python3 test_mcp_roast.py 'python3 your_broken_script.py'
+   
+   # Test with successful code (will get sassy compliment 💅)
+   python3 test_mcp_roast.py 'python3 your_working_script.py'
+   
+   # Test with any command
+   python3 test_mcp_roast.py 'swift your_code.swift'
+   ```
+
+3. **TalkBack will roast you based on errors**:
+   - ✅ **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
+   - 😏 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
+   - 🔥 **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
+
+4. **Example test**:
+   ```bash
+   # This will trigger a savage roast
+   python3 test_mcp_roast.py 'python3 broken_code.py'
+   
+   # TalkBack will speak the roast with Ivanna's voice!
+   ```
 
 ## 📋 API Endpoints Used
 
@@ -111,11 +186,18 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
 - **Output**: MP3 audio
 
-### OpenAI GPT-4o-mini
+### OpenAI GPT-4o
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
-- **Model**: `gpt-4o-mini`
+- **Model**: `gpt-4o`
 - **Temperature**: 0.9 (for sassy responses)
 - **Max Tokens**: 50 (short, snappy replies)
+
+### Gemini 2.5 Flash (Vision)
+- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
+- **Model**: `gemini-2.0-flash-exp`
+- **Input**: Base64-encoded JPEG images from webcam
+- **Output**: Behavior analysis (gaze, emotion, focus, distraction detection)
+- **Frequency**: Every 15 seconds
 
 ## 🎭 Personality
 
@@ -139,7 +221,7 @@ TalkBack is designed to be:
 - Verify ElevenLabs API key is valid
 
 ### Rate Limit Errors?
-- OpenAI free tier: 3 requests per minute
+- OpenAI usage limits: Check your account for current limits
 - Add payment method or wait 20 seconds between requests
 
 ### Crashes on Launch?

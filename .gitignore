@@ -33,6 +33,8 @@ WorkingTalkBack
 # API Keys (keep these secret!)
 *_keys.swift
 secrets.swift
+.env
+config.swift
 
 # Audio recordings
 *.m4a

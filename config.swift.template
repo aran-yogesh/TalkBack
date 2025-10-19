@@ -1,0 +1,22 @@
+import Foundation
+
+// 🔐 API Keys Configuration Template
+// Copy this file to config.swift and add your actual API keys
+
+struct Config {
+    // OpenAI API Key (for GPT-4o-mini chat responses)
+    // Get it from: https://platform.openai.com/account/api-keys
+    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+    
+    // ElevenLabs API Key (for voice synthesis and speech-to-text)
+    // Get it from: https://elevenlabs.io/
+    static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+    
+    // ElevenLabs Voice ID (Ivanna's voice)
+    static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+    
+    // Gemini API Key (for vision/behavior monitoring)
+    // Get it from: https://aistudio.google.com/app/apikey
+    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
+}
+
