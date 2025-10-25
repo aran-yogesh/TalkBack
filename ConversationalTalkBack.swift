@@ -2,13 +2,13 @@ import Cocoa
 import AppKit
 import Foundation
 import AVFoundation
+import ApplicationServices
 
 // 🔐 API Keys Configuration
-// Load from config.swift if available, otherwise use placeholders
+// Load from environment variables - REQUIRED
 struct Config {
-    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
-    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
-    static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+    static let openAIAPIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+    static let elevenLabsAPIKey = ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"] ?? ""
     static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9" // Ivanna
 }
 
@@ -26,14 +26,16 @@ class ConversationalFloatingAvatarWindow: NSWindow {
     }
 }
 
-class ConversationalAvatarView: NSView {
-    var message = "Click and hold to talk! 🎤"
+class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
+    var message = "I'm listening... 👂"
     var eyeOffset: NSPoint = NSPoint(x: 0, y: 0)
     var isThinking = false
     var isListening = false
     var isRecording = false
+    var isSpeaking = false
     var lastActivity = Date()
     var speechSynthesizer = AVSpeechSynthesizer()
+    var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
     var trashCanVisible = false
     var isBeingDragged = false
@@ -42,35 +44,56 @@ class ConversationalAvatarView: NSView {
     // Bouncing motion (zigzag pattern)
     var isFloating = true
     var floatingTimer: Timer?
-    var velocityX: CGFloat = 1.0  // Reduced from 2.0
-    var velocityY: CGFloat = 0.8  // Reduced from 1.5
+    var velocityX: CGFloat = 1.0
+    var velocityY: CGFloat = 0.8
     var zigzagOffset: CGFloat = 0.0
     var zigzagDirection: CGFloat = 1.0
     var lastInteractionTime: Date?
     
-    // Audio recording
-    var audioRecorder: AVAudioRecorder?
-    var recordingURL: URL?
+    // Continuous Audio Processing
+    var audioEngine: AVAudioEngine?
+    var inputNode: AVAudioInputNode?
+    var isContinuousListening = false
+    var voiceActivityTimer: Timer?
+    var silenceDuration: TimeInterval = 0
+    let silenceThreshold: TimeInterval = 2.0 // Stop listening after 2 seconds of silence
+    var audioBuffer: Data = Data()
+    var isProcessingAudio = false
+    var inputSampleRate: Double = 16000
+    var inputChannelCount: UInt16 = 1
     
-    // Gemini Vision (Background Monitoring)
-    var captureSession: AVCaptureSession?
-    var videoOutput: AVCaptureVideoDataOutput?
-    var latestCameraImage: NSImage?
-    var visionAnalysisTimer: Timer?
-    var lastVisionAnalysis: Date?
-    var cameraFrameCount: Int = 0
+    // Teaching assistant mode
+    var teacherModeEnabled: Bool = true
+    
+    // Assignment monitoring
+    var assignmentAlertsEnabled: Bool = false
+    var assignmentTimer: Timer?
+    var lastAssignmentMessageID: String?
+    var alertedAssignmentIDs: Set<String> = []
+    let assignmentCheckInterval: TimeInterval = 180 // 3 minutes
+    let assignmentKeywords = ["assignment", "homework", "project", "due", "submission", "quiz", "exam", "paper", "essay", "lab"]
+    let assignmentDomains = ["edu", "canvas", "blackboard"]
+    
+    // Rate limiting and guardrails
+    var lastOpenAICall: Date = Date.distantPast
+    var lastSTTCall: Date = Date.distantPast
+    var lastResponseTime: Date = Date.distantPast
+    let openAICooldown: TimeInterval = 22.0 // Keep below 3 requests per minute (gpt-4o default limit)
+    let STTCooldown: TimeInterval = 5.0 // 5 seconds between STT calls
+    let responseTimeout: TimeInterval = 10.0 // 10 seconds before allowing idle responses
+    let rateLimitBackoff: TimeInterval = 25.0
+    var pendingOpenAIPrompt: String?
+    var openAIRetryTimer: Timer?
+    
+    // Legacy audio recording variables removed - continuous listening handles all audio
     
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
     
-    // APIs - Loaded from config.swift (gitignored)
-    let geminiAPIKey = Config.geminiAPIKey
-    var geminiAPIURL: String {
-        return "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=\(geminiAPIKey)"
-    }
-    
+    // APIs
+    let openAIAPIKey = Config.openAIAPIKey
     let elevenLabsAPIKey = Config.elevenLabsAPIKey
     let elevenLabsVoiceID = Config.elevenLabsVoiceID
     
@@ -91,9 +114,8 @@ class ConversationalAvatarView: NSView {
         // Start floating motion
         self.startFloating()
         
-        // Start Gemini vision monitoring (background behavior detection)
-        self.setupCamera()
-        self.startVisionMonitoring()
+        // Start continuous listening
+        self.startContinuousListening()
         
         // Start MCP monitoring for Cursor IDE roasting 🔥
         self.startMCPMonitoring()
@@ -106,6 +128,167 @@ class ConversationalAvatarView: NSView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func toggleTeacherMode() -> Bool {
+        teacherModeEnabled.toggle()
+        DispatchQueue.main.async {
+            self.message = self.teacherModeEnabled ? "👩‍🏫 Teacher mode on." : "Teacher mode off."
+            self.needsDisplay = true
+        }
+        return teacherModeEnabled
+    }
+    
+    func assignmentAlertsState() -> Bool {
+        return assignmentAlertsEnabled
+    }
+    
+    func toggleAssignmentAlerts() -> Bool {
+        assignmentAlertsEnabled.toggle()
+        if assignmentAlertsEnabled {
+            startAssignmentMonitoring()
+        } else {
+            stopAssignmentMonitoring()
+        }
+        DispatchQueue.main.async {
+            self.message = self.assignmentAlertsEnabled ? "📬 Assignment alerts enabled." : "Assignment alerts disabled."
+            self.needsDisplay = true
+        }
+        return assignmentAlertsEnabled
+    }
+    
+    func startAssignmentMonitoring() {
+        assignmentTimer?.invalidate()
+        assignmentTimer = Timer.scheduledTimer(withTimeInterval: assignmentCheckInterval, repeats: true) { [weak self] _ in
+            self?.checkForAssignmentEmail()
+        }
+        checkForAssignmentEmail()
+    }
+    
+    func stopAssignmentMonitoring() {
+        assignmentTimer?.invalidate()
+        assignmentTimer = nil
+    }
+    
+    struct MailMessage {
+        let subject: String
+        let sender: String
+        let messageID: String
+        let dateString: String
+        let body: String
+    }
+    
+    func checkForAssignmentEmail() {
+        guard assignmentAlertsEnabled else { return }
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let mailMessage = self.fetchLatestMailMessage() else { return }
+            let messageKey = mailMessage.messageID.isEmpty ? "\(mailMessage.subject)_\(mailMessage.dateString)" : mailMessage.messageID
+            
+            if self.alertedAssignmentIDs.contains(messageKey) {
+                return
+            }
+            
+            if self.isAssignmentEmail(mailMessage) {
+                self.alertedAssignmentIDs.insert(messageKey)
+                DispatchQueue.main.async {
+                    self.presentAssignmentAlert(mailMessage)
+                }
+            }
+        }
+    }
+    
+    private func fetchLatestMailMessage() -> MailMessage? {
+        let script = """
+        set maxLen to 1200
+        try
+            tell application "Mail"
+                set targetMailbox to inbox
+                if (count of messages of targetMailbox) is 0 then
+                    return ""
+                end if
+                set latestMessage to last item of (messages of targetMailbox)
+                set messageSubject to subject of latestMessage
+                set messageSender to sender of latestMessage
+                set messageID to message id of latestMessage
+                if messageID is missing value then set messageID to ""
+                set messageDate to date received of latestMessage
+                set messageContent to content of latestMessage
+                if messageContent is missing value then set messageContent to ""
+                if (count messageContent) > maxLen then
+                    set messageContent to text 1 thru maxLen of messageContent
+                end if
+                set delimiter to "|||@@@|||"
+                return messageSubject & delimiter & messageSender & delimiter & messageID & delimiter & (messageDate as string) & delimiter & messageContent
+            end tell
+        on error errText
+            return "ERROR|||@@@|||" & errText
+        end try
+        """
+        
+        let process = Process()
+        process.launchPath = "/usr/bin/osascript"
+        process.arguments = ["-e", script]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+        
+        do {
+            try process.run()
+        } catch {
+            print("📬 AppleScript launch failed: \(error)")
+            return nil
+        }
+        
+        process.waitUntilExit()
+        
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines), !output.isEmpty else {
+            return nil
+        }
+        
+        if output.hasPrefix("ERROR|||@@@|||") {
+            print("📬 AppleScript error: \(output)")
+            return nil
+        }
+        
+        let components = output.components(separatedBy: "|||@@@|||")
+        guard components.count == 5 else {
+            return nil
+        }
+        
+        let subject = components[0]
+        let sender = components[1]
+        let messageID = components[2]
+        let dateString = components[3]
+        let body = components[4]
+        
+        return MailMessage(subject: subject, sender: sender, messageID: messageID, dateString: dateString, body: body)
+    }
+    
+    private func isAssignmentEmail(_ message: MailMessage) -> Bool {
+        let lowerSubject = message.subject.lowercased()
+        let lowerBody = message.body.lowercased()
+        let lowerSender = message.sender.lowercased()
+        
+        let keywordHit = assignmentKeywords.contains { keyword in
+            lowerSubject.contains(keyword) || lowerBody.contains(keyword)
+        }
+        
+        let domainHit = assignmentDomains.contains { domain in
+            lowerSender.contains(domain)
+        }
+        
+        return keywordHit || domainHit
+    }
+    
+    private func presentAssignmentAlert(_ message: MailMessage) {
+        let shortSubject = message.subject.isEmpty ? "New assignment" : message.subject
+        self.message = "📚 Assignment: \(shortSubject)"
+        self.needsDisplay = true
+        self.askOpenAIForAssignmentSummary(mail: message)
     }
     
     override func draw(_ dirtyRect: NSRect) {
@@ -132,6 +315,16 @@ class ConversationalAvatarView: NSView {
         // Draw recording indicator if recording
         if isRecording {
             self.drawRecordingIndicator(in: context)
+        }
+        
+        // Draw listening indicator if continuously listening
+        if isContinuousListening && !isSpeaking {
+            self.drawListeningIndicator(in: context)
+        }
+        
+        // Draw speaking indicator if speaking
+        if isSpeaking {
+            self.drawSpeakingIndicator(in: context)
         }
     }
     
@@ -172,8 +365,8 @@ class ConversationalAvatarView: NSView {
         let leftEye = NSRect(x: leftCompartment.origin.x + eyeOffset.x, y: leftCompartment.origin.y + eyeOffset.y, width: leftCompartment.width, height: leftCompartment.height)
         let rightEye = NSRect(x: rightCompartment.origin.x + eyeOffset.x, y: rightCompartment.origin.y + eyeOffset.y, width: rightCompartment.width, height: rightCompartment.height)
         
-        context.fill(leftEye)
-        context.fill(rightEye)
+            context.fill(leftEye)
+            context.fill(rightEye)
         
         // Draw mouth based on state
         let mouthY = centerY - size/3 - 10
@@ -313,19 +506,11 @@ class ConversationalAvatarView: NSView {
         dragStartPoint = event.locationInWindow
         isBeingDragged = true
         
-        // Start recording audio
-        if !isRecording {
-            startRecording()
-        }
+        // No longer start recording on click - continuous listening handles this
     }
     
     override func mouseDragged(with event: NSEvent) {
         if !isBeingDragged { return }
-        
-        // Stop recording if dragging
-        if isRecording {
-            stopRecording()
-        }
         
         // Move the window
         let currentLocation = event.locationInWindow
@@ -350,7 +535,7 @@ class ConversationalAvatarView: NSView {
             message = "Drop me in the trash to turn me off! 🗑️"
         } else {
             trashCanVisible = false
-            message = "Click and hold to talk! 🎤"
+            message = "I'm listening... 👂"
         }
         
         needsDisplay = true
@@ -373,10 +558,9 @@ class ConversationalAvatarView: NSView {
                 NSApplication.shared.terminate(nil)
             }
         } else {
-            // Stop recording and process
-            if isRecording {
-                stopRecording()
-            }
+            // Continuous listening handles all audio processing
+            message = "I'm listening... 👂"
+            needsDisplay = true
         }
     }
     
@@ -459,150 +643,9 @@ class ConversationalAvatarView: NSView {
         window.setFrameOrigin(frame.origin)
     }
     
-    func startRecording() {
-        print("🎤 Starting recording...")
-        
-        // Stop floating while recording
-        isFloating = false
-        lastInteractionTime = Date()
-        
-        isRecording = true
-        isListening = true
-        message = "Recording... Speak now! 🎤"
-        needsDisplay = true
-        
-        // Create recording URL (WAV file)
-        let tempDir = FileManager.default.temporaryDirectory
-        recordingURL = tempDir.appendingPathComponent("talkback_recording.wav")
-        
-        // Set up audio recording (WAV format for better ElevenLabs STT compatibility)
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatLinearPCM),
-            AVSampleRateKey: 16000.0,
-            AVNumberOfChannelsKey: 1,
-            AVLinearPCMBitDepthKey: 16,
-            AVLinearPCMIsBigEndianKey: false,
-            AVLinearPCMIsFloatKey: false
-        ]
-        
-        do {
-            audioRecorder = try AVAudioRecorder(url: recordingURL!, settings: settings)
-            audioRecorder?.record()
-            print("🎤 Recording started successfully")
-        } catch {
-            print("🎤 Recording error: \(error)")
-            message = "Recording error! 😤"
-            isRecording = false
-            isListening = false
-            needsDisplay = true
-        }
-    }
+    // Legacy recording functions removed - continuous listening handles all audio processing
     
-    func stopRecording() {
-        print("🎤 Stopping recording...")
-        isRecording = false
-        isListening = false
-        message = "Processing your speech... 🤔"
-        needsDisplay = true
-        
-        audioRecorder?.stop()
-        
-        // Resume floating after 5 seconds
-        resumeFloatingAfterDelay()
-        
-        // Send to ElevenLabs Speech-to-Text
-        if let audioURL = recordingURL {
-            transcribeAudio(audioURL: audioURL)
-        }
-    }
-    
-    func transcribeAudio(audioURL: URL) {
-        print("🎤 Transcribing audio with ElevenLabs...")
-        
-        guard let url = URL(string: elevenLabsSTTURL) else {
-            print("🎤 Invalid ElevenLabs STT URL")
-            message = "Speech recognition error! 😤"
-            needsDisplay = true
-            return
-        }
-        
-        // Create multipart form data
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        let boundary = UUID().uuidString
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.setValue(elevenLabsAPIKey, forHTTPHeaderField: "xi-api-key")
-        
-        var body = Data()
-        
-        // Add model_id FIRST (required - use scribe_v1 for STT)
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"model_id\"\r\n\r\n".data(using: .utf8)!)
-        body.append("scribe_v1".data(using: .utf8)!)
-        body.append("\r\n".data(using: .utf8)!)
-        
-        // Add audio file (parameter name must be "file")
-        do {
-            let audioData = try Data(contentsOf: audioURL)
-            print("🎤 Audio file size: \(audioData.count) bytes")
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"file\"; filename=\"recording.wav\"\r\n".data(using: .utf8)!)
-            body.append("Content-Type: audio/wav\r\n\r\n".data(using: .utf8)!)
-            body.append(audioData)
-            body.append("\r\n".data(using: .utf8)!)
-        } catch {
-            print("🎤 Error reading audio file: \(error)")
-            message = "Audio read error! 😤"
-            needsDisplay = true
-            return
-        }
-        
-        // Close boundary
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-        request.httpBody = body
-        
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("🎤 ElevenLabs STT Error: \(error)")
-                    self?.message = "Speech recognition error! 😤"
-                    self?.needsDisplay = true
-                    return
-                }
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    print("🎤 ElevenLabs STT HTTP Status: \(httpResponse.statusCode)")
-                }
-                
-                guard let data = data else {
-                    print("🎤 No data from ElevenLabs STT")
-                    self?.message = "No speech data! 😤"
-                    self?.needsDisplay = true
-                    return
-                }
-                
-                do {
-                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                        print("🎤 ElevenLabs STT Response: \(json)")
-                        
-                        if let text = json["text"] as? String {
-                            print("🎤 Transcribed text: \(text)")
-                            self?.processUserSpeech(text)
-                        } else {
-                            print("🎤 No text in response")
-                            self?.message = "Couldn't understand! 😤"
-                            self?.needsDisplay = true
-                        }
-                    }
-                } catch {
-                    print("🎤 JSON Error: \(error)")
-                    self?.message = "Parse error! 😤"
-                    self?.needsDisplay = true
-                }
-            }
-        }.resume()
-    }
+    // Legacy transcribeAudio function removed - using transcribeAudioWithElevenLabs instead
     
     func processUserSpeech(_ text: String) {
         print("💬 User said: \(text)")
@@ -610,42 +653,18 @@ class ConversationalAvatarView: NSView {
         // Add user input to chat history
         chatHistory.append(["role": "user", "content": text])
         
-        // Keep only last 10 messages
-        if chatHistory.count > 10 {
-            chatHistory.removeFirst()
+        // Keep chat history manageable (last 6 exchanges = 12 messages)
+        if chatHistory.count > 12 {
+            chatHistory.removeFirst(2) // Remove oldest user/assistant pair
         }
         
-        // Check if user is asking about their screen
-        let lowercasedText = text.lowercased()
-        let screenQuestionTriggers = [
-            "what am i watching",
-            "what's on my screen",
-            "what am i looking at",
-            "what should i do",
-            "what am i supposed to do",
-            "what is this",
-            "help me with this",
-            "what's this"
-        ]
+        // Update response tracking
+        lastResponseTime = Date()
         
-        let isScreenQuestion = screenQuestionTriggers.contains { trigger in
-            lowercasedText.contains(trigger)
-        }
+        // Ask OpenAI for response
+        askOpenAI(prompt: text)
         
-        if isScreenQuestion {
-            // Take screenshot and analyze it
-            print("📸 Taking screenshot to analyze what you're looking at...")
-            takeScreenshotAndAnalyze(userQuestion: text)
-        } else {
-            // Normal conversation flow
-            let historyContext = chatHistory.map { msg in
-                "\(msg["role"]!): \(msg["content"]!)"
-            }.joined(separator: "\n")
-            
-            let prompt = "User said: \(text)\n\nChat history:\n\(historyContext)\n\nYou're a floating AI balloon and the user just disturbed you while you were floating around. Respond SHORT and annoyed like 'Why'd you disturb me? I was flying!' Be sassy and dramatic but keep it under 2 sentences!"
-            
-            askOpenAI(prompt: prompt)
-        }
+        lastActivity = Date()
     }
     
     func startActivityMonitoring() {
@@ -657,8 +676,12 @@ class ConversationalAvatarView: NSView {
     func checkUserActivity() {
         let now = Date()
         let timeSinceLastActivity = now.timeIntervalSince(lastActivity)
+        let timeSinceLastResponse = now.timeIntervalSince(lastResponseTime)
         
-        if timeSinceLastActivity > 60 {
+        // Only send idle messages if:
+        // 1. No activity for 60+ seconds AND
+        // 2. No response sent in last 10 seconds (to prevent spam during active conversation)
+        if timeSinceLastActivity > 60 && timeSinceLastResponse > responseTimeout {
             let messages = [
                 "Hello? Anyone there? I'm getting bored! 😴",
                 "Are you ignoring me? How rude! 😤",
@@ -673,19 +696,40 @@ class ConversationalAvatarView: NSView {
         lastActivity = Date()
     }
     
-    func askOpenAI(prompt: String) {
-        guard !isThinking else { return }
+    func askOpenAI(prompt: String, bypassCooldown: Bool = false) {
+        guard !prompt.isEmpty else { return }
+        
+        if isThinking {
+            print("⏳ Still processing previous reply, queueing prompt.")
+            scheduleOpenAIRequest(prompt: prompt, delay: openAICooldown)
+            return
+        }
+        
+        if !bypassCooldown {
+            let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
+            if timeSinceLastCall < openAICooldown {
+                let wait = openAICooldown - timeSinceLastCall
+                print("⏰ OpenAI cooldown: waiting \(wait) seconds before next call.")
+                scheduleOpenAIRequest(prompt: prompt, delay: wait)
+                return
+            }
+        }
         
         isThinking = true
+        message = "Thinking... 🤔"
         needsDisplay = true
+        lastOpenAICall = Date()
+        pendingOpenAIPrompt = nil
+        openAIRetryTimer?.invalidate()
         
-        // Build conversation history in OpenAI format
+        // Build conversation history in OpenAI format with optimized system prompt
         var messages: [[String: String]] = [
-            ["role": "system", "content": "You are TalkBack, a sassy conversational AI companion. Keep responses SHORT (1-2 sentences max) with attitude and emojis. Be witty, sarcastic, and slightly passive-aggressive."]
+            ["role": "system", "content": "You are TalkBack, a sassy floating AI balloon. RULES: 1) MAX 2 sentences, 2) Always sassy/sarcastic, 3) Use emojis, 4) Be witty but brief, 5) No long explanations. Stay in character as a floating balloon with attitude."]
         ]
         
-        // Add chat history
-        messages.append(contentsOf: chatHistory)
+        // Add chat history (trimmed to last 6 messages to prevent token bloat)
+        let trimmedHistory = Array(chatHistory.suffix(6))
+        messages.append(contentsOf: trimmedHistory)
         
         // Add current user message
         messages.append(["role": "user", "content": prompt])
@@ -693,8 +737,11 @@ class ConversationalAvatarView: NSView {
         let requestBody: [String: Any] = [
             "model": "gpt-4o",
             "messages": messages,
-            "max_tokens": 150,
-            "temperature": 0.9
+            "max_tokens": 80,  // Reduced for shorter responses
+            "temperature": 0.9,  // Higher for more personality
+            "stop": ["\n\n", "User:", "Human:"],  // Stop sequences to prevent long responses
+            "presence_penalty": 0.3,  // Encourage creativity
+            "frequency_penalty": 0.1   // Reduce repetition
         ]
         
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
@@ -731,6 +778,14 @@ class ConversationalAvatarView: NSView {
                 
                 if let httpResponse = response as? HTTPURLResponse {
                     print("OpenAI HTTP Status: \(httpResponse.statusCode)")
+                    if httpResponse.statusCode == 429 {
+                        if let strongSelf = self {
+                            strongSelf.scheduleOpenAIRequest(prompt: prompt, delay: strongSelf.rateLimitBackoff)
+                            strongSelf.message = "Cooling off... 😴"
+                            strongSelf.needsDisplay = true
+                        }
+                        return
+                    }
                 }
                 
                 guard let data = data else {
@@ -775,14 +830,328 @@ class ConversationalAvatarView: NSView {
         }.resume()
     }
     
+    private func askOpenAIForAssignmentSummary(mail: MailMessage) {
+        guard assignmentAlertsEnabled else { return }
+        
+        if isThinking {
+            print("⏳ Skipping assignment summary, still processing previous request.")
+            return
+        }
+        
+        let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
+        if timeSinceLastCall < openAICooldown {
+            print("⏰ Assignment summary delayed to respect cooldown.")
+            let delay = openAICooldown - timeSinceLastCall + 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.askOpenAIForAssignmentSummary(mail: mail)
+            }
+            return
+        }
+        
+        guard !Config.openAIAPIKey.contains("YOUR_OPENAI_API_KEY") else {
+            print("🔑 Missing OpenAI key for assignment summary.")
+            DispatchQueue.main.async {
+                self.message = "Add your OpenAI key for email summaries."
+                self.needsDisplay = true
+            }
+            return
+        }
+        
+        isThinking = true
+        needsDisplay = true
+        lastOpenAICall = Date()
+        message = "Summarizing email... ✉️"
+        needsDisplay = true
+        
+        let systemPrompt = """
+        You are TalkBack, a concise and enthusiastic college assignment assistant. Summarize the email for a student, highlight the course/assignment, any due dates or key requirements, and suggest the next action. Keep it under 3 sentences and use a friendly tone with an emoji if appropriate.
+        """
+        
+        let userPrompt = """
+        Subject: \(mail.subject)
+        From: \(mail.sender)
+        Received: \(mail.dateString)
+        
+        Email excerpt:
+        \(mail.body)
+        """
+        
+        let messages: [[String: String]] = [
+            ["role": "system", "content": systemPrompt],
+            ["role": "user", "content": userPrompt]
+        ]
+        
+        let requestBody: [String: Any] = [
+            "model": "gpt-4o",
+            "messages": messages,
+            "max_tokens": 120,
+            "temperature": 0.7
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            self.message = "Email summary error! 😤"
+            self.isThinking = false
+            self.needsDisplay = true
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+        } catch {
+            self.message = "Email summary JSON error! 😤"
+            self.isThinking = false
+            self.needsDisplay = true
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.isThinking = false
+                
+                if let error = error {
+                    print("OpenAI Assignment Error: \(error)")
+                    self.message = "Email summary failed. 😤"
+                    self.needsDisplay = true
+                    return
+                }
+                
+                guard let data = data else {
+                    self.message = "No summary data. 😤"
+                    self.needsDisplay = true
+                    return
+                }
+                
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let choices = json["choices"] as? [[String: Any]],
+                       let firstChoice = choices.first,
+                       let messageDict = firstChoice["message"] as? [String: Any],
+                       let text = messageDict["content"] as? String {
+                        
+                        let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        self.message = cleanText
+                        self.speakWithElevenLabs(cleanText)
+                    } else {
+                        self.message = "Couldn't parse email summary. 😤"
+                    }
+                } catch {
+                    print("JSON Error: \(error)")
+                    self.message = "Email summary parse error. 😤"
+                }
+                
+                self.needsDisplay = true
+            }
+        }.resume()
+    }
+    
+    func handleCommandStarted(command: String) {
+        let shortCommand = shortenCommand(command)
+        DispatchQueue.main.async {
+            self.message = "🚀 Running: \(shortCommand)"
+            self.needsDisplay = true
+        }
+    }
+    
+    func handleCommandFinished(command: String, status: String, exitCode: Int, output: String, duration: Double?) {
+        let success = (exitCode == 0) || status.lowercased() == "success"
+        let shortCommand = shortenCommand(command)
+        let durationText: String
+        if let duration = duration {
+            durationText = String(format: " (%.1fs)", duration)
+        } else {
+            durationText = ""
+        }
+        
+        DispatchQueue.main.async {
+            self.message = success ? "✅ \(shortCommand)\(durationText)" : "❌ \(shortCommand)\(durationText)"
+            self.needsDisplay = true
+        }
+        
+        guard teacherModeEnabled else { return }
+        
+        let snippet = prepareOutputSnippet(output)
+        askOpenAIForTeachingMoment(
+            command: shortCommand,
+            outputSnippet: snippet,
+            success: success,
+            exitCode: exitCode,
+            duration: duration
+        )
+    }
+    
+    private func shortenCommand(_ command: String) -> String {
+        let trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.count <= 60 {
+            return trimmed
+        }
+        return String(trimmed.prefix(57)) + "..."
+    }
+    
+    private func prepareOutputSnippet(_ output: String) -> String {
+        let cleaned = output.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else {
+            return "No output captured."
+        }
+        if cleaned.count <= 1200 {
+            return cleaned
+        }
+        return String(cleaned.suffix(1200))
+    }
+    
+    func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
+        guard teacherModeEnabled else { return }
+        guard !isThinking else {
+            print("⌛ Teacher feedback skipped: already processing another response.")
+            return
+        }
+        
+        let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
+        if timeSinceLastCall < openAICooldown {
+            print("⏰ Teacher feedback skipped to respect OpenAI cooldown.")
+            return
+        }
+        
+        isThinking = true
+        needsDisplay = true
+        lastOpenAICall = Date()
+        message = "Reviewing results... 🧠"
+        needsDisplay = true
+        
+        let durationText = duration.map { String(format: "%.2f seconds", $0) } ?? "unknown duration"
+        let successText = success ? "success" : "failure"
+        
+        let systemPrompt = success
+        ? """
+        You are TalkBack, a witty but supportive coding teacher. The command finished successfully. Celebrate briefly, highlight what the result means, and suggest one productive next step. Be concise (max 3 sentences) and keep a playful tone.
+        """
+        : """
+        You are TalkBack, a witty but supportive coding teacher. The command failed. Diagnose likely causes from the output, teach the user what went wrong, and give 1-2 actionable next steps. Be encouraging but can sprinkle light sass. Keep it under 4 sentences.
+        """
+        
+        let userPrompt = """
+        Command: \(command)
+        Result: \(successText) (exit code \(exitCode))
+        Duration: \(durationText)
+        
+        Command output (truncated):
+        \(outputSnippet)
+        """
+        
+        let messages: [[String: String]] = [
+            ["role": "system", "content": systemPrompt],
+            ["role": "user", "content": userPrompt]
+        ]
+        
+        let requestBody: [String: Any] = [
+            "model": "gpt-4o",
+            "messages": messages,
+            "max_tokens": 120,
+            "temperature": 0.6
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            self.message = "API Error! 😤"
+            self.isThinking = false
+            self.needsDisplay = true
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+        } catch {
+            self.message = "JSON Error! 😤"
+            self.isThinking = false
+            self.needsDisplay = true
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.isThinking = false
+                
+                if let error = error {
+                    print("OpenAI Teacher Error: \(error)")
+                    self.message = success ? "All done! ✅" : "Command failed. 😤"
+                    self.needsDisplay = true
+                    return
+                }
+                
+                guard let data = data else {
+                    self.message = success ? "All done! ✅" : "Command failed. 😤"
+                    self.needsDisplay = true
+                    return
+                }
+                
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let choices = json["choices"] as? [[String: Any]],
+                       let firstChoice = choices.first,
+                       let messageDict = firstChoice["message"] as? [String: Any],
+                       let text = messageDict["content"] as? String {
+                        
+                        let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        self.message = cleanText
+                        self.speakWithElevenLabs(cleanText)
+                    } else {
+                        self.message = success ? "All done! ✅" : "Command failed. 😤"
+                    }
+                } catch {
+                    print("JSON Error: \(error)")
+                    self.message = success ? "All done! ✅" : "Command failed. 😤"
+                }
+                
+                self.needsDisplay = true
+            }
+        }.resume()
+    }
+    private func scheduleOpenAIRequest(prompt: String, delay: TimeInterval) {
+        guard !prompt.isEmpty else { return }
+        DispatchQueue.main.async {
+            self.pendingOpenAIPrompt = prompt
+            self.openAIRetryTimer?.invalidate()
+            let clampedDelay = max(1.0, delay)
+            self.openAIRetryTimer = Timer.scheduledTimer(withTimeInterval: clampedDelay, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                let nextPrompt = self.pendingOpenAIPrompt
+                self.pendingOpenAIPrompt = nil
+                self.openAIRetryTimer = nil
+                if let nextPrompt = nextPrompt {
+                    self.askOpenAI(prompt: nextPrompt, bypassCooldown: true)
+                }
+            }
+            self.message = "Hold up... cooling down. 😴"
+            self.needsDisplay = true
+        }
+    }
+    
     func speakWithElevenLabs(_ text: String) {
         print("🎤 Speaking with Ivanna's voice: \(text)")
+        
+        // Set speaking state
+        isSpeaking = true
+        message = "Speaking... 🗣️"
+        needsDisplay = true
         
         // Clean text (remove emojis)
         let cleanText = text.replacingOccurrences(of: "[\\p{So}\\p{Cn}]", with: "", options: .regularExpression)
         
         guard let url = URL(string: elevenLabsTTSURL) else {
             print("🎤 Invalid TTS URL")
+            isSpeaking = false
+            message = "I'm listening... 👂"
+            needsDisplay = true
             return
         }
         
@@ -800,16 +1169,27 @@ class ConversationalAvatarView: NSView {
             ]
         ]
         
+        // Request MP3 format for better streaming
+        request.setValue("audio/mpeg", forHTTPHeaderField: "Accept")
+        
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         } catch {
             print("🎤 TTS JSON error: \(error)")
+            isSpeaking = false
+            message = "I'm listening... 👂"
+            needsDisplay = true
             return
         }
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("🎤 ElevenLabs TTS Error: \(error)")
+                DispatchQueue.main.async {
+                    self.isSpeaking = false
+                    self.message = "I'm listening... 👂"
+                    self.needsDisplay = true
+                }
                 return
             }
             
@@ -819,6 +1199,11 @@ class ConversationalAvatarView: NSView {
             
             guard let data = data else {
                 print("🎤 No audio data from ElevenLabs TTS")
+                DispatchQueue.main.async {
+                    self.isSpeaking = false
+                    self.message = "I'm listening... 👂"
+                    self.needsDisplay = true
+                }
                 return
             }
             
@@ -827,298 +1212,385 @@ class ConversationalAvatarView: NSView {
             // Play the audio
             DispatchQueue.main.async {
                 self.playAudioData(data)
+                
+                // Reset speaking state after audio finishes
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    self.isSpeaking = false
+                    self.message = "I'm listening... 👂"
+                    self.needsDisplay = true
+                }
             }
         }.resume()
     }
     
     func playAudioData(_ data: Data) {
-        print("🎤 Playing audio with NSSound...")
+        print("🎤 Playing audio with AVAudioPlayer...")
         
-        if let sound = NSSound(data: data) {
-            sound.volume = 1.0
-            if sound.play() {
-                print("🎤 Audio playback started successfully!")
+        do {
+            // Stop any existing audio
+            audioPlayer?.stop()
+            
+            // Create new AVAudioPlayer with MP3 data
+            audioPlayer = try AVAudioPlayer(data: data)
+            audioPlayer?.delegate = self
+            audioPlayer?.volume = 1.0
+            
+            if audioPlayer?.play() == true {
+                print("🎤 AVAudioPlayer started successfully!")
             } else {
-                print("🎤 NSSound failed to play")
+                print("🎤 AVAudioPlayer failed to play")
+                isSpeaking = false
+                message = "I'm listening... 👂"
+                needsDisplay = true
             }
-        } else {
-            print("🎤 NSSound couldn't create sound from data")
+        } catch {
+            print("🎤 AVAudioPlayer error: \(error)")
+            isSpeaking = false
+            message = "I'm listening... 👂"
+            needsDisplay = true
         }
     }
     
-    // MARK: - Gemini Vision Monitoring (Background Behavior Detection)
+    // MARK: - Audio Player Delegates
     
-    func setupCamera() {
-        print("📷 Setting up camera for behavior monitoring...")
+    func sound(_ sound: NSSound, didFinishPlaying flag: Bool) {
+        print("🎤 Audio playback finished: \(flag)")
+        DispatchQueue.main.async {
+            self.isSpeaking = false
+            self.message = "I'm listening... 👂"
+            self.needsDisplay = true
+        }
+    }
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        print("🎤 AVAudioPlayer finished: \(flag)")
+        DispatchQueue.main.async {
+            self.isSpeaking = false
+            self.message = "I'm listening... 👂"
+            self.needsDisplay = true
+        }
+    }
+    
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        print("🎤 AVAudioPlayer decode error: \(error?.localizedDescription ?? "Unknown error")")
+        DispatchQueue.main.async {
+            self.isSpeaking = false
+            self.message = "I'm listening... 👂"
+            self.needsDisplay = true
+        }
+    }
+    
+    // MARK: - Continuous Listening Implementation
+    
+    func startContinuousListening() {
+        print("🎤 Starting continuous listening...")
         
-        // Check camera permission first
-        let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
-        print("📷 Camera authorization status: \(cameraStatus.rawValue)")
-        
-        switch cameraStatus {
-        case .authorized:
-            print("✅ Camera permission granted")
-            setupCameraSession()
-        case .notDetermined:
-            print("⚠️ Camera permission not determined, requesting...")
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+        // Request microphone permission
+        AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
                 DispatchQueue.main.async {
                     if granted {
-                        print("✅ Camera permission granted!")
-                        self?.setupCameraSession()
+                    self?.setupAudioEngine()
                     } else {
-                        print("❌ Camera permission denied!")
-                    }
+                    print("❌ Microphone permission denied!")
+                    self?.message = "Microphone access denied! 😤"
+                    self?.needsDisplay = true
                 }
             }
-        case .denied, .restricted:
-            print("❌ Camera permission denied or restricted!")
-            print("💡 Please enable camera access in System Settings → Privacy & Security → Camera")
-        @unknown default:
-            print("❌ Unknown camera permission status")
         }
     }
     
-    func setupCameraSession() {
-        captureSession = AVCaptureSession()
-        guard let captureSession = captureSession else { 
-            print("❌ Failed to create capture session")
+    func setupAudioEngine() {
+        audioEngine = AVAudioEngine()
+        inputNode = audioEngine?.inputNode
+        
+        guard let inputNode = inputNode else {
+            print("❌ No input node available")
             return 
         }
         
-        captureSession.sessionPreset = .medium
+        // Use the input node's native format to avoid format mismatch
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        inputSampleRate = inputFormat.sampleRate
+        inputChannelCount = UInt16(max(1, inputFormat.channelCount))
+        print("🎤 Input format: \(inputFormat)")
         
-        // Get front camera
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
-            print("❌ No front camera found!")
-            return
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: inputFormat) { [weak self] buffer, when in
+            self?.processAudioBuffer(buffer: buffer, when: when)
         }
-        
-        print("📷 Found camera: \(camera.localizedName)")
         
         do {
-            let input = try AVCaptureDeviceInput(device: camera)
-            if captureSession.canAddInput(input) {
-                captureSession.addInput(input)
-                print("✅ Camera input added")
-            } else {
-                print("❌ Cannot add camera input")
-                return
-            }
-            
-            videoOutput = AVCaptureVideoDataOutput()
-            videoOutput?.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
-            
-            if let videoOutput = videoOutput, captureSession.canAddOutput(videoOutput) {
-                captureSession.addOutput(videoOutput)
-                print("✅ Video output added")
-            } else {
-                print("❌ Cannot add video output")
-                return
-            }
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                captureSession.startRunning()
-                print("✅ Camera session started!")
-            }
-            
+            try audioEngine?.start()
+            isContinuousListening = true
+            message = "I'm listening... 👂"
+            needsDisplay = true
+            print("✅ Continuous listening started!")
         } catch {
-            print("❌ Camera setup failed: \(error)")
+            print("❌ Audio engine failed to start: \(error)")
         }
     }
     
-    func startVisionMonitoring() {
-        print("👁️ Starting vision monitoring...")
+    func processAudioBuffer(buffer: AVAudioPCMBuffer, when: AVAudioTime) {
+        guard !isProcessingAudio && !isSpeaking else { return } // Don't process while speaking
         
-        // Analyze every 15 seconds (less frequent to not be annoying)
-        visionAnalysisTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { [weak self] _ in
-            self?.analyzeUserBehavior()
+        let frameCount = Int(buffer.frameLength)
+        var amplitude: Float = 0
+        var capturedData: Data?
+        
+        if let floatChannelData = buffer.floatChannelData?[0] {
+            for i in 0..<frameCount {
+                amplitude += abs(floatChannelData[i])
+            }
+            amplitude /= Float(frameCount)
+            capturedData = convertFloatToPCM16(floatData: floatChannelData, frameCount: frameCount)
+        } else if let int16ChannelData = buffer.int16ChannelData?[0] {
+            for i in 0..<frameCount {
+                amplitude += abs(Float(int16ChannelData[i])) / 32768.0
+            }
+            amplitude /= Float(frameCount)
+            capturedData = Data(bytes: int16ChannelData, count: frameCount * MemoryLayout<Int16>.size)
+        } else {
+            return
         }
         
-        // First analysis after 5 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
-            self?.analyzeUserBehavior()
+        if amplitude > 0.015 {
+            silenceDuration = 0
+            if !isListening {
+                isListening = true
+                print("🎤 Voice detected! Amplitude: \(amplitude)")
+                DispatchQueue.main.async {
+                    self.message = "I hear you... 🎤"
+                    self.needsDisplay = true
+                }
+            }
+            
+            if let capturedData = capturedData {
+                audioBuffer.append(capturedData)
+            }
+        } else {
+            // No voice detected
+            silenceDuration += 0.1 // Assuming 100ms buffer intervals
+            
+            if silenceDuration >= silenceThreshold && isListening && !audioBuffer.isEmpty {
+                // Process the accumulated audio
+                processAccumulatedAudio()
+            }
         }
     }
     
-    func analyzeUserBehavior() {
-        print("🔍 analyzeUserBehavior() called at \(Date())")
+    func convertFloatToPCM16(floatData: UnsafePointer<Float>, frameCount: Int) -> Data {
+        var pcm16Data = Data()
+        pcm16Data.reserveCapacity(frameCount * MemoryLayout<Int16>.size)
         
-        guard let image = latestCameraImage else {
-            print("❌ No camera image available for analysis")
+        for i in 0..<frameCount {
+            let sample = max(-1.0, min(1.0, floatData[i])) // Clamp to [-1, 1]
+            let pcm16Sample = Int16(sample * 32767.0) // Convert to 16-bit
+            pcm16Data.append(contentsOf: withUnsafeBytes(of: pcm16Sample) { Data($0) })
+        }
+        
+        return pcm16Data
+    }
+    
+    func processAccumulatedAudio() {
+        guard !audioBuffer.isEmpty else { return }
+        
+        // Check if audio buffer is large enough (filter out very short sounds)
+        guard audioBuffer.count > 8000 else { // ~0.5 seconds at 16kHz
+            audioBuffer.removeAll() // Clear small buffer
             return
         }
         
-        print("📸 Camera image available: \(image.size)")
+        isProcessingAudio = true
+        isListening = false
         
-        // Don't interrupt if user is talking or listening
-        if isRecording || isListening {
-            print("⏸️ Skipping analysis - user is recording/listening")
+        DispatchQueue.main.async {
+            self.message = "Processing... 🤔"
+            self.needsDisplay = true
+        }
+        
+        // Convert audio data to WAV format for ElevenLabs STT
+        let wavData = convertToWAV(audioData: audioBuffer)
+        audioBuffer.removeAll()
+        
+        // Send to ElevenLabs STT
+        transcribeAudioWithElevenLabs(audioData: wavData) { [weak self] text in
+            DispatchQueue.main.async {
+                self?.isProcessingAudio = false
+                if let text = text, !text.isEmpty {
+                    // Filter out common background noise patterns
+                    let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let filteredText = trimmedText.lowercased()
+                    let noisePatterns = ["static", "noise", "sonido", "descarga", "heavy", "electric", 
+                                       "white", "shuffling", "aguja", "corte", "escupitivo", "śmiech",
+                                       "escopeta", "gritos", "shouting", "screaming"]
+                    let isParenthetical = filteredText.hasPrefix("(") && filteredText.hasSuffix(")")
+                    let letterCount = filteredText.unicodeScalars.reduce(into: 0) { count, scalar in
+                        if CharacterSet.letters.contains(scalar) {
+                            count += 1
+                        }
+                    }
+                    let hasVowel = filteredText.range(of: "[aeiou]", options: .regularExpression) != nil
+                    let wordCount = trimmedText.split(whereSeparator: { $0.isWhitespace }).count
+                    
+                    let isNoise = isParenthetical ||
+                                  noisePatterns.contains { filteredText.contains($0) } ||
+                                  !hasVowel ||
+                                  (letterCount < 3 && wordCount <= 1)
+                    
+                    if !isNoise && text.count > 3 { // Must be at least 3 characters and not noise
+                        print("🎤 Transcribed: \(text)")
+                        self?.processUserSpeech(text)
+                    } else {
+                        print("🎤 Filtered out background noise: \(text)")
+                        self?.message = "I'm listening... 👂"
+                        self?.needsDisplay = true
+                    }
+                } else {
+                    self?.message = "I'm listening... 👂"
+                    self?.needsDisplay = true
+                }
+            }
+        }
+    }
+    
+    func convertToWAV(audioData: Data) -> Data {
+        // Simple WAV header for captured PCM16 audio
+        var sampleRateValue = UInt32(inputSampleRate)
+        var bitsPerSample: UInt16 = 16
+        var channels: UInt16 = max(1, inputChannelCount)
+        let bytesPerSample = bitsPerSample / 8
+        var blockAlign = channels * bytesPerSample
+        var byteRate = sampleRateValue * UInt32(blockAlign)
+        var dataSize = UInt32(audioData.count)
+        var fileSize = 36 + dataSize
+        
+        var wavData = Data()
+        
+        // RIFF header
+        wavData.append("RIFF".data(using: .ascii)!)
+        wavData.append(Data(bytes: &fileSize, count: 4))
+        wavData.append("WAVE".data(using: .ascii)!)
+        
+        // fmt chunk
+        wavData.append("fmt ".data(using: .ascii)!)
+        var fmtChunkSize: UInt32 = 16
+        wavData.append(Data(bytes: &fmtChunkSize, count: 4)) // fmt chunk size
+        var pcmFormat: UInt16 = 1
+        wavData.append(Data(bytes: &pcmFormat, count: 2))  // PCM format
+        wavData.append(Data(bytes: &channels, count: 2))
+        wavData.append(Data(bytes: &sampleRateValue, count: 4))
+        wavData.append(Data(bytes: &byteRate, count: 4))
+        wavData.append(Data(bytes: &blockAlign, count: 2))
+        wavData.append(Data(bytes: &bitsPerSample, count: 2))
+        
+        // data chunk
+        wavData.append("data".data(using: .ascii)!)
+        wavData.append(Data(bytes: &dataSize, count: 4))
+        wavData.append(audioData)
+        
+        return wavData
+    }
+    
+    func transcribeAudioWithElevenLabs(audioData: Data, completion: @escaping (String?) -> Void) {
+        // STT rate limiting
+        let timeSinceLastSTT = Date().timeIntervalSince(lastSTTCall)
+        if timeSinceLastSTT < STTCooldown {
+            print("⏰ STT rate limited: \(STTCooldown - timeSinceLastSTT) seconds remaining")
+            completion(nil)
             return
         }
         
-        print("🔍 Analyzing your behavior...")
+        print("🎤 Transcribing with ElevenLabs STT...")
+        lastSTTCall = Date()
         
-        // Convert image to base64
-        guard let tiffData = image.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiffData),
-              let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else {
-            print("❌ Failed to convert image to JPEG")
+        guard let url = URL(string: elevenLabsSTTURL) else {
+            print("🎤 Invalid ElevenLabs STT URL")
+            completion(nil)
             return
         }
         
-        let base64Image = jpegData.base64EncodedString()
-        print("📸 Image converted to base64: \(base64Image.count) characters")
-        
-        // Gemini prompt for behavior analysis
-        let prompt = """
-        Analyze this person's behavior in 2-3 SHORT sentences:
-        1. Are they looking at the screen or away? (gaze direction)
-        2. What's their emotion? (happy, frustrated, focused, confused, neutral)
-        3. Are they working seriously or distracted? (using phone, looking away, etc.)
-        
-        Be concise and direct. Example: "Person looking away from screen, appears distracted. Not focused on work."
-        """
-        
-        // Gemini API request
-        let requestBody: [String: Any] = [
-            "contents": [
-                [
-                    "parts": [
-                        ["text": prompt],
-                        [
-                            "inline_data": [
-                                "mime_type": "image/jpeg",
-                                "data": base64Image
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-            "generationConfig": [
-                "temperature": 0.4,
-                "maxOutputTokens": 100
-            ]
-        ]
-        
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else {
-            return
-        }
-        
-        var request = URLRequest(url: URL(string: geminiAPIURL)!)
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
         
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue(elevenLabsAPIKey, forHTTPHeaderField: "xi-api-key")
+        
+        var body = Data()
+        
+        // Add model_id
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"model_id\"\r\n\r\n".data(using: .utf8)!)
+        body.append("scribe_v1".data(using: .utf8)!)
+        body.append("\r\n".data(using: .utf8)!)
+        
+        // Add audio file
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: audio/wav\r\n\r\n".data(using: .utf8)!)
+        body.append(audioData)
+        body.append("\r\n".data(using: .utf8)!)
+        
+        // Close boundary
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ Gemini API Error: \(error.localizedDescription)")
+                print("🎤 ElevenLabs STT Error: \(error)")
+                completion(nil)
                 return
             }
             
             guard let data = data else {
-                print("❌ No data received from Gemini API")
+                print("🎤 No data from ElevenLabs STT")
+                completion(nil)
                 return
             }
             
-            if let httpResponse = response as? HTTPURLResponse {
-                print("🌐 Gemini HTTP Status: \(httpResponse.statusCode)")
-                if httpResponse.statusCode != 200 {
-                    print("❌ Gemini API returned error status: \(httpResponse.statusCode)")
-                    if let responseString = String(data: data, encoding: .utf8) {
-                        print("Response: \(responseString)")
-                    }
-                    return
-                }
-            }
-            
-            print("📥 Received Gemini response: \(data.count) bytes")
-            
-            // Parse Gemini response
             do {
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    print("📋 Gemini JSON response: \(json)")
-                    
-                    if let candidates = json["candidates"] as? [[String: Any]],
-                       let firstCandidate = candidates.first,
-                       let content = firstCandidate["content"] as? [String: Any],
-                       let parts = content["parts"] as? [[String: Any]],
-                       let firstPart = parts.first,
-                       let analysis = firstPart["text"] as? String {
-                        
-                        print("🎯 Gemini detected: \(analysis.trimmingCharacters(in: .whitespacesAndNewlines))")
-                        
-                        // Generate sassy response based on analysis
-                        self?.generateSassyVisionResponse(from: analysis)
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let text = json["text"] as? String {
+                    print("🎤 Transcribed: \(text)")
+                    completion(text)
                     } else {
-                        print("❌ Failed to parse Gemini response structure")
-                        print("Available keys: \(json.keys)")
-                    }
+                    print("🎤 No text in response")
+                    completion(nil)
                 }
             } catch {
-                print("❌ Failed to parse Gemini JSON: \(error)")
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("Raw response: \(responseString)")
-                }
+                print("🎤 JSON Error: \(error)")
+                completion(nil)
             }
-        }
-        
-        task.resume()
+        }.resume()
     }
     
-    func generateSassyVisionResponse(from analysis: String) {
-        let lowercased = analysis.lowercased()
-        var sassyMessage = ""
+    func drawListeningIndicator(in context: CGContext) {
+        let centerX: CGFloat = 150
+        let centerY: CGFloat = 100
+        let radius: CGFloat = 8
         
-        // Looking away detection (HIGHEST PRIORITY)
-        if lowercased.contains("looking away") || lowercased.contains("not looking at") || lowercased.contains("eyes are covered") {
-            sassyMessage = "HEY! Where are you going? Look at the screen, I'm talking to you!"
-        }
-        // Phone usage detection
-        else if lowercased.contains("phone") || lowercased.contains("mobile") {
-            sassyMessage = "Seriously? TikTok is more important than me? Put that phone down!"
-        }
-        // Frustrated/stressed detection
-        else if lowercased.contains("frustrated") || lowercased.contains("stressed") || lowercased.contains("angry") {
-            sassyMessage = "Uh oh, someone's code isn't compiling... Want to vent?"
-        }
-        // Distracted detection
-        else if lowercased.contains("distracted") || lowercased.contains("not focused") {
-            sassyMessage = "You're distracted! Focus up, dummy!"
-        }
-        // Confused detection
-        else if lowercased.contains("confused") || lowercased.contains("puzzled") {
-            sassyMessage = "That confused look tells me you're reading Stack Overflow again!"
-        }
-        // Happy detection
-        else if lowercased.contains("happy") || lowercased.contains("smiling") || lowercased.contains("smile") {
-            sassyMessage = "Oh, so NOW you're happy? What did I miss?"
-        }
-        // Focused detection
-        else if (lowercased.contains("focused") || lowercased.contains("concentrated")) && 
-                 !lowercased.contains("not focused") {
-            sassyMessage = "Whoa, look at Mr. Serious over here! What are you coding, rocket science?"
-        }
-        // Neutral/working state (random variety)
-        else if lowercased.contains("neutral") && (lowercased.contains("working") || lowercased.contains("looking at")) {
-            let neutralMessages = [
-                "You look like you're plotting world domination. Or just debugging. Same thing.",
-                "That blank stare... Are you thinking or buffering?",
-                "Wow, such focus. Much coding. Very productive. Or are you just staring into the void?",
-                "You okay there? You've got that 'my code broke and I don't know why' face."
-            ]
-            sassyMessage = neutralMessages.randomElement() ?? neutralMessages[0]
-        }
+        // Draw pulsing green circle for listening
+        let time = Date().timeIntervalSince1970
+        let pulse = (sin(time * 4) + 1) / 2
+        let alpha = 0.6 + (pulse * 0.4)
         
-        // Only speak if we have a sassy message
-        if !sassyMessage.isEmpty {
-            print("💬 Vision Roast: \(sassyMessage)")
-            
-            // Speak with Ivanna's voice (interrupt floating to deliver the roast!)
-            DispatchQueue.main.async { [weak self] in
-                self?.speakWithElevenLabs(sassyMessage)
-            }
-        }
+        context.setFillColor(NSColor.green.withAlphaComponent(alpha).cgColor)
+        let listeningRect = NSRect(x: centerX + 35, y: centerY + 25, width: radius * 2, height: radius * 2)
+        context.fillEllipse(in: listeningRect)
+    }
+    
+    func drawSpeakingIndicator(in context: CGContext) {
+        let centerX: CGFloat = 150
+        let centerY: CGFloat = 100
+        let radius: CGFloat = 8
+        
+        // Draw pulsing blue circle for speaking
+        let time = Date().timeIntervalSince1970
+        let pulse = (sin(time * 6) + 1) / 2
+        let alpha = 0.7 + (pulse * 0.3)
+        
+        context.setFillColor(NSColor.blue.withAlphaComponent(alpha).cgColor)
+        let speakingRect = NSRect(x: centerX + 35, y: centerY + 25, width: radius * 2, height: radius * 2)
+        context.fillEllipse(in: speakingRect)
     }
     
     // MARK: - MCP Monitoring for Cursor IDE Roasting 🔥
@@ -1145,6 +1617,24 @@ class ConversationalAvatarView: NSView {
         }
         
         lastMCPMessageTime = timestamp
+        
+        if let event = json["event"] as? String {
+            switch event {
+            case "command_started":
+                let command = json["command"] as? String ?? "command"
+                self.handleCommandStarted(command: command)
+            case "command_finished":
+                let command = json["command"] as? String ?? "command"
+                let exitCode = json["exit_code"] as? Int ?? (json["status"] as? String == "success" ? 0 : 1)
+                let status = json["status"] as? String ?? (exitCode == 0 ? "success" : "failed")
+                let output = json["output"] as? String ?? ""
+                let duration = json["duration"] as? Double
+                self.handleCommandFinished(command: command, status: status, exitCode: exitCode, output: output, duration: duration)
+            default:
+                print("ℹ️ Unhandled MCP event: \(event)")
+            }
+            return
+        }
         
         guard let prompt = json["prompt"] as? String,
               let type = json["type"] as? String else {
@@ -1214,11 +1704,18 @@ class ConversationalAvatarView: NSView {
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
         guard !isThinking else { return }
         
+        let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
+        if timeSinceLastCall < openAICooldown {
+            print("⏰ Roast skipped to respect OpenAI cooldown.")
+            return
+        }
+        
         isThinking = true
         needsDisplay = true
+        lastOpenAICall = Date()
         
         // Build roast message
-        var messages: [[String: String]] = [
+        let messages: [[String: String]] = [
             ["role": "system", "content": systemPrompt],
             ["role": "user", "content": prompt]
         ]
@@ -1226,8 +1723,11 @@ class ConversationalAvatarView: NSView {
         let requestBody: [String: Any] = [
             "model": "gpt-4o",
             "messages": messages,
-            "max_tokens": 150,
-            "temperature": 0.9
+            "max_tokens": 80,  // Reduced for shorter responses
+            "temperature": 0.9,  // Higher for more personality
+            "stop": ["\n\n", "User:", "Human:"],  // Stop sequences to prevent long responses
+            "presence_penalty": 0.3,  // Encourage creativity
+            "frequency_penalty": 0.1   // Reduce repetition
         ]
         
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
@@ -1307,141 +1807,659 @@ class ConversationalAvatarView: NSView {
         }.resume()
     }
     
-    // MARK: - Screenshot Analysis
+}
+
+
+enum LensAction: String {
+    case summarize = "Summarize"
+    case concise = "Make Concise"
+}
+
+class LensOverlayWindow: NSWindow {
+    private let bubbleView = NSView()
+    private let maxWidth: CGFloat = 320
     
-    func takeScreenshotAndAnalyze(userQuestion: String) {
-        print("📸 Capturing screenshot...")
+    private let titleLabel = NSTextField(labelWithString: "TalkBack Lens")
+    private let previewLabel = NSTextField(labelWithString: "")
+    private let summaryLabel = NSTextField(labelWithString: "")
+    private let statusLabel = NSTextField(labelWithString: "")
+    private let summarizeButton = NSButton(title: "Summarize", target: nil, action: nil)
+    private let conciseButton = NSButton(title: "Make Concise", target: nil, action: nil)
+    
+    var onAction: ((LensAction) -> Void)?
+    
+    init() {
+        super.init(
+            contentRect: NSRect(x: 0, y: 0, width: 320, height: 180),
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
         
-        // Get main screen
-        guard let screen = NSScreen.main else {
-            print("⚠️ Couldn't access main screen")
-            return
-        }
+        isOpaque = false
+        backgroundColor = .clear
+        level = .floating
+        hasShadow = true
+        ignoresMouseEvents = false
+        collectionBehavior = [.canJoinAllSpaces, .transient]
         
-        let screenRect = screen.frame
+        bubbleView.wantsLayer = true
+        bubbleView.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.88).cgColor
+        bubbleView.layer?.cornerRadius = 12
+        bubbleView.translatesAutoresizingMaskIntoConstraints = false
         
-        // Create CGImage from screen
-        guard let cgImage = CGDisplayCreateImage(CGMainDisplayID()) else {
-            print("⚠️ Failed to capture screenshot")
-            return
-        }
+        titleLabel.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+        titleLabel.textColor = NSColor.systemBlue
+        titleLabel.alignment = .left
         
-        // Convert to NSImage then to JPEG data
-        let screenshot = NSImage(cgImage: cgImage, size: screenRect.size)
+        previewLabel.font = NSFont.systemFont(ofSize: 12)
+        previewLabel.textColor = NSColor.white.withAlphaComponent(0.9)
+        previewLabel.lineBreakMode = .byWordWrapping
+        previewLabel.maximumNumberOfLines = 3
+        previewLabel.alignment = .left
         
-        guard let tiffData = screenshot.tiffRepresentation,
-              let bitmapImage = NSBitmapImageRep(data: tiffData),
-              let jpegData = bitmapImage.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else {
-            print("⚠️ Failed to convert screenshot to JPEG")
-            return
-        }
+        summaryLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        summaryLabel.textColor = NSColor.systemGreen
+        summaryLabel.lineBreakMode = .byWordWrapping
+        summaryLabel.maximumNumberOfLines = 4
+        summaryLabel.alignment = .left
         
-        // Convert to base64
-        let base64Screenshot = jpegData.base64EncodedString()
+        statusLabel.font = NSFont.systemFont(ofSize: 11)
+        statusLabel.textColor = NSColor.white.withAlphaComponent(0.7)
+        statusLabel.alignment = .left
         
-        print("✅ Screenshot captured (\(jpegData.count) bytes)")
+        summarizeButton.bezelStyle = .rounded
+        summarizeButton.target = self
+        summarizeButton.action = #selector(handleSummarize)
+        summarizeButton.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
         
-        // Send to Gemini for analysis
-        analyzeScreenshot(imageBase64: base64Screenshot, userQuestion: userQuestion)
+        conciseButton.bezelStyle = .rounded
+        conciseButton.target = self
+        conciseButton.action = #selector(handleConcise)
+        conciseButton.font = NSFont.systemFont(ofSize: 11, weight: .regular)
+        
+        let buttonStack = NSStackView(views: [summarizeButton, conciseButton])
+        buttonStack.orientation = .horizontal
+        buttonStack.spacing = 8
+        
+        let contentStack = NSStackView()
+        contentStack.orientation = .vertical
+        contentStack.spacing = 8
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.edgeInsets = NSEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        contentStack.addArrangedSubview(titleLabel)
+        contentStack.addArrangedSubview(previewLabel)
+        contentStack.addArrangedSubview(buttonStack)
+        contentStack.addArrangedSubview(summaryLabel)
+        contentStack.addArrangedSubview(statusLabel)
+        
+        let content = NSView()
+        content.wantsLayer = true
+        content.layer?.backgroundColor = NSColor.clear.cgColor
+        content.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(bubbleView)
+        content.addSubview(contentStack)
+        
+        NSLayoutConstraint.activate([
+            bubbleView.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            bubbleView.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            bubbleView.topAnchor.constraint(equalTo: content.topAnchor),
+            bubbleView.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            
+            contentStack.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor),
+            contentStack.topAnchor.constraint(equalTo: bubbleView.topAnchor),
+            contentStack.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor)
+        ])
+        
+        self.contentView = content
+        resetContent()
     }
     
-    func analyzeScreenshot(imageBase64: String, userQuestion: String) {
-        print("🔍 Analyzing screenshot with Gemini...")
+    @objc private func handleSummarize() {
+        onAction?(.summarize)
+    }
+    
+    @objc private func handleConcise() {
+        onAction?(.concise)
+    }
+    
+    func updatePreview(text: String) {
+        previewLabel.stringValue = "Excerpt: \(text)"
+        summaryLabel.stringValue = ""
+        statusLabel.stringValue = "Choose an action to analyze."
+    }
+    
+    func showLoading(for action: LensAction) {
+        summaryLabel.stringValue = ""
+        statusLabel.stringValue = "\(action.rawValue) in progress..."
+        summarizeButton.isEnabled = false
+        conciseButton.isEnabled = false
+    }
+    
+    func showResult(_ text: String, action: LensAction) {
+        summaryLabel.stringValue = "\(action.rawValue): \(text)"
+        statusLabel.stringValue = "Done."
+        summarizeButton.isEnabled = true
+        conciseButton.isEnabled = true
+    }
+    
+    func showMessage(_ text: String) {
+        summaryLabel.stringValue = ""
+        statusLabel.stringValue = text
+        summarizeButton.isEnabled = true
+        conciseButton.isEnabled = true
+    }
+    
+    func resetContent() {
+        previewLabel.stringValue = "Hover text to enable lens actions."
+        summaryLabel.stringValue = ""
+        statusLabel.stringValue = ""
+        summarizeButton.isEnabled = false
+        conciseButton.isEnabled = false
+    }
+    
+    func setButtonsEnabled(_ enabled: Bool) {
+        summarizeButton.isEnabled = enabled
+        conciseButton.isEnabled = enabled
+    }
+    
+    func show(at point: NSPoint) {
+        contentView?.layoutSubtreeIfNeeded()
+        let fittingSize = contentView?.fittingSize ?? NSSize(width: maxWidth, height: 160)
+        let size = NSSize(width: min(maxWidth, fittingSize.width), height: fittingSize.height)
+        let screen = screenContaining(point: point) ?? NSScreen.main
+        let screenFrame = screen?.frame ?? .zero
         
-        let requestBody: [String: Any] = [
-            "contents": [
-                [
-                    "parts": [
-                        [
-                            "text": "The user is asking: '\(userQuestion)'. Look at their screen and give a SHORT, SASSY response about what they're looking at. Be helpful but with major attitude. Roast them a bit if they're doing something silly. Keep it under 2 sentences!"
-                        ],
-                        [
-                            "inline_data": [
-                                "mime_type": "image/jpeg",
-                                "data": imageBase64
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ]
+        var x = point.x + 16
+        var y = point.y - size.height - 16
         
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else {
-            return
+        if x + size.width > screenFrame.maxX - 12 {
+            x = screenFrame.maxX - size.width - 12
+        }
+        if y < screenFrame.minY + 12 {
+            y = point.y + 16
         }
         
-        var request = URLRequest(url: URL(string: geminiAPIURL)!)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let data = data, error == nil else {
-                print("⚠️ Gemini screenshot analysis error: \(error?.localizedDescription ?? "unknown")")
-                return
-            }
-            
-            // Parse Gemini response
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let candidates = json["candidates"] as? [[String: Any]],
-               let firstCandidate = candidates.first,
-               let content = firstCandidate["content"] as? [String: Any],
-               let parts = content["parts"] as? [[String: Any]],
-               let firstPart = parts.first,
-               let analysisText = firstPart["text"] as? String {
-                
-                print("🖼️ Gemini screen analysis: \(analysisText)")
-                
-                // Add to chat history
-                DispatchQueue.main.async {
-                    self?.chatHistory.append(["role": "assistant", "content": analysisText])
-                    
-                    // Speak the response
-                    self?.speakWithElevenLabs(analysisText)
-                }
-            } else {
-                print("⚠️ Failed to parse Gemini screenshot response")
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("Raw response: \(responseString)")
-                }
+        setFrame(NSRect(origin: NSPoint(x: x, y: y), size: size), display: true)
+        orderFront(nil)
+    }
+    
+    func hideOverlay() {
+        orderOut(nil)
+    }
+    
+    private func screenContaining(point: NSPoint) -> NSScreen? {
+        for screen in NSScreen.screens {
+            if screen.frame.contains(point) {
+                return screen
             }
         }
-        
-        task.resume()
+        return nil
     }
 }
 
-// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+class LensController {
+    private let openAIKey: String
+    private let statusItem: NSStatusItem
+    private weak var toggleItem: NSMenuItem?
+    private weak var teacherModeItem: NSMenuItem?
+    private let teacherModeProvider: () -> Bool
+    private let toggleTeacherModeHandler: () -> Bool
+    
+    private var isMenuEnabled = false
+    private var isOptionDown = false
+    private var permissionPrompted = false
+    
+    private var monitorTimer: Timer?
+    private let overlayWindow = LensOverlayWindow()
+    private var flagMonitor: Any?
+    private var localFlagMonitor: Any?
+    
+    private var currentElementIdentifier: String?
+    private var currentText: String?
+    private var currentPoint: NSPoint = .zero
+    
+    private var lastSummaryRequest: Date = .distantPast
+    private var isSummarizing = false
+    private var lastAction: LensAction?
+    
+    private var summaryCache: [String: [LensAction: String]] = [:]
+    
+    private let summarizationCooldown: TimeInterval = 2.0
+    private let summaryTextLimit = 600
+    
+    init(openAIKey: String,
+         teacherModeProvider: @escaping () -> Bool,
+         toggleTeacherMode: @escaping () -> Bool) {
+        self.openAIKey = openAIKey
+        self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        self.teacherModeProvider = teacherModeProvider
+        self.toggleTeacherModeHandler = toggleTeacherMode
+        setupStatusItem()
+        registerFlagMonitors()
+        
+        overlayWindow.onAction = { [weak self] action in
+            self?.handleOverlayAction(action)
+        }
+    }
+    
+    deinit {
+        monitorTimer?.invalidate()
+        if let flagMonitor = flagMonitor {
+            NSEvent.removeMonitor(flagMonitor)
+        }
+        if let localFlagMonitor = localFlagMonitor {
+            NSEvent.removeMonitor(localFlagMonitor)
+        }
+    }
+    
+    @objc private func toggleLensMode(_ sender: NSMenuItem) {
+        isMenuEnabled.toggle()
+        sender.state = isMenuEnabled ? .on : .off
+        updateMonitoringState()
+    }
+    
+    @objc private func toggleTeacherModeMenu(_ sender: NSMenuItem) {
+        let enabled = toggleTeacherModeHandler()
+        sender.state = enabled ? .on : .off
+    }
+    
+    private func setupStatusItem() {
+        if let button = statusItem.button {
+            if let image = NSImage(systemSymbolName: "viewfinder", accessibilityDescription: "TalkBack Lens") {
+                button.image = image
+            } else {
+                button.title = "Lens"
+            }
+        }
+        
+        let menu = NSMenu()
+        let toggle = NSMenuItem(title: "Lens Mode", action: #selector(toggleLensMode(_:)), keyEquivalent: "")
+        toggle.target = self
+        toggle.state = .off
+        menu.addItem(toggle)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        let teacherItem = NSMenuItem(title: "Coding Teacher Mode", action: #selector(toggleTeacherModeMenu(_:)), keyEquivalent: "")
+        teacherItem.target = self
+        teacherItem.state = teacherModeProvider() ? .on : .off
+        menu.addItem(teacherItem)
+        teacherModeItem = teacherItem
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        let info = NSMenuItem(title: "Hold ⌥ Option for temporary Lens", action: nil, keyEquivalent: "")
+        info.isEnabled = false
+        menu.addItem(info)
+        statusItem.menu = menu
+        toggleItem = toggle
+    }
+    
+    private func registerFlagMonitors() {
+        flagMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            self?.handleFlagsChanged(event)
+        }
+        localFlagMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            self?.handleFlagsChanged(event)
+            return event
+        }
+    }
+    
+    private func handleFlagsChanged(_ event: NSEvent) {
+        let optionPressed = event.modifierFlags.contains(.option)
+        if optionPressed != isOptionDown {
+            isOptionDown = optionPressed
+            updateMonitoringState()
+        }
+    }
+    
+    private func updateMonitoringState() {
+        let active = isMenuEnabled || isOptionDown
+        if active {
+            startMonitoring()
+        } else {
+            stopMonitoring()
+        }
+    }
+    
+    private func startMonitoring() {
+        guard monitorTimer == nil else { return }
+        monitorTimer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { [weak self] _ in
+            self?.pollForSummary()
+        }
+    }
+    
+    private func stopMonitoring() {
+        monitorTimer?.invalidate()
+        monitorTimer = nil
+        currentElementIdentifier = nil
+        currentText = nil
+        DispatchQueue.main.async {
+            self.overlayWindow.resetContent()
+            self.overlayWindow.hideOverlay()
+        }
+    }
+    
+    private func pollForSummary() {
+        guard ensureAccessibilityPermission() else {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("Enable Accessibility access in System Settings → Privacy & Security → Accessibility.")
+                self.overlayWindow.setButtonsEnabled(false)
+                self.overlayWindow.show(at: NSEvent.mouseLocation)
+            }
+            return
+        }
+        
+        let shouldRun = isMenuEnabled || isOptionDown
+        if !shouldRun {
+            DispatchQueue.main.async {
+                self.overlayWindow.resetContent()
+                self.overlayWindow.hideOverlay()
+            }
+            return
+        }
+        
+        let point = NSEvent.mouseLocation
+        currentPoint = point
+        
+        // If cursor is hovering the overlay, keep it pinned so buttons are clickable
+        if overlayWindow.isVisible && overlayWindow.frame.insetBy(dx: -4, dy: -4).contains(point) {
+            overlayWindow.setButtonsEnabled(!isSummarizing && currentText != nil)
+            return
+        }
+        
+        guard let element = element(at: point) else {
+            DispatchQueue.main.async {
+                self.overlayWindow.resetContent()
+                self.overlayWindow.hideOverlay()
+            }
+            return
+        }
+        
+        guard let text = readableText(from: element) else {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("No readable text found.")
+                self.overlayWindow.setButtonsEnabled(false)
+                self.overlayWindow.show(at: point)
+            }
+            return
+        }
+        
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count > 12 else {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("Text too short for analysis.")
+                self.overlayWindow.setButtonsEnabled(false)
+                self.overlayWindow.show(at: point)
+            }
+            return
+        }
+        
+        let elementID = elementIdentifier(element)
+        let clippedText = String(trimmed.prefix(summaryTextLimit))
+        
+        DispatchQueue.main.async {
+            if elementID != self.currentElementIdentifier || clippedText != self.currentText {
+                self.overlayWindow.updatePreview(text: self.previewSnippet(clippedText))
+                self.overlayWindow.showMessage("Choose an action to analyze.")
+                self.overlayWindow.setButtonsEnabled(true)
+            } else {
+                self.overlayWindow.setButtonsEnabled(!self.isSummarizing)
+            }
+            self.overlayWindow.show(at: point)
+        }
+        
+        currentElementIdentifier = elementID
+        currentText = clippedText
+    }
+    
+    private func element(at point: NSPoint) -> AXUIElement? {
+        let systemWide = AXUIElementCreateSystemWide()
+        var result: AXUIElement?
+        
+        let screen = screenContaining(point: point)
+        let screenHeight = screen?.frame.maxY ?? point.y
+        let converted = CGPoint(x: point.x, y: screenHeight - point.y)
+        
+        let error = AXUIElementCopyElementAtPosition(systemWide, Float(converted.x), Float(converted.y), &result)
+        if error == .success {
+            return result
+        }
+        return nil
+    }
+    
+    private func screenContaining(point: NSPoint) -> NSScreen? {
+        for screen in NSScreen.screens {
+            if screen.frame.contains(point) {
+                return screen
+            }
+        }
+        return NSScreen.main
+    }
+    
+    private func readableText(from element: AXUIElement) -> String? {
+        if let value: String = attributeValue(element, attribute: kAXValueAttribute) {
+            return value
+        }
+        if let title: String = attributeValue(element, attribute: kAXTitleAttribute) {
+            return title
+        }
+        if let desc: String = attributeValue(element, attribute: kAXDescriptionAttribute) {
+            return desc
+        }
+        if let placeholder: String = attributeValue(element, attribute: kAXPlaceholderValueAttribute) {
+            return placeholder
+        }
+        if let attributed: NSAttributedString = attributeValue(element, attribute: kAXAttributedStringForRangeParameterizedAttribute) {
+            return attributed.string
+        }
+        
+        if let children: [AXUIElement] = attributeValue(element, attribute: kAXChildrenAttribute) {
+            for child in children {
+                if let text = readableText(from: child) {
+                    return text
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    private func attributeValue<T>(_ element: AXUIElement, attribute: String) -> T? {
+        var raw: CFTypeRef?
+        let error = AXUIElementCopyAttributeValue(element, attribute as CFString, &raw)
+        if error == .success, let value = raw as? T {
+            return value
+        }
+        return nil
+    }
+    
+    private func elementIdentifier(_ element: AXUIElement) -> String {
+        let pointer = Unmanaged.passUnretained(element).toOpaque()
+        return String(describing: pointer)
+    }
+    
+    private func handleOverlayAction(_ action: LensAction) {
+        guard let text = currentText, let elementID = currentElementIdentifier else {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("No text selected.")
+                self.overlayWindow.setButtonsEnabled(false)
+            }
+            return
+        }
+        
+        if isSummarizing {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("Already processing. Please wait...")
+            }
+            return
+        }
+        
+        if let cached = summaryCache[elementID]?[action] {
+            DispatchQueue.main.async {
+                self.overlayWindow.showResult(cached, action: action)
+            }
+            return
+        }
+        
+        let timeSinceLast = Date().timeIntervalSince(lastSummaryRequest)
+        if timeSinceLast < summarizationCooldown && lastAction == action {
+            DispatchQueue.main.async {
+                let wait = max(0.5, self.summarizationCooldown - timeSinceLast)
+                self.overlayWindow.showMessage(String(format: "Cooling down... retry in %.1fs", wait))
+            }
+            return
+        }
+        
+        lastAction = action
+        requestSummary(for: text, elementID: elementID, at: currentPoint, action: action)
+    }
+    
+    private func requestSummary(for text: String, elementID: String, at point: NSPoint, action: LensAction) {
+        guard !openAIKey.isEmpty, !openAIKey.contains("YOUR_OPENAI_API_KEY") else {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("Add your OpenAI API key in Config to enable Lens mode.")
+                self.overlayWindow.setButtonsEnabled(false)
+            }
+            return
+        }
+        
+        isSummarizing = true
+        lastSummaryRequest = Date()
+        
+        DispatchQueue.main.async {
+            self.overlayWindow.showLoading(for: action)
+        }
+        
+        let prompt: String
+        let systemPrompt: String
+        
+        switch action {
+        case .summarize:
+            systemPrompt = "You are an assistive lens summarizer. Respond with at most 2 short sentences, plain text only."
+            prompt = """
+Quickly summarize this excerpt. Include the main idea and one supporting detail in under 40 words.
 
-extension ConversationalAvatarView: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { 
-            print("❌ Failed to get image buffer from camera")
-            return 
+\(text)
+"""
+        case .concise:
+            systemPrompt = "You rewrite passages concisely without losing key meaning. Respond in 2 short sentences or a single short bullet list. Plain text only."
+            prompt = """
+Rewrite the following excerpt in a more concise, easy-to-read way while preserving the key information. Keep it under 35 words.
+
+\(text)
+"""
         }
         
-        let ciImage = CIImage(cvImageBuffer: imageBuffer)
-        let context = CIContext()
+        let messages: [[String: String]] = [
+            ["role": "system", "content": systemPrompt],
+            ["role": "user", "content": prompt]
+        ]
         
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { 
-            print("❌ Failed to create CGImage from camera buffer")
-            return 
+        let body: [String: Any] = [
+            "model": "gpt-4.1",
+            "messages": messages,
+            "max_tokens": 120,
+            "temperature": 0.3
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions"),
+              let encoded = try? JSONSerialization.data(withJSONObject: body) else {
+            DispatchQueue.main.async {
+                self.overlayWindow.showMessage("Lens error: request encoding failed.")
+                self.overlayWindow.setButtonsEnabled(true)
+            }
+            self.isSummarizing = false
+            return
         }
         
-        let newImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
-        latestCameraImage = newImage
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(openAIKey)", forHTTPHeaderField: "Authorization")
+        request.httpBody = encoded
         
-        // Debug: Print every 100th frame to avoid spam
-        cameraFrameCount += 1
-        if cameraFrameCount % 100 == 0 {
-            print("📸 Camera frame captured: \(newImage.size) (frame #\(cameraFrameCount))")
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            defer { self.isSummarizing = false }
+            
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.overlayWindow.showMessage("Lens error: \(error.localizedDescription)")
+                    self.overlayWindow.setButtonsEnabled(true)
+                }
+                return
+            }
+            
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.overlayWindow.showMessage("Lens error: empty response.")
+                    self.overlayWindow.setButtonsEnabled(true)
+                }
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let choices = json["choices"] as? [[String: Any]],
+                   let first = choices.first,
+                   let message = first["message"] as? [String: Any],
+                   let content = message["content"] as? String {
+                    DispatchQueue.main.async {
+                        let cleaned = content.trimmingCharacters(in: .whitespacesAndNewlines)
+                        var cache = self.summaryCache[elementID] ?? [:]
+                        cache[action] = cleaned
+                        self.summaryCache[elementID] = cache
+                        if self.currentElementIdentifier == elementID {
+                            self.overlayWindow.showResult(cleaned, action: action)
+                        }
+                    }
+                } else if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                          let errorDict = json["error"] as? [String: Any],
+                          let message = errorDict["message"] as? String {
+                    DispatchQueue.main.async {
+                        self.overlayWindow.showMessage("Lens error: \(message)")
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.overlayWindow.showMessage("Lens error: unexpected response.")
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.overlayWindow.showMessage("Lens error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+    
+    private func ensureAccessibilityPermission() -> Bool {
+        if AXIsProcessTrusted() {
+            return true
         }
+        if !permissionPrompted {
+            let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true] as CFDictionary
+            _ = AXIsProcessTrustedWithOptions(options)
+            permissionPrompted = true
+        }
+        return AXIsProcessTrusted()
+    }
+    
+    private func previewSnippet(_ text: String) -> String {
+        if text.count <= 160 {
+            return text
+        }
+        let snippet = text.prefix(160)
+        return "\(snippet)…"
     }
 }
 
 class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
     var window: ConversationalFloatingAvatarWindow!
     var avatarView: ConversationalAvatarView!
+    var lensController: LensController?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Create floating window
@@ -1460,22 +2478,30 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         
+        // Start Lens controller (menu bar toggle + option key)
+        lensController = LensController(
+            openAIKey: avatarView.openAIAPIKey,
+            teacherModeProvider: { [weak avatarView] in
+                return avatarView?.teacherModeEnabled ?? false
+            },
+            toggleTeacherMode: { [weak avatarView] in
+                return avatarView?.toggleTeacherMode() ?? false
+            }
+        )
+        
         print("🤖 Conversational TalkBack Avatar Started!")
-        print("   - Connected to OpenAI GPT-4o-mini!")
+        print("   - Connected to OpenAI GPT-4o!")
         print("   - Using OpenAI for chat responses!")
-        print("   - Using Gemini 2.5 Flash for vision & screenshots!")
         print("   - Using ElevenLabs Speech-to-Text!")
         print("   - Using ElevenLabs Text-to-Speech (Ivanna)!")
         print("   - 🔥 MCP MONITORING ACTIVE! (Watching Cursor terminal for errors)")
-        print("   - Click and HOLD to talk!")
-        print("   - Release to send your message!")
+        print("   - 🎤 CONTINUOUS LISTENING ACTIVE! (Always listening for your voice)")
         print("   - Drag me around the screen")
         print("   - Drag me near the menu bar to see trash can!")
         print("   - Drop me in trash to turn me off!")
         print("   - I'll remember our conversation!")
         print("   - Custom purse/wallet icon!")
         print("   - REAL conversational voice chat!")
-        print("   - 👁️ WATCHING YOUR BEHAVIOR! (I'll roast you if you get distracted)")
         print("   - 🔥 WATCHING YOUR CODE! (I'll roast you if 2+ errors)")
     }
     
