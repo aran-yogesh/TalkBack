@@ -5,12 +5,8 @@ import AVFoundation
 import ApplicationServices
 
 // 🔐 API Keys Configuration
-// Load from environment variables - REQUIRED
-struct Config {
-    static let openAIAPIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-    static let elevenLabsAPIKey = ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"] ?? ""
-    static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9" // Ivanna
-}
+// Config is loaded from config.swift (which is gitignored for security)
+// If config.swift is missing, copy config.swift.template and add your keys
 
 class ConversationalFloatingAvatarWindow: NSWindow {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
