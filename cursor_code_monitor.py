@@ -17,7 +17,10 @@ from watchdog.observers import Observer
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):
+    """Monitors terminal output for errors and triggers TalkBack responses."""
+
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
+        """Initialize the monitor with a TalkBack message file path."""
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
@@ -112,6 +115,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             self.send_to_talkback(str(e), 1, False)
 
 def main():
+    """Entry point for the TalkBack cursor monitor CLI."""
     print("🤖 TalkBack Cursor Monitor Started!")
     print("   - Monitoring your code execution")
     print("   - Will trigger TalkBack roasts on errors")
