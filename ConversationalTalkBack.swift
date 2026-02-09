@@ -27,9 +27,11 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var eyeOffset: NSPoint = NSPoint(x: 0, y: 0)
     var isThinking = false
     var isListening = false
+    @available(*, deprecated, message: "Recording state is handled by continuous listening. This property will be removed.")
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
+    @available(*, deprecated, message: "AVSpeechSynthesizer is unavailable on macOS. Use ElevenLabs TTS instead.")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
@@ -81,7 +83,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var pendingOpenAIPrompt: String?
     var openAIRetryTimer: Timer?
     
-    // Legacy audio recording variables removed - continuous listening handles all audio
+    // DEPRECATED: Legacy audio recording variables removed - continuous listening handles all audio
     
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
@@ -223,7 +225,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         """
         
         let process = Process()
-        process.launchPath = "/usr/bin/osascript"
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         process.arguments = ["-e", script]
         
         let pipe = Pipe()
@@ -1248,7 +1250,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     // MARK: - Audio Player Delegates
-    
+
+    @available(*, deprecated, message: "NSSoundDelegate callback is legacy. Use AVAudioPlayerDelegate instead.")
     func sound(_ sound: NSSound, didFinishPlaying flag: Bool) {
         print("🎤 Audio playback finished: \(flag)")
         DispatchQueue.main.async {
@@ -2436,7 +2439,7 @@ Rewrite the following excerpt in a more concise, easy-to-read way while preservi
             return true
         }
         if !permissionPrompted {
-            let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true] as CFDictionary
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
             _ = AXIsProcessTrustedWithOptions(options)
             permissionPrompted = true
         }

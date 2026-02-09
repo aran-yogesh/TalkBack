@@ -10,14 +10,31 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+warnings.warn(
+    "cursor_code_monitor is deprecated and will be removed in a future release. "
+    "Use cursor_mcp_server instead for Cursor IDE integration.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 
 class CodeExecutionMonitor(FileSystemEventHandler):
+    """Deprecated: Use cursor_mcp_server.py instead."""
+
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
+        warnings.warn(
+            "CodeExecutionMonitor is deprecated. The watchdog-based file system "
+            "monitoring approach has been replaced by the MCP server. "
+            "Use cursor_mcp_server.py instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
