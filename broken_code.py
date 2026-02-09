@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """
-Intentionally broken code to test TalkBack roasting
+Fixed code that previously contained intentional errors for TalkBack roasting
 """
 
-# Error 1: NameError - undefined variable
-print(undefined_variable)
+defined_variable = "Hello, TalkBack!"
+print(defined_variable)
 
-# Error 2: TypeError - string + int
-result = "hello" + 5
+result = "hello" + str(5)
 
-# Error 3: ZeroDivisionError
-answer = 10 / 0
+denominator = 1
+answer = 10 / denominator
 
-print("This will never run")
-
-
+print("All operations completed successfully")
