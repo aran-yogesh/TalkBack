@@ -6,12 +6,10 @@ Sends roasts to TalkBack avatar based on errors/success
 
 import asyncio
 import json
-import os
-import subprocess
 import sys
 import time
 import warnings
-from typing import Any, Dict, List
+from typing import Any
 
 from mcp import types
 from mcp.server import NotificationOptions, Server

@@ -86,6 +86,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // DEPRECATED: Legacy audio recording variables removed - continuous listening handles all audio
     
     // MCP monitoring for Cursor IDE roasting 🔥
+    // DEPRECATED: File-based IPC will be replaced by HTTP/WebSocket in a future release.
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
@@ -392,6 +393,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         context.restoreGState()
     }
     
+    @available(*, deprecated, message: "Recording indicator is legacy. Continuous listening replaces manual recording.")
     func drawRecordingIndicator(in context: CGContext) {
         let centerX: CGFloat = 150
         let centerY: CGFloat = 100
@@ -1595,6 +1597,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // MARK: - MCP Monitoring for Cursor IDE Roasting 🔥
     
     func startMCPMonitoring() {
+        print("⚠️ DEPRECATION WARNING: File-based MCP monitoring via \(mcpMessageFile) is deprecated. It will be replaced by HTTP/WebSocket in a future release.")
         print("🔍 Starting MCP monitoring for Cursor IDE...")
         
         // Monitor the MCP message file every 0.5 seconds
