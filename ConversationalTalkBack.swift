@@ -1,3 +1,9 @@
+/// TalkBack — A floating, conversational AI avatar for macOS.
+///
+/// Provides a sassy desktop companion that listens via microphone, chats through
+/// OpenAI, speaks with ElevenLabs TTS, monitors Cursor IDE terminal output for
+/// errors, and offers a Lens overlay for on-screen text summarization.
+
 import Cocoa
 import AppKit
 import Foundation
@@ -10,6 +16,7 @@ import ApplicationServices
 
 /// Borderless floating window for the TalkBack avatar.
 class ConversationalFloatingAvatarWindow: NSWindow {
+    /// Configures a borderless, transparent, always-on-top floating window.
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: [.borderless], backing: backingStoreType, defer: flag)
         
@@ -101,6 +108,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     let elevenLabsSTTURL = "https://api.elevenlabs.io/v1/speech-to-text"
     
+    /// Sets up the avatar view layer, starts monitoring, floating, listening, and MCP polling.
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         self.wantsLayer = true
@@ -124,6 +132,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Not supported — the avatar view must be created programmatically.
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -1970,10 +1979,12 @@ class LensOverlayWindow: NSWindow {
         resetContent()
     }
     
+    /// Forwards the summarize action to the overlay callback.
     @objc private func handleSummarize() {
         onAction?(.summarize)
     }
     
+    /// Forwards the concise-rewrite action to the overlay callback.
     @objc private func handleConcise() {
         onAction?(.concise)
     }
@@ -2109,6 +2120,7 @@ class LensController {
         }
     }
     
+    /// Tears down timers and event monitors.
     deinit {
         monitorTimer?.invalidate()
         if let flagMonitor = flagMonitor {
@@ -2119,12 +2131,14 @@ class LensController {
         }
     }
     
+    /// Toggles the persistent Lens mode from the menu bar.
     @objc private func toggleLensMode(_ sender: NSMenuItem) {
         isMenuEnabled.toggle()
         sender.state = isMenuEnabled ? .on : .off
         updateMonitoringState()
     }
     
+    /// Toggles teacher mode from the menu bar.
     @objc private func toggleTeacherModeMenu(_ sender: NSMenuItem) {
         let enabled = toggleTeacherModeHandler()
         sender.state = enabled ? .on : .off
