@@ -5,19 +5,31 @@ This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
 import time
-from pathlib import Path
+import warnings
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+warnings.warn(
+    "cursor_code_monitor is deprecated and will be removed in a future release. "
+    "Use cursor_mcp_server instead for Cursor IDE integration.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
-class CodeExecutionMonitor(FileSystemEventHandler):
+class CodeExecutionMonitor:
+    """Deprecated: Use cursor_mcp_server.py instead."""
+
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
+        warnings.warn(
+            "CodeExecutionMonitor is deprecated. The watchdog-based file system "
+            "monitoring approach has been replaced by the MCP server. "
+            "Use cursor_mcp_server.py instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
@@ -49,8 +61,13 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
+        """Deprecated: file-based IPC will be replaced by HTTP/WebSocket."""
+        warnings.warn(
+            "File-based IPC via /tmp/talkback_message.json is deprecated and will be "
+            "replaced by a proper HTTP or WebSocket connection in a future release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         # Determine response type
         if error_count >= 2:
             response_type = "roast"

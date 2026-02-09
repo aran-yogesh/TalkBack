@@ -2,6 +2,10 @@
 
 # TalkBack MCP Starter Script
 
+echo "⚠️  DEPRECATION WARNING: This script is deprecated."
+echo "   The watchdog-based cursor_code_monitor.py is no longer used."
+echo "   Use cursor_mcp_server.py directly via the MCP protocol instead."
+echo ""
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
 
@@ -27,11 +31,7 @@ if [ $? -ne 0 ]; then
     pip3 install mcp
 fi
 
-python3 -c "import watchdog" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo "⚠️  'watchdog' not installed. Installing..."
-    pip3 install watchdog
-fi
+echo "⚠️  Skipping deprecated watchdog dependency (no longer required)."
 
 echo ""
 echo "✅ All dependencies ready!"
@@ -46,7 +46,8 @@ TALKBACK_PID=$!
 echo "✅ TalkBack running (PID: $TALKBACK_PID)"
 echo ""
 echo "📋 Quick Guide:"
-echo "   1. Run code with: python3 cursor_code_monitor.py run \"YOUR_COMMAND\""
+echo "   1. (DEPRECATED) Run code with: python3 cursor_code_monitor.py run \"YOUR_COMMAND\""
+echo "      ↳ Use cursor_mcp_server.py via MCP protocol instead."
 echo "   2. Test roasts with: python3 test_roast.py [1|2|3]"
 echo "   3. Stop TalkBack: kill $TALKBACK_PID"
 echo ""

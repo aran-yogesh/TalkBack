@@ -2,6 +2,10 @@
 
 echo "🚀 Starting TalkBack MCP Integration Setup"
 echo "=========================================="
+echo ""
+echo "⚠️  DEPRECATION WARNING: File-based IPC via /tmp/talkback_message.json"
+echo "   is deprecated and will be replaced by HTTP/WebSocket in a future release."
+echo ""
 
 # Check if virtual environment exists
 if [ ! -d ".venv" ]; then
