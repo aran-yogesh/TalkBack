@@ -1,5 +1,7 @@
 # TalkBack + Cursor MCP Integration 🤖🔥
 
+> **⚠️ Private Repository** — Solely owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). Do not distribute.
+
 ## Overview
 
 TalkBack now integrates with Cursor IDE via MCP (Model Context Protocol) to monitor your code execution and roast you when you mess up!

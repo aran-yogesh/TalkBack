@@ -1,6 +1,12 @@
 # TalkBack - Annoying But Useful AI Companion 🤖
 
-> **⚠️ Private Repository** — This is a private project. All source code, assets, and documentation are proprietary and confidential. Unauthorized distribution, reproduction, or use of any part of this repository is strictly prohibited. Access is granted only to explicitly authorized collaborators.
+> **⚠️ Private Repository** — This is a solely private project owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). All source code, assets, and documentation are proprietary and confidential. Unauthorized distribution, reproduction, or use of any part of this repository is strictly prohibited. Access is granted only to explicitly authorized collaborators.
+
+| | |
+|---|---|
+| **Author** | Yogesh Mahendran ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)) |
+| **GitHub** | [@aran-yogesh](https://github.com/aran-yogesh) |
+| **Visibility** | Private |
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
@@ -14,7 +20,7 @@ At its core, TalkBack is designed to keep developers engaged and productive thro
 
 Beyond conversation, TalkBack leverages Gemini 2.5 Flash for real-time webcam analysis — detecting gaze direction, emotional state, focus level, and distractions like phone usage — and delivers voice-based commentary every 15 seconds to keep you on track. The MCP (Model Context Protocol) integration with Cursor IDE monitors your terminal output in real time, automatically counting errors and delivering tiered voice feedback: savage roasts for multiple failures, light sarcasm for single errors, and backhanded compliments for clean runs.
 
-The avatar itself is a transparent, always-on-top floating window with animated eyes that track your cursor, dynamic expressions based on mood, and a playful drag-to-trash quit mechanism. TalkBack is designed as a personal developer tool — a private, self-hosted companion that runs locally on your Mac with your own API keys.
+The avatar itself is a transparent, always-on-top floating window with animated eyes that track your cursor, dynamic expressions based on mood, and a playful drag-to-trash quit mechanism. TalkBack is designed as a personal developer tool — a solely private, self-hosted companion that runs locally on your Mac with your own API keys.
 
 ## 🎯 Features
 
@@ -258,17 +264,17 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🤝 Contributing
 
-This is a **private repository**. Contributions are limited to authorized collaborators only. If you have been granted access, feel free to:
+This is a **solely private repository** owned by **Yogesh Mahendran**. Contributions are limited to authorized collaborators only. If you have been granted access, feel free to:
 - Report bugs via issues
 - Suggest new features
 - Submit pull requests for review
 - Improve documentation
 
-Please do not share or redistribute any part of this codebase without explicit permission from the maintainer.
+Please do not share, fork, or redistribute any part of this codebase without explicit written permission from the maintainer at [Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev).
 
 ## 📄 License
 
-MIT License — see the repository license for full terms.
+MIT License — see the repository license for full terms. This license does not grant public access; the repository remains solely private.
 
 ## 🙏 Acknowledgments
 

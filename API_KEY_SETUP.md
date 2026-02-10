@@ -1,5 +1,7 @@
 # 🔐 API Key Configuration Guide
 
+> **⚠️ Private Repository** — Solely owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). Do not distribute.
+
 This document explains how TalkBack handles API keys.
 
 ## 📍 Where Are API Keys Stored?
