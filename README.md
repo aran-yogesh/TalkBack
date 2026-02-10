@@ -266,9 +266,9 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 💬 Questions or Feedback?
 
-Open an issue or reach out! TalkBack loves to chat (obviously). 😉
+Open an issue or reach out at [Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh) — [Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)
 
