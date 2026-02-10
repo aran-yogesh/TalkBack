@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
-"""
-TalkBack MCP Server - Monitors Cursor IDE for code execution results
-Sends roasts to TalkBack avatar based on errors/success
+"""TalkBack MCP Server for Cursor IDE integration.
+
+This module implements a Model Context Protocol (MCP) server that bridges
+Cursor IDE code execution events with the TalkBack floating avatar. It
+exposes MCP resources (execution results, linter errors) and tools
+(report_code_execution, trigger_talkback_roast) so that Cursor can push
+terminal output to TalkBack, which then generates personality-driven
+spoken roasts or sassy success messages via OpenAI and ElevenLabs.
+
+Typical lifecycle:
+    1. Cursor IDE calls ``report_code_execution`` with terminal output.
+    2. The server classifies the result (roast / minor_sass / sassy_success).
+    3. A prompt is written to ``/tmp/talkback_message.json`` for the avatar.
+    4. The TalkBack macOS avatar picks up the file and speaks the response.
 """
 
 import asyncio
@@ -31,7 +42,7 @@ execution_results = {
 
 @app.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
-    """List available resources from TalkBack monitor"""
+    """Return the catalogue of MCP resources exposed by this server."""
     return [
         types.Resource(
             uri="talkback://execution-results",
@@ -49,7 +60,7 @@ async def handle_list_resources() -> list[types.Resource]:
 
 @app.read_resource()
 async def handle_read_resource(uri: str) -> str:
-    """Read resource data"""
+    """Resolve a resource URI and return its current JSON payload."""
     if uri == "talkback://execution-results":
         return json.dumps(execution_results, indent=2)
     elif uri == "talkback://linter-errors":
@@ -62,7 +73,7 @@ async def handle_read_resource(uri: str) -> str:
 
 @app.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
-    """List available tools"""
+    """Advertise the MCP tools that Cursor can invoke."""
     return [
         types.Tool(
             name="report_code_execution",
@@ -110,7 +121,7 @@ async def handle_list_tools() -> list[types.Tool]:
 async def handle_call_tool(
     name: str, arguments: dict[str, Any] | None
 ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-    """Handle tool calls"""
+    """Dispatch an incoming MCP tool call to the appropriate handler."""
     
     if name == "report_code_execution":
         # Update execution results
@@ -176,7 +187,7 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
+    """Write a roast/sass prompt to the shared message file for the TalkBack avatar."""
     # For now, we'll write to a file that TalkBack monitors
     # In production, this would be a proper socket/HTTP connection
     
@@ -194,7 +205,7 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 
 async def main():
-    """Main entry point"""
+    """Start the MCP server over stdio and block until the connection closes."""
     # Run the server using stdin/stdout streams
     async with stdio_server() as (read_stream, write_stream):
         await app.run(

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""
-Intentionally broken code to test TalkBack roasting
+"""Intentionally broken script used to trigger TalkBack roast responses.
+
+Every statement below raises a different exception (NameError, TypeError,
+ZeroDivisionError) so that the TalkBack monitor can detect multiple errors
+and fire its roast / sass pipeline during integration testing.
 """
 
 # Error 1: NameError - undefined variable

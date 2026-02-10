@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
-"""
-Cursor Code Monitor - Watches for code execution and triggers TalkBack roasts
-This script monitors terminal output and linter errors, then sends to TalkBack
+"""Cursor Code Monitor — watches terminal commands and triggers TalkBack roasts.
+
+This module provides ``CodeExecutionMonitor``, a file-system event handler that
+can also run arbitrary shell commands, inspect their output for common error
+patterns, and forward the results to the TalkBack floating avatar via a shared
+JSON file (``/tmp/talkback_message.json``).
+
+Usage from the command line::
+
+    python cursor_code_monitor.py run 'python your_script.py'
+
+The monitor classifies results into three tiers:
+    * **roast** — 2 or more errors detected.
+    * **minor_sass** — exactly 1 error detected.
+    * **sassy_success** — the command succeeded with no errors.
 """
 
 import json
@@ -17,6 +29,8 @@ from watchdog.observers import Observer
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):
+    """Runs shell commands, counts errors in their output, and notifies TalkBack."""
+
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
@@ -49,7 +63,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
+        """Write a classified prompt to the TalkBack message file."""
         
         # Determine response type
         if error_count >= 2:
@@ -112,6 +126,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             self.send_to_talkback(str(e), 1, False)
 
 def main():
+    """Entry point — parse CLI args and either run a command or idle-monitor."""
     print("🤖 TalkBack Cursor Monitor Started!")
     print("   - Monitoring your code execution")
     print("   - Will trigger TalkBack roasts on errors")

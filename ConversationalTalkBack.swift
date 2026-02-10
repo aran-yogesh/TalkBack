@@ -8,6 +8,7 @@ import ApplicationServices
 // Config is loaded from config.swift (which is gitignored for security)
 // If config.swift is missing, copy config.swift.template and add your keys
 
+/// Borderless, always-on-top, transparent window that hosts the TalkBack avatar.
 class ConversationalFloatingAvatarWindow: NSWindow {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: [.borderless], backing: backingStoreType, defer: flag)
@@ -22,6 +23,7 @@ class ConversationalFloatingAvatarWindow: NSWindow {
     }
 }
 
+/// Main avatar view — handles drawing, floating motion, continuous listening, OpenAI chat, TTS, and MCP monitoring.
 class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var message = "I'm listening... 👂"
     var eyeOffset: NSPoint = NSPoint(x: 0, y: 0)
@@ -126,6 +128,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// Toggle the teaching-assistant personality on or off and return the new state.
     func toggleTeacherMode() -> Bool {
         teacherModeEnabled.toggle()
         DispatchQueue.main.async {
@@ -135,10 +138,12 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return teacherModeEnabled
     }
     
+    /// Return whether assignment email alerts are currently enabled.
     func assignmentAlertsState() -> Bool {
         return assignmentAlertsEnabled
     }
     
+    /// Toggle assignment email monitoring on or off and return the new state.
     func toggleAssignmentAlerts() -> Bool {
         assignmentAlertsEnabled.toggle()
         if assignmentAlertsEnabled {
@@ -161,11 +166,13 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         checkForAssignmentEmail()
     }
     
+    /// Stop the periodic assignment email check timer.
     func stopAssignmentMonitoring() {
         assignmentTimer?.invalidate()
         assignmentTimer = nil
     }
     
+    /// Lightweight value type representing a single email fetched from Apple Mail.
     struct MailMessage {
         let subject: String
         let sender: String
@@ -194,6 +201,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Use AppleScript to read the most recent inbox message from Apple Mail.
     private func fetchLatestMailMessage() -> MailMessage? {
         let script = """
         set maxLen to 1200
@@ -264,6 +272,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return MailMessage(subject: subject, sender: sender, messageID: messageID, dateString: dateString, body: body)
     }
     
+    /// Return true if the message subject, body, or sender matches assignment heuristics.
     private func isAssignmentEmail(_ message: MailMessage) -> Bool {
         let lowerSubject = message.subject.lowercased()
         let lowerBody = message.body.lowercased()
@@ -280,6 +289,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return keywordHit || domainHit
     }
     
+    /// Display the assignment subject in the speech bubble and request an AI summary.
     private func presentAssignmentAlert(_ message: MailMessage) {
         let shortSubject = message.subject.isEmpty ? "New assignment" : message.subject
         self.message = "📚 Assignment: \(shortSubject)"
@@ -560,6 +570,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Begin the bouncing/zigzag floating animation across the screen.
     func startFloating() {
         print("🎈 Starting floating motion...")
         floatingTimer = Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { [weak self] _ in
@@ -567,6 +578,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Stop the floating animation and hold the avatar in place.
     func stopFloating() {
         print("🛑 Stopping floating motion...")
         floatingTimer?.invalidate()
@@ -574,6 +586,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         isFloating = false
     }
     
+    /// Resume floating animation 5 seconds after the last user interaction.
     func resumeFloatingAfterDelay() {
         // Resume floating 5 seconds after last interaction
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
@@ -590,6 +603,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Advance the avatar window by one animation frame, bouncing off screen edges.
     func updateFloatingPosition() {
         guard isFloating, !isRecording, !isBeingDragged, let window = self.window else { return }
         
@@ -663,6 +677,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         lastActivity = Date()
     }
     
+    /// Start a 30-second repeating timer that checks for prolonged user inactivity.
     func startActivityMonitoring() {
         Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { _ in
             self.checkUserActivity()
@@ -692,6 +707,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         lastActivity = Date()
     }
     
+    /// Send a conversational prompt to OpenAI GPT-4o and speak the response via ElevenLabs.
     func askOpenAI(prompt: String, bypassCooldown: Bool = false) {
         guard !prompt.isEmpty else { return }
         
@@ -946,6 +962,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }.resume()
     }
     
+    /// Update the speech bubble to show the command that just started running.
     func handleCommandStarted(command: String) {
         let shortCommand = shortenCommand(command)
         DispatchQueue.main.async {
@@ -954,6 +971,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Process a completed command — update the bubble and optionally request a teaching moment.
     func handleCommandFinished(command: String, status: String, exitCode: Int, output: String, duration: Double?) {
         let success = (exitCode == 0) || status.lowercased() == "success"
         let shortCommand = shortenCommand(command)
@@ -989,6 +1007,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return String(trimmed.prefix(57)) + "..."
     }
     
+    /// Return the last 1200 characters of command output for inclusion in an AI prompt.
     private func prepareOutputSnippet(_ output: String) -> String {
         let cleaned = output.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else {
@@ -1000,6 +1019,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return String(cleaned.suffix(1200))
     }
     
+    /// Ask OpenAI to provide a brief teaching-assistant analysis of a command's result.
     func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
         guard teacherModeEnabled else { return }
         guard !isThinking else {
@@ -1219,6 +1239,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }.resume()
     }
     
+    /// Play raw audio data (MP3) through AVAudioPlayer.
     func playAudioData(_ data: Data) {
         print("🎤 Playing audio with AVAudioPlayer...")
         
@@ -1278,6 +1299,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     // MARK: - Continuous Listening Implementation
     
+    /// Request microphone permission and start the always-on audio capture pipeline.
     func startContinuousListening() {
         print("🎤 Starting continuous listening...")
         
@@ -1295,6 +1317,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Configure AVAudioEngine with an input tap for real-time voice activity detection.
     func setupAudioEngine() {
         audioEngine = AVAudioEngine()
         inputNode = audioEngine?.inputNode
@@ -1373,6 +1396,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Convert a buffer of 32-bit float samples to 16-bit signed PCM data.
     func convertFloatToPCM16(floatData: UnsafePointer<Float>, frameCount: Int) -> Data {
         var pcm16Data = Data()
         pcm16Data.reserveCapacity(frameCount * MemoryLayout<Int16>.size)
@@ -1386,6 +1410,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return pcm16Data
     }
     
+    /// Package accumulated voice data into WAV format and send it to ElevenLabs STT.
     func processAccumulatedAudio() {
         guard !audioBuffer.isEmpty else { return }
         
@@ -1448,6 +1473,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Prepend a standard WAV/RIFF header to raw PCM-16 audio data.
     func convertToWAV(audioData: Data) -> Data {
         // Simple WAV header for captured PCM16 audio
         var sampleRateValue = UInt32(inputSampleRate)
@@ -1559,6 +1585,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }.resume()
     }
     
+    /// Draw a pulsing green dot to indicate continuous listening is active.
     func drawListeningIndicator(in context: CGContext) {
         let centerX: CGFloat = 150
         let centerY: CGFloat = 100
@@ -1574,6 +1601,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         context.fillEllipse(in: listeningRect)
     }
     
+    /// Draw a pulsing blue dot to indicate the avatar is currently speaking.
     func drawSpeakingIndicator(in context: CGContext) {
         let centerX: CGFloat = 150
         let centerY: CGFloat = 100
@@ -1591,6 +1619,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     // MARK: - MCP Monitoring for Cursor IDE Roasting 🔥
     
+    /// Begin polling the MCP message file for Cursor IDE code execution events.
     func startMCPMonitoring() {
         print("🔍 Starting MCP monitoring for Cursor IDE...")
         
@@ -1600,6 +1629,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    /// Read the shared JSON message file and dispatch new MCP events.
     func checkForMCPMessages() {
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -1659,6 +1689,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         self.generateRoastResponse(prompt: prompt, type: type)
     }
     
+    /// Build a system prompt for the given roast tier and forward it to OpenAI.
     func generateRoastResponse(prompt: String, type: String) {
         var systemPrompt = ""
         
@@ -1697,6 +1728,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         self.askOpenAIForRoast(prompt: prompt, systemPrompt: systemPrompt)
     }
     
+    /// Send a roast-specific prompt to OpenAI and speak the response via ElevenLabs.
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
         guard !isThinking else { return }
         
@@ -1806,11 +1838,13 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
 }
 
 
+/// Actions available in the TalkBack Lens overlay for text analysis.
 enum LensAction: String {
     case summarize = "Summarize"
     case concise = "Make Concise"
 }
 
+/// Floating overlay panel that shows Lens text previews, action buttons, and AI summaries.
 class LensOverlayWindow: NSWindow {
     private let bubbleView = NSView()
     private let maxWidth: CGFloat = 320
@@ -1995,6 +2029,7 @@ class LensOverlayWindow: NSWindow {
     }
 }
 
+/// Manages the Lens feature — polls accessibility elements under the cursor and summarises text via OpenAI.
 class LensController {
     private let openAIKey: String
     private let statusItem: NSStatusItem
@@ -2452,6 +2487,7 @@ Rewrite the following excerpt in a more concise, easy-to-read way while preservi
     }
 }
 
+/// Application delegate that creates the floating avatar window and wires up the Lens controller.
 class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
     var window: ConversationalFloatingAvatarWindow!
     var avatarView: ConversationalAvatarView!
@@ -2507,6 +2543,7 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
 }
 
 // Main execution
+/// Application entry point — creates the NSApplication, assigns the delegate, and starts the run loop.
 func main() {
     let app = NSApplication.shared
     let delegate = ConversationalAppDelegate()
@@ -2515,3 +2552,4 @@ func main() {
 }
 
 main()
+

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""
-Test script to verify MCP server connection
+"""Smoke test for the TalkBack MCP server connection.
+
+Writes a test JSON payload to the shared message file
+(``/tmp/talkback_message.json``) and prints confirmation.
+Run this script to verify that the file-based IPC path between the MCP
+server and the TalkBack avatar is functional.
 """
 
 import json
@@ -10,7 +14,7 @@ import time
 
 
 def test_mcp_server():
-    """Test the MCP server by sending a test message"""
+    """Write a test payload to the TalkBack message file and return True on success."""
     
     # Test message to send to TalkBack
     test_message = {
