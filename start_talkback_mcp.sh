@@ -21,17 +21,7 @@ fi
 
 # Check Python dependencies
 echo "🔍 Checking Python dependencies..."
-python3 -c "import mcp" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo "⚠️  'mcp' not installed. Installing..."
-    pip3 install mcp
-fi
-
-python3 -c "import watchdog" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo "⚠️  'watchdog' not installed. Installing..."
-    pip3 install watchdog
-fi
+pip3 install -r requirements.txt
 
 echo ""
 echo "✅ All dependencies ready!"

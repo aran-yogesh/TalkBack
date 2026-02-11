@@ -13,12 +13,9 @@ fi
 echo "🔧 Activating virtual environment..."
 source .venv/bin/activate
 
-# Check if MCP is installed
-echo "🔍 Checking MCP installation..."
-python -c "import mcp; print('✅ MCP package is installed!')" || {
-    echo "❌ MCP package not found. Installing..."
-    pip install mcp
-}
+# Install all Python dependencies
+echo "🔍 Installing Python dependencies..."
+pip install -r requirements.txt
 
 # Test MCP server
 echo "🧪 Testing MCP server..."
