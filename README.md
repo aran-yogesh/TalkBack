@@ -47,6 +47,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Delivers sassy roasts based on your behavior
 - Automatic analysis every 15 seconds
 
+### 🖥️ **Screen Monitoring (Idle vs Active Detection)**
+- **Tracks mouse and keyboard activity** across all applications
+- Detects when you've been idle for 2+ minutes (configurable)
+- **Idle detected**: Sassy roast when you stop working ("Ummm hello?? Your screen is RIGHT THERE!")
+- **Welcome back**: Attitude-filled greeting when you return ("Oh LOOK who decided to grace their computer!")
+- Automatic check every 15 seconds (reuses existing timer patterns)
+- Escalating sass: longer idle = spicier messages 🌶️
+
 ### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
@@ -138,8 +146,12 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    - Looking away? → "HEY! Where are you going?"
    - Using your phone? → "Seriously? TikTok is more important than me?"
    - Looking stressed? → "Uh oh, code not compiling?"
-6. **Drag**: Move the avatar anywhere on your screen
-7. **Quit**: Drag avatar near the menu bar → drop in trash can
+6. **Screen Monitoring**: TalkBack automatically watches for idle activity:
+   - No mouse/keyboard for 2 minutes? → Sassy roast
+   - Come back after being idle? → Attitude-filled welcome back
+   - 5+ minutes idle? → Extra spicy messages 🌶️
+7. **Drag**: Move the avatar anywhere on your screen
+8. **Quit**: Drag avatar near the menu bar → drop in trash can
 
 ### 🔥 MCP Code Monitoring (Cursor IDE Integration)
 
@@ -239,7 +251,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🔮 Future Features
 
-- [ ] Screen monitoring (detect what user is doing)
+- [x] Screen monitoring (detect what user is doing)
 - [ ] Context-aware productivity tips
 - [ ] Custom voice selection
 - [ ] Multiple personality modes

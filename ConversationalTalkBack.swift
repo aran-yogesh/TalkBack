@@ -88,6 +88,19 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
     
+    // Screen monitoring (idle vs active detection)
+    var screenMonitorTimer: Timer?
+    var lastInputEventTime: Date = Date()
+    var isUserIdle: Bool = false
+    var idleTransitionHandled: Bool = false
+    var activeReturnHandled: Bool = true
+    let screenIdleThreshold: TimeInterval = 120
+    let screenCheckInterval: TimeInterval = 15.0
+    var mouseEventMonitor: Any?
+    var keyboardEventMonitor: Any?
+    var localMouseMonitor: Any?
+    var localKeyboardMonitor: Any?
+    
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
     let elevenLabsAPIKey = Config.elevenLabsAPIKey
@@ -115,6 +128,9 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         // Start MCP monitoring for Cursor IDE roasting 🔥
         self.startMCPMonitoring()
+        
+        // Start screen monitoring (idle vs active detection) 🖥️
+        self.startScreenMonitoring()
         
         // Start initial message
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -688,8 +704,115 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             let randomMessage = messages.randomElement() ?? "I'm still here!"
             askOpenAI(prompt: randomMessage)
         }
+    }
+    
+    // MARK: - Screen Monitoring (Idle vs Active Detection)
+    
+    func startScreenMonitoring() {
+        print("🖥️ Starting screen monitoring (idle vs active detection)...")
         
+        mouseEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown, .rightMouseDown, .scrollWheel]) { [weak self] _ in
+            self?.recordInputEvent()
+        }
+        
+        keyboardEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown]) { [weak self] _ in
+            self?.recordInputEvent()
+        }
+        
+        localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDown, .rightMouseDown, .scrollWheel]) { [weak self] event in
+            self?.recordInputEvent()
+            return event
+        }
+        
+        localKeyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { [weak self] event in
+            self?.recordInputEvent()
+            return event
+        }
+        
+        screenMonitorTimer = Timer.scheduledTimer(withTimeInterval: screenCheckInterval, repeats: true) { [weak self] _ in
+            self?.checkScreenActivity()
+        }
+    }
+    
+    func stopScreenMonitoring() {
+        screenMonitorTimer?.invalidate()
+        screenMonitorTimer = nil
+        if let m = mouseEventMonitor { NSEvent.removeMonitor(m) }
+        if let m = keyboardEventMonitor { NSEvent.removeMonitor(m) }
+        if let m = localMouseMonitor { NSEvent.removeMonitor(m) }
+        if let m = localKeyboardMonitor { NSEvent.removeMonitor(m) }
+        mouseEventMonitor = nil
+        keyboardEventMonitor = nil
+        localMouseMonitor = nil
+        localKeyboardMonitor = nil
+    }
+    
+    private func recordInputEvent() {
+        lastInputEventTime = Date()
         lastActivity = Date()
+        
+        if isUserIdle {
+            isUserIdle = false
+            idleTransitionHandled = false
+            if !activeReturnHandled {
+                activeReturnHandled = true
+                handleUserReturned()
+            }
+        }
+    }
+    
+    func checkScreenActivity() {
+        let idleDuration = Date().timeIntervalSince(lastInputEventTime)
+        let timeSinceLastResponse = Date().timeIntervalSince(lastResponseTime)
+        
+        print("🖥️ Screen check — idle: \(String(format: "%.0f", idleDuration))s, threshold: \(String(format: "%.0f", screenIdleThreshold))s, isIdle: \(isUserIdle)")
+        
+        if idleDuration >= screenIdleThreshold {
+            if !isUserIdle {
+                isUserIdle = true
+                activeReturnHandled = false
+            }
+            if !idleTransitionHandled && timeSinceLastResponse > responseTimeout {
+                idleTransitionHandled = true
+                handleUserWentIdle(idleDuration: idleDuration)
+            }
+        }
+    }
+    
+    private func handleUserWentIdle(idleDuration: TimeInterval) {
+        let minutes = Int(idleDuration / 60)
+        let idleMessages: [String]
+        if minutes >= 5 {
+            idleMessages = [
+                "Okay at this point I think you LEFT. It's been \(minutes) minutes! 😤💤",
+                "Are you napping?! \(minutes) minutes of NOTHING. I'm filing a missing persons report! 🚨",
+                "\(minutes) minutes idle... I've seen screensavers with more personality! 💀"
+            ]
+        } else {
+            idleMessages = [
+                "Ummm hello?? Your screen is RIGHT THERE and you're just... not using it? 👀",
+                "I can SEE you're not doing anything. The mouse hasn't moved in \(minutes > 0 ? "\(minutes) minutes" : "ages"). Get it together! 💅",
+                "Idle detected! Are you staring into the void again? Because same, honestly. 😴",
+                "Your keyboard misses you. Your mouse misses you. I don't miss you though. ...okay maybe a little. 😏",
+                "Screen's getting lonely over here! Did you wander off to get snacks? Bring me some! 🍿"
+            ]
+        }
+        let chosen = idleMessages.randomElement() ?? "Hey, wake up! 😴"
+        print("🖥️ User went idle — triggering sassy message")
+        askOpenAI(prompt: "The user has been idle (no mouse or keyboard activity) for \(minutes > 0 ? "\(minutes) minutes" : "a while"). React to this: \(chosen)")
+    }
+    
+    private func handleUserReturned() {
+        let returnMessages = [
+            "Oh LOOK who decided to grace their computer with their presence! 👑",
+            "Welcome back, your highness! Did you have a nice break while I sat here ALONE? 😤",
+            "The prodigal user returns! Quick, everyone act natural! 🎭",
+            "Back from the dead! I was about to start planning your memorial service. 💀",
+            "Oh hey! I definitely wasn't worried. Not even a little. ...okay maybe a little. 😏"
+        ]
+        let chosen = returnMessages.randomElement() ?? "Oh, you're back! 👋"
+        print("🖥️ User returned from idle — triggering welcome back message")
+        askOpenAI(prompt: "The user just came back after being idle for a while. React sassily: \(chosen)")
     }
     
     func askOpenAI(prompt: String, bypassCooldown: Bool = false) {
