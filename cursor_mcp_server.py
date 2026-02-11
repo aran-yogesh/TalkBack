@@ -107,7 +107,10 @@ async def handle_call_tool(
 
         if error_count >= 2:
             # ROAST MODE 🔥
-            roast_prompt = f"ROAST ME HARD! My code just failed with {error_count} errors. Here's the output: {execution_results['last_output'][:500]}"
+            output_preview = execution_results["last_output"][:500]
+            roast_prompt = (
+                f"ROAST ME HARD! My code just failed with {error_count} errors. Here's the output: {output_preview}"
+            )
             response_type = "roast"
         elif error_count == 1:
             # Minor sass
