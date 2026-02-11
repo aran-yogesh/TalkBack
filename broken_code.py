@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
 Intentionally broken code to test TalkBack roasting
+
+Private Repository — Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
 """
 
 # Error 1: NameError - undefined variable

@@ -2,6 +2,8 @@
 """
 TalkBack MCP Server - Monitors Cursor IDE for code execution results
 Sends roasts to TalkBack avatar based on errors/success
+
+Private Repository — Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
 """
 
 import asyncio

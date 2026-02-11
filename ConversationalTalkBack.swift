@@ -1,3 +1,7 @@
+// ConversationalTalkBack.swift
+// TalkBack - Private Repository
+// Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
+
 import Cocoa
 import AppKit
 import Foundation
