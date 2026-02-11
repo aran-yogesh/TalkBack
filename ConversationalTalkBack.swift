@@ -89,10 +89,11 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
     
-    // APIs
+    // APIs — loaded from config.swift / environment variables
     let openAIAPIKey = Config.openAIAPIKey
     let elevenLabsAPIKey = Config.elevenLabsAPIKey
     let elevenLabsVoiceID = Config.elevenLabsVoiceID
+    let geminiAPIKey = Config.geminiAPIKey
     
     var elevenLabsTTSURL: String {
         return "https://api.elevenlabs.io/v1/text-to-speech/\(elevenLabsVoiceID)"
@@ -751,7 +752,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -845,7 +846,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             return
         }
         
-        guard !Config.openAIAPIKey.contains("YOUR_OPENAI_API_KEY") else {
+        guard !openAIAPIKey.contains("YOUR_OPENAI_API_KEY") else {
             print("🔑 Missing OpenAI key for assignment summary.")
             DispatchQueue.main.async {
                 self.message = "Add your OpenAI key for email summaries."
@@ -895,7 +896,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -1062,7 +1063,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -1737,7 +1738,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
         
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -2486,6 +2487,8 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
             }
         )
         
+        printKeyStatus()
+        
         print("🤖 Conversational TalkBack Avatar Started!")
         print("   - Connected to OpenAI GPT-4o!")
         print("   - Using OpenAI for chat responses!")
@@ -2500,6 +2503,22 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         print("   - Custom purse/wallet icon!")
         print("   - REAL conversational voice chat!")
         print("   - 🔥 WATCHING YOUR CODE! (I'll roast you if 2+ errors)")
+    }
+    
+    private func printKeyStatus() {
+        func status(_ key: String, _ envName: String) -> String {
+            if let val = ProcessInfo.processInfo.environment[envName], !val.isEmpty {
+                return "✅ \(envName) (env)"
+            } else if key.contains("YOUR_") {
+                return "❌ \(envName) (placeholder — not configured)"
+            } else {
+                return "✅ \(envName) (config.swift)"
+            }
+        }
+        print("🔐 API Key Status:")
+        print("   \(status(Config.openAIAPIKey, "OPENAI_API_KEY"))")
+        print("   \(status(Config.elevenLabsAPIKey, "ELEVENLABS_API_KEY"))")
+        print("   \(status(Config.geminiAPIKey, "GEMINI_API_KEY"))")
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
