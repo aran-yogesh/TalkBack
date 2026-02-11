@@ -1,4 +1,6 @@
 #!/bin/bash
+# TalkBack MCP Integration Setup
+# Private Repository — Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
 
 echo "🚀 Starting TalkBack MCP Integration Setup"
 echo "=========================================="

@@ -1,6 +1,6 @@
 #!/bin/bash
-
 # TalkBack MCP Starter Script
+# Private Repository — Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
 
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""

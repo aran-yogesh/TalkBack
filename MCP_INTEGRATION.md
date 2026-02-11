@@ -1,5 +1,7 @@
 # MCP Integration Guide 🔥
 
+> **⚠️ Private Repository** — Solely owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). Do not distribute.
+
 ## Overview
 
 TalkBack now includes **MCP (Model Context Protocol) Code Monitoring** that watches your terminal for code execution results and automatically roasts you when your code fails! 

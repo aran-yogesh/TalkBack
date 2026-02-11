@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
 Test script to verify MCP server connection
+
+Private Repository — Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
 """
 
 import json

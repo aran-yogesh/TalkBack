@@ -1,5 +1,7 @@
 # 🚀 Complete MCP Integration Setup Guide
 
+> **⚠️ Private Repository** — Solely owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). Do not distribute.
+
 ## ✅ **Step 1: Verify MCP Server**
 Your MCP server is ready! Test it:
 
