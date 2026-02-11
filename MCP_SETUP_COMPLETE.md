@@ -75,8 +75,8 @@ tail -f /tmp/talkback_message.json
 which python
 # Should show: /Users/aran/Desktop/talkback/.venv/bin/python
 
-# Reinstall MCP if needed
-pip install mcp
+# Reinstall dependencies if needed
+pip install -r requirements.txt
 ```
 
 ### **If Cursor can't connect:**

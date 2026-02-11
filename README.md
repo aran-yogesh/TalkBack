@@ -111,14 +111,19 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    
    > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
 
-3. **Compile the app**:
+3. **Install Python dependencies** (for MCP code monitoring):
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+4. **Compile the app**:
    ```bash
    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
 
-4. **Run TalkBack**:
+5. **Run TalkBack**:
    ```bash
    ./ConversationalTalkBack
    ```

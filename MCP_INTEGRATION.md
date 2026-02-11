@@ -100,6 +100,8 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 - **`cursor_code_monitor.py`**: Alternative monitor (requires `watchdog` package)
 - **`MCPTalkBack.swift`**: Standalone MCP version (reference implementation)
 
+> **Note**: All Python dependencies are listed in `requirements.txt`. Install them with `pip install -r requirements.txt`.
+
 ---
 
 ## 🚀 Quick Start
