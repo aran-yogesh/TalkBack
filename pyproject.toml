@@ -1,0 +1,24 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+exclude = ["broken_code.py"]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "B",
+    "SIM",
+    "RUF",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["talkback"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

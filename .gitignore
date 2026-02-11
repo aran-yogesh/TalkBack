@@ -41,3 +41,13 @@ config.swift
 *.wav
 recording.*
 
+# Python
+__pycache__/
+*.pyc
+.ruff_cache/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
