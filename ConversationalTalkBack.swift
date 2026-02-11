@@ -5,8 +5,9 @@ import AVFoundation
 import ApplicationServices
 
 // 🔐 API Keys Configuration
-// Config is loaded from config.swift (which is gitignored for security)
-// If config.swift is missing, copy config.swift.template and add your keys
+// Config is loaded from config.swift (gitignored) or from environment variables.
+// Run: cp config.swift.template config.swift   — then fill in your keys.
+// Alternatively, export OPENAI_API_KEY, ELEVENLABS_API_KEY, and GEMINI_API_KEY.
 
 class ConversationalFloatingAvatarWindow: NSWindow {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {

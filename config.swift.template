@@ -1,22 +1,35 @@
 import Foundation
 
 // 🔐 API Keys Configuration Template
-// Copy this file to config.swift and add your actual API keys
+// Copy this file to config.swift and add your actual API keys.
+// Each key first checks the corresponding environment variable;
+// if the variable is unset it falls back to the literal value below.
 
 struct Config {
-    // OpenAI API Key (for GPT-4o-mini chat responses)
+    private static func env(_ name: String, fallback: String) -> String {
+        if let value = ProcessInfo.processInfo.environment[name], !value.isEmpty {
+            return value
+        }
+        return fallback
+    }
+
+    // OpenAI API Key (for GPT-4o chat responses)
+    // Env var: OPENAI_API_KEY
     // Get it from: https://platform.openai.com/account/api-keys
-    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
-    
+    static let openAIAPIKey = env("OPENAI_API_KEY", fallback: "YOUR_OPENAI_API_KEY_HERE")
+
     // ElevenLabs API Key (for voice synthesis and speech-to-text)
+    // Env var: ELEVENLABS_API_KEY
     // Get it from: https://elevenlabs.io/
-    static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
-    
+    static let elevenLabsAPIKey = env("ELEVENLABS_API_KEY", fallback: "YOUR_ELEVENLABS_API_KEY_HERE")
+
     // ElevenLabs Voice ID (Ivanna's voice)
-    static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
-    
+    // Env var: ELEVENLABS_VOICE_ID
+    static let elevenLabsVoiceID = env("ELEVENLABS_VOICE_ID", fallback: "cgSgspJ2msm6clMCkdW9")
+
     // Gemini API Key (for vision/behavior monitoring)
+    // Env var: GEMINI_API_KEY
     // Get it from: https://aistudio.google.com/app/apikey
-    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
+    static let geminiAPIKey = env("GEMINI_API_KEY", fallback: "YOUR_GEMINI_API_KEY_HERE")
 }
 

@@ -86,34 +86,28 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    cd TalkBack
    ```
 
-2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
-   ```swift
-   struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
-   }
+2. **Configure API Keys** (choose **one** of the two options):
+
+   **Option A — Config file (recommended)**:
+   ```bash
+   cp config.swift.template config.swift
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+   Open `config.swift` and replace the placeholder values with your real keys.
+   This file is gitignored and will never be committed.
+
+   **Option B — Environment variables**:
+   ```bash
+   export OPENAI_API_KEY="sk-..."
+   export ELEVENLABS_API_KEY="..."
+   export GEMINI_API_KEY="..."
+   # Optional: override the default ElevenLabs voice
+   # export ELEVENLABS_VOICE_ID="..."
+   ```
+   When environment variables are set they take precedence over the values in `config.swift`.
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
