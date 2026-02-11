@@ -696,6 +696,12 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     func askOpenAI(prompt: String, bypassCooldown: Bool = false) {
         guard !prompt.isEmpty else { return }
+        guard !openAIAPIKey.contains("YOUR_OPENAI_API_KEY") else {
+            print("🔑 OpenAI API key not configured.")
+            message = "Set your OpenAI key in config.swift or OPENAI_API_KEY env var."
+            needsDisplay = true
+            return
+        }
         
         if isThinking {
             print("⏳ Still processing previous reply, queueing prompt.")
@@ -1004,6 +1010,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
         guard teacherModeEnabled else { return }
+        guard !openAIAPIKey.contains("YOUR_OPENAI_API_KEY") else { return }
         guard !isThinking else {
             print("⌛ Teacher feedback skipped: already processing another response.")
             return
@@ -1135,9 +1142,12 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func speakWithElevenLabs(_ text: String) {
+        guard !elevenLabsAPIKey.contains("YOUR_ELEVENLABS_API_KEY") else {
+            print("🔑 ElevenLabs API key not configured — skipping TTS.")
+            return
+        }
         print("🎤 Speaking with Ivanna's voice: \(text)")
         
-        // Set speaking state
         isSpeaking = true
         message = "Speaking... 🗣️"
         needsDisplay = true
@@ -1489,7 +1499,11 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func transcribeAudioWithElevenLabs(audioData: Data, completion: @escaping (String?) -> Void) {
-        // STT rate limiting
+        guard !elevenLabsAPIKey.contains("YOUR_ELEVENLABS_API_KEY") else {
+            print("🔑 ElevenLabs API key not configured — skipping STT.")
+            completion(nil)
+            return
+        }
         let timeSinceLastSTT = Date().timeIntervalSince(lastSTTCall)
         if timeSinceLastSTT < STTCooldown {
             print("⏰ STT rate limited: \(STTCooldown - timeSinceLastSTT) seconds remaining")
@@ -1700,6 +1714,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
+        guard !openAIAPIKey.contains("YOUR_OPENAI_API_KEY") else { return }
         guard !isThinking else { return }
         
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
@@ -2518,6 +2533,7 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         print("🔐 API Key Status:")
         print("   \(status(Config.openAIAPIKey, "OPENAI_API_KEY"))")
         print("   \(status(Config.elevenLabsAPIKey, "ELEVENLABS_API_KEY"))")
+        print("   \(status(Config.elevenLabsVoiceID, "ELEVENLABS_VOICE_ID"))")
         print("   \(status(Config.geminiAPIKey, "GEMINI_API_KEY"))")
     }
     

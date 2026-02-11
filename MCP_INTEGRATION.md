@@ -271,7 +271,7 @@ Keep it under 30 words. Be dramatic.
 ### Roasts are too harsh/mild?
 - Edit the `generateRoastResponse` function in `ConversationalTalkBack.swift`
 - Adjust the system prompts to your liking
-- Recompile: `swiftc -O -target arm64-apple-macosx13.0 ConversationalTalkBack.swift -o ConversationalTalkBack`
+- Recompile: `swiftc -O -target arm64-apple-macosx13.0 config.swift ConversationalTalkBack.swift -o ConversationalTalkBack`
 
 ### Want different error thresholds?
 - Edit `test_mcp_roast.py`
