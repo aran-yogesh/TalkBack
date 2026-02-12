@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "description": "TalkBack - Sassy macOS AI companion that monitors your code",
+  "scripts": {
+    "start": "./start_talkback_mcp.sh",
+    "test": "python3 test_mcp_connection.py",
+    "mcp:server": "python3 cursor_mcp_server.py",
+    "mcp:monitor": "python3 cursor_code_monitor.py",
+    "setup": "./start_integration.sh"
+  },
   "dependencies": {
     "@codemirror/commands": "^6.2.4",
     "@codemirror/lang-javascript": "^6.2.2",
