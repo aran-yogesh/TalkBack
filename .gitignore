@@ -41,3 +41,7 @@ config.swift
 *.wav
 recording.*
 
+# Node.js
+node_modules/
+package-lock.json
+
