@@ -1,0 +1,12 @@
+# SwiftFormat configuration for TalkBack macOS project
+# Install SwiftFormat via: brew install swiftformat (macOS) or download from https://github.com/nicklockwood/SwiftFormat/releases
+
+--indent 4
+--maxwidth 120
+--commas always
+--trimwhitespace always
+--stripunusedargs closure-only
+--importgrouping alphabetized
+--enable sortImports
+--enable duplicateImports
+--enable trailingCommas

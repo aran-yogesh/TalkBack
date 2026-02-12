@@ -36,6 +36,10 @@ secrets.swift
 .env
 config.swift
 
+# Node.js
+node_modules/
+package-lock.json
+
 # Audio recordings
 *.m4a
 *.wav
