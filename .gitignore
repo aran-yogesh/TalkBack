@@ -41,3 +41,6 @@ config.swift
 *.wav
 recording.*
 
+# Node
+node_modules/
+
