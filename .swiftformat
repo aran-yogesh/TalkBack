@@ -1,0 +1,5 @@
+--indent 4
+--maxwidth 120
+--commas always
+--enable sortImports,duplicateImports
+--import-grouping alpha
