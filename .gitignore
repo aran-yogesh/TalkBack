@@ -34,10 +34,34 @@ WorkingTalkBack
 *_keys.swift
 secrets.swift
 .env
+.env.local
+.env.*.local
 config.swift
 
 # Audio recordings
 *.m4a
 *.wav
 recording.*
+
+# Node / JavaScript
+node_modules/
+dist/
+build/
+coverage/
+.eslintcache
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
 

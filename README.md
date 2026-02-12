@@ -73,7 +73,9 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 1. **macOS 13.0+** (developed on macOS 26.0.1 beta)
 2. **Xcode Command Line Tools** installed
-3. **API Keys**:
+3. **Node.js 18+** and **npm** (for frontend dependencies)
+4. **Python 3.9+** (for MCP server and code monitoring)
+5. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
    - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
@@ -86,7 +88,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    cd TalkBack
    ```
 
-2. **Configure API Keys**:
+2. **Install dependencies**:
+   ```bash
+   npm install
+   pip install -r requirements.txt
+   ```
+
+3. **Configure API Keys**:
    
    Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
    ```swift
@@ -111,14 +119,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    
    > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
 
-3. **Compile the app**:
+4. **Compile the app**:
    ```bash
    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
 
-4. **Run TalkBack**:
+5. **Run TalkBack**:
    ```bash
    ./ConversationalTalkBack
    ```
