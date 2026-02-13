@@ -2,6 +2,10 @@
 """
 Cursor Code Monitor - Watches for code execution and triggers TalkBack roasts
 This script monitors terminal output and linter errors, then sends to TalkBack
+
+.. deprecated::
+    This module is deprecated and will be removed in a future release.
+    Use the MCP server (cursor_mcp_server.py) instead for Cursor IDE integration.
 """
 
 import json
@@ -10,13 +14,22 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+warnings.warn(
+    "cursor_code_monitor is deprecated and will be removed in a future release. "
+    "Use the MCP server (cursor_mcp_server.py) instead for Cursor IDE integration.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 
 class CodeExecutionMonitor(FileSystemEventHandler):
+    """Deprecated: Use cursor_mcp_server.py instead."""
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
@@ -49,7 +62,13 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
+        """Deprecated: Use the MCP server's report_code_execution tool instead."""
+        warnings.warn(
+            "send_to_talkback is deprecated. Use the MCP server's "
+            "report_code_execution tool instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         
         # Determine response type
         if error_count >= 2:
