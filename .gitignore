@@ -41,3 +41,15 @@ config.swift
 *.wav
 recording.*
 
+# Dependencies
+node_modules
+.pnp.*
+.yarn/
+.deps-installed
+
+# Tooling
+bin/
+
+# Lockfiles
+yarn.lock
+
