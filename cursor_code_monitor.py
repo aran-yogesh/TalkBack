@@ -2,6 +2,10 @@
 """
 Cursor Code Monitor - Watches for code execution and triggers TalkBack roasts
 This script monitors terminal output and linter errors, then sends to TalkBack
+
+.. deprecated::
+    This standalone monitor is deprecated. MCP monitoring is now built directly
+    into ConversationalTalkBack.swift. Use the native Swift app instead.
 """
 
 import json
@@ -10,10 +14,19 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+
+warnings.warn(
+    "cursor_code_monitor.py is deprecated. "
+    "MCP monitoring is now built into ConversationalTalkBack.swift. "
+    "Use the native Swift app instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):

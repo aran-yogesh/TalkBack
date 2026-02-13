@@ -1,5 +1,10 @@
 #!/bin/bash
 
+echo "⚠️  DEPRECATION WARNING: This script is deprecated."
+echo "   MCP monitoring is now built into ConversationalTalkBack.swift."
+echo "   Compile and run the Swift app directly instead."
+echo ""
+
 echo "🚀 Starting TalkBack MCP Integration Setup"
 echo "=========================================="
 

@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
 """
 Test script to verify MCP server connection
+
+.. deprecated::
+    This test script is deprecated. MCP monitoring is now built directly
+    into ConversationalTalkBack.swift. Use the native Swift app instead.
 """
 
 import json
 import subprocess
 import sys
 import time
+import warnings
+
+warnings.warn(
+    "test_mcp_connection.py is deprecated. "
+    "MCP monitoring is now built into ConversationalTalkBack.swift. "
+    "Use the native Swift app instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def test_mcp_server():

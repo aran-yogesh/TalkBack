@@ -81,7 +81,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var pendingOpenAIPrompt: String?
     var openAIRetryTimer: Timer?
     
-    // Legacy audio recording variables removed - continuous listening handles all audio
+    // DEPRECATED: Legacy audio recording variables removed - continuous listening handles all audio
     
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
@@ -639,9 +639,9 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         window.setFrameOrigin(frame.origin)
     }
     
-    // Legacy recording functions removed - continuous listening handles all audio processing
+    // DEPRECATED: Legacy recording functions removed - continuous listening handles all audio processing
     
-    // Legacy transcribeAudio function removed - using transcribeAudioWithElevenLabs instead
+    // DEPRECATED: Legacy transcribeAudio function removed - using transcribeAudioWithElevenLabs instead
     
     func processUserSpeech(_ text: String) {
         print("💬 User said: \(text)")
@@ -1659,6 +1659,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         self.generateRoastResponse(prompt: prompt, type: type)
     }
     
+    @available(*, deprecated, message: "External MCP scripts are deprecated; roasting is now triggered via built-in MCP file monitoring.")
     func generateRoastResponse(prompt: String, type: String) {
         var systemPrompt = ""
         
@@ -1697,6 +1698,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         self.askOpenAIForRoast(prompt: prompt, systemPrompt: systemPrompt)
     }
     
+    @available(*, deprecated, message: "Use askOpenAI(prompt:) instead. This roast-specific path is superseded by the teaching-mode flow.")
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
         guard !isThinking else { return }
         
@@ -2499,6 +2501,15 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         print("   - Custom purse/wallet icon!")
         print("   - REAL conversational voice chat!")
         print("   - 🔥 WATCHING YOUR CODE! (I'll roast you if 2+ errors)")
+        print("")
+        print("⚠️  DEPRECATION NOTICE:")
+        print("   The standalone Python MCP scripts are deprecated:")
+        print("   - cursor_code_monitor.py")
+        print("   - cursor_mcp_server.py")
+        print("   - test_mcp_connection.py")
+        print("   - start_integration.sh")
+        print("   - start_talkback_mcp.sh")
+        print("   MCP monitoring is now built directly into this Swift app.")
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
