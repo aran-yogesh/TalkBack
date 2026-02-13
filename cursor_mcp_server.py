@@ -2,6 +2,10 @@
 """
 TalkBack MCP Server - Monitors Cursor IDE for code execution results
 Sends roasts to TalkBack avatar based on errors/success
+
+.. deprecated::
+    This standalone MCP server is deprecated. MCP monitoring is now built
+    directly into ConversationalTalkBack.swift. Use the native Swift app instead.
 """
 
 import asyncio
@@ -10,7 +14,16 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
+
+warnings.warn(
+    "cursor_mcp_server.py is deprecated. "
+    "MCP monitoring is now built into ConversationalTalkBack.swift. "
+    "Use the native Swift app instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
