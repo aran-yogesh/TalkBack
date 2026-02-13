@@ -30,6 +30,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
+    @available(macOS, deprecated: 15.0, message: "AVSpeechSynthesizer is deprecated. Use a dedicated TTS service (e.g. ElevenLabs) instead.")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
@@ -223,6 +224,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         """
         
         let process = Process()
+        #warning("Deprecated: 'launchPath' is deprecated. Use 'executableURL' instead.")
         process.launchPath = "/usr/bin/osascript"
         process.arguments = ["-e", script]
         
@@ -2472,6 +2474,7 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
+        #warning("Deprecated: 'activate(ignoringOtherApps:)' is deprecated in macOS 14+. Use 'NSApp.activate()' instead.")
         NSApp.activate(ignoringOtherApps: true)
         
         // Start Lens controller (menu bar toggle + option key)
