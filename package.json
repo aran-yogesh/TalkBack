@@ -3,6 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "_dependencies_deprecated_notes": {
+    "moment": "DEPRECATED: moment is in maintenance mode. Migrate to date-fns or dayjs.",
+    "reactflow": "DEPRECATED: reactflow has been renamed to @xyflow/react.",
+    "@mui/base": "DEPRECATED: @mui/base is deprecated. Migrate to @base-ui/components.",
+    "@types/date-fns": "DEPRECATED: date-fns v4+ ships its own types. Remove this package.",
+    "@types/react-router-dom": "DEPRECATED: react-router-dom v6+ ships its own types. Remove this package."
+  },
   "dependencies": {
     "@codemirror/commands": "^6.2.4",
     "@codemirror/lang-javascript": "^6.2.2",

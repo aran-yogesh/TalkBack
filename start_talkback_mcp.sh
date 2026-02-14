@@ -1,7 +1,16 @@
 #!/bin/bash
 
 # TalkBack MCP Starter Script
+#
+# DEPRECATED: This script launches the legacy Python-based MCP monitor
+# (cursor_code_monitor.py / cursor_mcp_server.py) which use file-based IPC.
+# The built-in Swift MCP monitoring in ConversationalTalkBack.swift is the
+# recommended approach. This script will be removed in a future release.
 
+echo "⚠️  DEPRECATION WARNING: This starter script is deprecated."
+echo "   The built-in Swift MCP monitoring is the recommended approach."
+echo "   See ConversationalTalkBack.swift for the current implementation."
+echo ""
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
 
@@ -20,7 +29,9 @@ if [ ! -f "MCPTalkBack" ]; then
 fi
 
 # Check Python dependencies
+# DEPRECATED: These Python dependencies are only needed by the legacy MCP scripts
 echo "🔍 Checking Python dependencies..."
+echo "⚠️  Note: Python MCP dependencies are deprecated. Swift handles MCP natively now."
 python3 -c "import mcp" 2>/dev/null
 if [ $? -ne 0 ]; then
     echo "⚠️  'mcp' not installed. Installing..."
@@ -30,6 +41,7 @@ fi
 python3 -c "import watchdog" 2>/dev/null
 if [ $? -ne 0 ]; then
     echo "⚠️  'watchdog' not installed. Installing..."
+    echo "⚠️  Note: watchdog is deprecated and only used by cursor_code_monitor.py"
     pip3 install watchdog
 fi
 

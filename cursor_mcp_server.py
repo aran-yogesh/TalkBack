@@ -2,20 +2,32 @@
 """
 TalkBack MCP Server - Monitors Cursor IDE for code execution results
 Sends roasts to TalkBack avatar based on errors/success
+
+DEPRECATED: This standalone Python MCP server uses file-based IPC
+(/tmp/talkback_message.json) which is insecure and inefficient.
+The built-in Swift MCP monitoring in ConversationalTalkBack.swift
+is the recommended replacement. This file will be removed in a
+future release.
 """
 
 import asyncio
 import json
-import os
-import subprocess
 import sys
 import time
-from typing import Any, Dict, List
+import warnings
+from typing import Any
 
-from mcp import types
-from mcp.server import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
-from mcp.server.stdio import stdio_server
+warnings.warn(
+    "cursor_mcp_server.py is deprecated. The built-in Swift MCP monitoring "
+    "in ConversationalTalkBack.swift is the recommended replacement.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+from mcp import types  # noqa: E402
+from mcp.server import NotificationOptions, Server  # noqa: E402
+from mcp.server.models import InitializationOptions  # noqa: E402
+from mcp.server.stdio import stdio_server  # noqa: E402
 
 # TalkBack MCP Server
 app = Server("talkback-monitor")
@@ -26,8 +38,9 @@ execution_results = {
     "last_output": "",
     "error_count": 0,
     "linter_errors": [],
-    "success": False
+    "success": False,
 }
+
 
 @app.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
@@ -37,15 +50,16 @@ async def handle_list_resources() -> list[types.Resource]:
             uri="talkback://execution-results",
             name="Latest Code Execution Results",
             description="Most recent code execution output and error count",
-            mimeType="application/json"
+            mimeType="application/json",
         ),
         types.Resource(
             uri="talkback://linter-errors",
             name="Current Linter Errors",
             description="Active linter/compiler errors in the workspace",
-            mimeType="application/json"
-        )
+            mimeType="application/json",
+        ),
     ]
+
 
 @app.read_resource()
 async def handle_read_resource(uri: str) -> str:
@@ -53,12 +67,16 @@ async def handle_read_resource(uri: str) -> str:
     if uri == "talkback://execution-results":
         return json.dumps(execution_results, indent=2)
     elif uri == "talkback://linter-errors":
-        return json.dumps({
-            "linter_errors": execution_results["linter_errors"],
-            "error_count": execution_results["error_count"]
-        }, indent=2)
+        return json.dumps(
+            {
+                "linter_errors": execution_results["linter_errors"],
+                "error_count": execution_results["error_count"],
+            },
+            indent=2,
+        )
     else:
         raise ValueError(f"Unknown resource: {uri}")
+
 
 @app.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
@@ -72,24 +90,24 @@ async def handle_list_tools() -> list[types.Tool]:
                 "properties": {
                     "output": {
                         "type": "string",
-                        "description": "Terminal output from code execution"
+                        "description": "Terminal output from code execution",
                     },
                     "error_count": {
                         "type": "integer",
-                        "description": "Number of errors detected"
+                        "description": "Number of errors detected",
                     },
                     "linter_errors": {
                         "type": "array",
                         "description": "List of linter/compiler error messages",
-                        "items": {"type": "string"}
+                        "items": {"type": "string"},
                     },
                     "success": {
                         "type": "boolean",
-                        "description": "Whether execution was successful"
-                    }
+                        "description": "Whether execution was successful",
+                    },
                 },
-                "required": ["output", "error_count", "success"]
-            }
+                "required": ["output", "error_count", "success"],
+            },
         ),
         types.Tool(
             name="trigger_talkback_roast",
@@ -99,19 +117,20 @@ async def handle_list_tools() -> list[types.Tool]:
                 "properties": {
                     "force": {
                         "type": "boolean",
-                        "description": "Force roast even if no recent execution"
+                        "description": "Force roast even if no recent execution",
                     }
-                }
-            }
-        )
+                },
+            },
+        ),
     ]
+
 
 @app.call_tool()
 async def handle_call_tool(
     name: str, arguments: dict[str, Any] | None
 ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     """Handle tool calls"""
-    
+
     if name == "report_code_execution":
         # Update execution results
         execution_results["last_run_time"] = time.time()
@@ -119,10 +138,10 @@ async def handle_call_tool(
         execution_results["error_count"] = arguments.get("error_count", 0)
         execution_results["linter_errors"] = arguments.get("linter_errors", [])
         execution_results["success"] = arguments.get("success", False)
-        
+
         # Generate roast message based on error count
         error_count = execution_results["error_count"]
-        
+
         if error_count >= 2:
             # ROAST MODE 🔥
             roast_prompt = f"ROAST ME HARD! My code just failed with {error_count} errors. Here's the output: {execution_results['last_output'][:500]}"
@@ -133,65 +152,67 @@ async def handle_call_tool(
             response_type = "minor_sass"
         else:
             # Success with attitude
-            roast_prompt = f"My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass."
+            roast_prompt = "My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass."
             response_type = "sassy_success"
-        
+
         # Call TalkBack to speak
         await trigger_talkback_speech(roast_prompt, response_type)
-        
+
         return [
             types.TextContent(
                 type="text",
-                text=json.dumps({
-                    "status": "success",
-                    "error_count": error_count,
-                    "response_type": response_type,
-                    "message": f"TalkBack triggered with {response_type}"
-                })
+                text=json.dumps(
+                    {
+                        "status": "success",
+                        "error_count": error_count,
+                        "response_type": response_type,
+                        "message": f"TalkBack triggered with {response_type}",
+                    }
+                ),
             )
         ]
-    
+
     elif name == "trigger_talkback_roast":
         force = arguments.get("force", False) if arguments else False
-        
+
         if not execution_results["last_run_time"] and not force:
             return [
                 types.TextContent(
-                    type="text",
-                    text="No recent code execution to roast about!"
+                    type="text", text="No recent code execution to roast about!"
                 )
             ]
-        
+
         error_count = execution_results["error_count"]
         roast_prompt = f"ROAST ME about my code with {error_count} errors!"
         await trigger_talkback_speech(roast_prompt, "roast")
-        
-        return [
-            types.TextContent(
-                type="text",
-                text="TalkBack roast triggered!"
-            )
-        ]
-    
+
+        return [types.TextContent(type="text", text="TalkBack roast triggered!")]
+
     raise ValueError(f"Unknown tool: {name}")
 
+
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via file-based IPC (deprecated)."""
+    warnings.warn(
+        "File-based IPC via /tmp/talkback_message.json is deprecated. "
+        "Use XPC, Unix sockets, or DistributedNotificationCenter instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
-        "timestamp": time.time()
+        "timestamp": time.time(),
     }
-    
+
     # Write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
     with open(message_file, "w") as f:
         json.dump(talkback_message, f)
-    
+
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+
 
 async def main():
     """Main entry point"""
@@ -205,11 +226,11 @@ async def main():
                 server_version="1.0.0",
                 capabilities=app.get_capabilities(
                     notification_options=NotificationOptions(),
-                    experimental_capabilities={}
-                )
-            )
+                    experimental_capabilities={},
+                ),
+            ),
         )
+
 
 if __name__ == "__main__":
     asyncio.run(main())
-
