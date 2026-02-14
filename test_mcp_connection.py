@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """
-Test script to verify MCP server connection
+Test script to verify MCP server connection.
+
+.. deprecated::
+    The file-based IPC mechanism used by this test script is deprecated.
+    Future versions will use HTTP or WebSocket transport.
 """
 
 import json
 import subprocess
 import sys
 import time
+import warnings
 
 
 def test_mcp_server():
-    """Test the MCP server by sending a test message"""
+    """Test the MCP server by sending a test message."""
+    warnings.warn(
+        "test_mcp_connection.py relies on file-based IPC via /tmp/talkback_message.json, "
+        "which is deprecated. Future versions will use HTTP or WebSocket transport.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     
-    # Test message to send to TalkBack
     test_message = {
         "prompt": "Test message from MCP server! Your code monitoring is working! 🎉",
         "type": "test",

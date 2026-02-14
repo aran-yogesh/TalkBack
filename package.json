@@ -3,6 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "_dependencies_deprecated_notes": {
+    "@codemirror/text": "Deprecated: merged into @codemirror/state. Migrate to @codemirror/state.",
+    "@mui/base": "Deprecated: pre-release package. Migrate to @mui/material.",
+    "@mui/joy": "Deprecated: alpha package, no longer maintained. Migrate to @mui/material.",
+    "@types/date-fns": "Deprecated: date-fns v4+ ships its own types. Remove this package.",
+    "moment": "Deprecated: legacy library. Migrate to date-fns or dayjs.",
+    "reactflow": "Deprecated: renamed to @xyflow/react. Migrate to @xyflow/react.",
+    "zustand": "Deprecated version: 5.0.0-rc.2 is a release candidate. Upgrade to stable 5.x."
+  },
   "dependencies": {
     "@codemirror/commands": "^6.2.4",
     "@codemirror/lang-javascript": "^6.2.2",

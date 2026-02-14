@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# DEPRECATED: This script is deprecated and will be removed in a future version.
+# The file-based IPC mechanism (/tmp/talkback_message.json) it tests is being
+# replaced with HTTP or WebSocket transport.
+
+echo "⚠️  WARNING: start_integration.sh is deprecated and will be removed in a future version."
+echo "   The file-based IPC mechanism it relies on is being replaced."
+echo ""
+
 echo "🚀 Starting TalkBack MCP Integration Setup"
 echo "=========================================="
 

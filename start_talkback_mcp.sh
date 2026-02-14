@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # TalkBack MCP Starter Script
+#
+# DEPRECATED: This script is deprecated and will be removed in a future version.
+# The MCPTalkBack binary it references has been replaced by ConversationalTalkBack.swift,
+# and cursor_code_monitor.py has been superseded by cursor_mcp_server.py.
+
+echo "⚠️  WARNING: start_talkback_mcp.sh is deprecated and will be removed in a future version."
+echo "   Please use ConversationalTalkBack.swift directly with cursor_mcp_server.py instead."
+echo ""
 
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
