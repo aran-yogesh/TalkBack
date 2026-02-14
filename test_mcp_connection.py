@@ -4,9 +4,16 @@ Test script to verify MCP server connection
 """
 
 import json
-import subprocess
 import sys
 import time
+import warnings
+
+warnings.warn(
+    "test_mcp_connection is deprecated and will be removed in a future release. "
+    "Use the MCP server integration tests instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def test_mcp_server():
