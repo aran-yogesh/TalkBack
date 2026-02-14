@@ -223,6 +223,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         """
         
         let process = Process()
+        // DEPRECATED: Process.launchPath is deprecated since macOS 13.
+        // Use process.executableURL = URL(fileURLWithPath:) instead.
         process.launchPath = "/usr/bin/osascript"
         process.arguments = ["-e", script]
         
@@ -1590,11 +1592,14 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     // MARK: - MCP Monitoring for Cursor IDE Roasting 🔥
+    // DEPRECATED: File-based IPC via /tmp/talkback_message.json is insecure and
+    // inefficient. Replace with XPC services, Unix domain sockets, or
+    // DistributedNotificationCenter for inter-process communication.
     
     func startMCPMonitoring() {
         print("🔍 Starting MCP monitoring for Cursor IDE...")
+        print("⚠️  WARNING: File-based IPC polling is deprecated. Consider XPC or sockets.")
         
-        // Monitor the MCP message file every 0.5 seconds
         mcpMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.checkForMCPMessages()
         }
@@ -2436,7 +2441,9 @@ Rewrite the following excerpt in a more concise, easy-to-read way while preservi
             return true
         }
         if !permissionPrompted {
-            let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true] as CFDictionary
+            // DEPRECATED: takeRetainedValue() on kAXTrustedCheckOptionPrompt is incorrect
+            // and risks a double-free. Use takeUnretainedValue() instead.
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
             _ = AXIsProcessTrustedWithOptions(options)
             permissionPrompted = true
         }
@@ -2472,6 +2479,8 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
+        // DEPRECATED: activate(ignoringOtherApps:) is deprecated since macOS 14.
+        // Use NSApp.activate() instead.
         NSApp.activate(ignoringOtherApps: true)
         
         // Start Lens controller (menu bar toggle + option key)
