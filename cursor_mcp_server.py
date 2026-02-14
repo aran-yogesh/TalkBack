@@ -10,6 +10,7 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
 
 from mcp import types
@@ -176,9 +177,13 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
+    """Send prompt to TalkBack via file-based IPC (deprecated)."""
+    warnings.warn(
+        "File-based IPC via /tmp/talkback_message.json is deprecated and will be "
+        "replaced with a proper HTTP or WebSocket transport in a future version.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     
     talkback_message = {
         "prompt": prompt,
