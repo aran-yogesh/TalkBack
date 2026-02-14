@@ -10,7 +10,17 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
+
+warnings.warn(
+    "This module uses the legacy MCP SDK server pattern (Server, InitializationOptions, "
+    "NotificationOptions, manual stdio_server). Migrate to the FastMCP API: "
+    "from mcp.server.fastmcp import FastMCP; mcp = FastMCP('talkback-monitor'). "
+    "See https://github.com/modelcontextprotocol/python-sdk for migration details.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
@@ -194,8 +204,13 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 
 async def main():
-    """Main entry point"""
-    # Run the server using stdin/stdout streams
+    """Main entry point - uses deprecated manual stdio_server pattern."""
+    warnings.warn(
+        "main() uses the deprecated manual stdio_server() initialization pattern. "
+        "Migrate to FastMCP: mcp = FastMCP('talkback-monitor'); mcp.run().",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     async with stdio_server() as (read_stream, write_stream):
         await app.run(
             read_stream,
