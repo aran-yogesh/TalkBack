@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
@@ -49,7 +50,13 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
+        """Deprecated: file-based IPC will be replaced by socket/HTTP transport."""
+        warnings.warn(
+            "send_to_talkback uses file-based IPC which is deprecated. "
+            "A future version will use a proper socket/HTTP connection.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         
         # Determine response type
         if error_count >= 2:
@@ -81,11 +88,16 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             print(f"❌ Error sending to TalkBack: {e}")
     
     def monitor_terminal_command(self, command: str):
-        """Run a command and monitor its output"""
+        """Deprecated: shell=True execution will be replaced by safer invocation."""
+        warnings.warn(
+            "monitor_terminal_command uses shell=True which is deprecated for "
+            "security reasons. A future version will accept argument lists.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         print(f"🔍 Monitoring command: {command}")
         
         try:
-            # Run command and capture output
             result = subprocess.run(
                 command,
                 shell=True,

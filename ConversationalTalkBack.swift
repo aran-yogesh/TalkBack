@@ -1249,6 +1249,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     // MARK: - Audio Player Delegates
     
+    @available(*, deprecated, message: "NSSoundDelegate callback is unused; use AVAudioPlayerDelegate instead.")
     func sound(_ sound: NSSound, didFinishPlaying flag: Bool) {
         print("🎤 Audio playback finished: \(flag)")
         DispatchQueue.main.async {
@@ -1600,6 +1601,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    @available(*, deprecated, message: "File-based IPC will be replaced by a socket/HTTP transport.")
     func checkForMCPMessages() {
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],

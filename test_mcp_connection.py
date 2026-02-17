@@ -7,12 +7,18 @@ import json
 import subprocess
 import sys
 import time
+import warnings
 
 
 def test_mcp_server():
-    """Test the MCP server by sending a test message"""
+    """Deprecated: file-based messaging will be replaced by socket/HTTP transport."""
+    warnings.warn(
+        "test_mcp_server uses file-based IPC which is deprecated. "
+        "A future version will use a proper socket/HTTP connection.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     
-    # Test message to send to TalkBack
     test_message = {
         "prompt": "Test message from MCP server! Your code monitoring is working! 🎉",
         "type": "test",
