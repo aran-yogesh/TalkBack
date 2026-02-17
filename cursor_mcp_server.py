@@ -6,11 +6,9 @@ Sends roasts to TalkBack avatar based on errors/success
 
 import asyncio
 import json
-import os
-import subprocess
 import sys
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
@@ -133,7 +131,7 @@ async def handle_call_tool(
             response_type = "minor_sass"
         else:
             # Success with attitude
-            roast_prompt = f"My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass."
+            roast_prompt = "My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass."
             response_type = "sassy_success"
         
         # Call TalkBack to speak
