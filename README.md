@@ -1,3 +1,6 @@
+> [!WARNING]
+> **DEPRECATED**: This project is no longer actively maintained. It may contain outdated dependencies, security vulnerabilities, or compatibility issues. Use at your own risk. No further updates or bug fixes are planned.
+
 # TalkBack - Annoying But Useful AI Companion 🤖
 
 A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
