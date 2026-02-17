@@ -41,3 +41,10 @@ config.swift
 *.wav
 recording.*
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
