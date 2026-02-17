@@ -7,6 +7,7 @@ echo ""
 
 # Check if compiled
 if [ ! -f "MCPTalkBack" ]; then
+    echo "⚠️  DEPRECATION WARNING: This script references MCPTalkBack.swift which has been renamed to ConversationalTalkBack.swift. Please update this script."
     echo "📦 Compiling MCPTalkBack..."
     swiftc -o MCPTalkBack MCPTalkBack.swift \
       -framework Cocoa -framework Foundation -framework AVFoundation \

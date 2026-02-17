@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
@@ -49,9 +50,14 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Deprecated: file-based IPC. Migrate to socket/HTTP transport."""
+        warnings.warn(
+            "send_to_talkback uses file-based IPC which is deprecated. "
+            "Migrate to a proper socket or HTTP connection.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
