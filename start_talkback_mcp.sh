@@ -27,12 +27,6 @@ if [ $? -ne 0 ]; then
     pip3 install mcp
 fi
 
-python3 -c "import watchdog" 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo "⚠️  'watchdog' not installed. Installing..."
-    pip3 install watchdog
-fi
-
 echo ""
 echo "✅ All dependencies ready!"
 echo ""

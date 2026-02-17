@@ -22,7 +22,7 @@ Your Code → Cursor IDE → MCP Monitor → TalkBack Avatar → Ivanna's Voice 
 
 ```bash
 cd /Users/aran/Desktop/talkback
-pip3 install mcp watchdog
+pip3 install mcp
 ```
 
 ### 2. Add Your API Keys

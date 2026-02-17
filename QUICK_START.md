@@ -124,7 +124,7 @@ python3 test_roast.py 3
 
 ### Python dependencies missing?
 ```bash
-pip3 install mcp watchdog
+pip3 install mcp
 ```
 
 ---

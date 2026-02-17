@@ -97,7 +97,7 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 
 ### Existing Files (untouched):
 - **`cursor_mcp_server.py`**: Full MCP server (requires `mcp` package)
-- **`cursor_code_monitor.py`**: Alternative monitor (requires `watchdog` package)
+- **`cursor_code_monitor.py`**: Alternative monitor for code execution
 - **`MCPTalkBack.swift`**: Standalone MCP version (reference implementation)
 
 ---
