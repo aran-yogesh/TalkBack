@@ -3,15 +3,16 @@
 Intentionally broken code to test TalkBack roasting
 """
 
-# Error 1: NameError - undefined variable
+# Fix 1: Define the variable before use
+undefined_variable = "I am now defined!"
 print(undefined_variable)
 
-# Error 2: TypeError - string + int
-result = "hello" + 5
+# Fix 2: Convert int to string before concatenation
+result = "hello" + str(5)
 
-# Error 3: ZeroDivisionError
-answer = 10 / 0
+# Fix 3: Use a non-zero divisor
+answer = 10 / 2
 
-print("This will never run")
+print("This will now run successfully!")
 
 
