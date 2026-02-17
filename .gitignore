@@ -41,3 +41,12 @@ config.swift
 *.wav
 recording.*
 
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node (not used - prevent accidental inclusion)
+node_modules/
+package-lock.json
+
