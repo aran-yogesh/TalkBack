@@ -30,6 +30,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
+    @available(*, deprecated, message: "Use speakWithElevenLabs() instead. AVSpeechSynthesizer is no longer used.")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
