@@ -22,6 +22,7 @@ class ConversationalFloatingAvatarWindow: NSWindow {
     }
 }
 
+#warning("DEPRECATED: NSSoundDelegate conformance is unused — NSSound is legacy. Remove NSSoundDelegate and the sound(_:didFinishPlaying:) method.")
 class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var message = "I'm listening... 👂"
     var eyeOffset: NSPoint = NSPoint(x: 0, y: 0)
@@ -30,6 +31,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
+    #warning("DEPRECATED: AVSpeechSynthesizer is deprecated in macOS 14+. This property is unused — remove it.")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
@@ -223,6 +225,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         """
         
         let process = Process()
+        #warning("DEPRECATED: Process.launchPath is deprecated since macOS 10.13. Use process.executableURL = URL(fileURLWithPath:) instead.")
         process.launchPath = "/usr/bin/osascript"
         process.arguments = ["-e", script]
         
@@ -1249,6 +1252,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     // MARK: - Audio Player Delegates
     
+    #warning("DEPRECATED: This NSSoundDelegate method is orphaned — no NSSound instance exists. Use AVAudioPlayerDelegate instead.")
     func sound(_ sound: NSSound, didFinishPlaying flag: Bool) {
         print("🎤 Audio playback finished: \(flag)")
         DispatchQueue.main.async {
@@ -1282,6 +1286,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         print("🎤 Starting continuous listening...")
         
         // Request microphone permission
+        #warning("DEPRECATED: AVCaptureDevice.requestAccess(for: .audio) is deprecated in macOS 14+. Use AVAudioApplication.requestRecordPermission instead.")
         AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
                 DispatchQueue.main.async {
                     if granted {
@@ -2436,6 +2441,7 @@ Rewrite the following excerpt in a more concise, easy-to-read way while preservi
             return true
         }
         if !permissionPrompted {
+            #warning("DEPRECATED: takeRetainedValue() on a global constant is unsafe and may over-release. Use takeUnretainedValue() instead.")
             let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true] as CFDictionary
             _ = AXIsProcessTrustedWithOptions(options)
             permissionPrompted = true
@@ -2472,6 +2478,7 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
+        #warning("DEPRECATED: NSApp.activate(ignoringOtherApps:) is deprecated in macOS 14+. Use NSApp.activate() instead.")
         NSApp.activate(ignoringOtherApps: true)
         
         // Start Lens controller (menu bar toggle + option key)
