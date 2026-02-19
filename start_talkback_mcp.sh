@@ -2,6 +2,9 @@
 
 # TalkBack MCP Starter Script
 
+echo "⚠️  DEPRECATION WARNING: pip3 install without a virtual environment is deprecated (PEP 668)."
+echo "⚠️  Consider using a virtual environment instead. See start_integration.sh for reference."
+echo ""
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
 

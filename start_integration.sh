@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "⚠️  DEPRECATION WARNING: This script uses 'python' and 'pip' instead of 'python3' and 'pip3'."
+echo "⚠️  On many systems 'python' may resolve to Python 2 (EOL since Jan 2020). Prefer 'python3'."
+echo ""
 echo "🚀 Starting TalkBack MCP Integration Setup"
 echo "=========================================="
 
