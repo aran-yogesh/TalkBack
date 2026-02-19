@@ -8,8 +8,10 @@ For Sass versions of Bootstrap 3 and 2 see [bootstrap-sass](https://github.com/t
 
 Please see the appropriate guide for your environment of choice:
 
-* [Ruby on Rails 4+](#a-ruby-on-rails) or other Sprockets environment.
-* [Other Ruby frameworks](#b-other-ruby-frameworks) not on Rails.
+| Framework | Guide |
+| --------- | ----- |
+| Ruby on Rails 4+ | [Rails Setup](#a-ruby-on-rails) or other Sprockets environment |
+| Other Ruby frameworks | [Other Ruby Setup](#b-other-ruby-frameworks) not on Rails |
 
 ### a. Ruby on Rails
 
