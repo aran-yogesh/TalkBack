@@ -87,29 +87,23 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```
 
 2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+
+   Copy the template and add your keys:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+   Then edit `config.swift` and replace the placeholders:
    ```swift
    struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
+       static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+       static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+
+   > **Note**: `config.swift` is gitignored. For production use, consider using environment variables or a secure keychain.
 
 3. **Compile the app**:
    ```bash
