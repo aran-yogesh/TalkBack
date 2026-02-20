@@ -123,6 +123,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ./ConversationalTalkBack
    ```
 
+## 📚 Documentation
+
+- [Quick Start](QUICK_START.md)
+- [API Key Setup](API_KEY_SETUP.md)
+- [MCP Setup](MCP_SETUP.md)
+- [MCP Integration](MCP_INTEGRATION.md)
+
 ## 🎮 How to Use
 
 ### Basic Usage
