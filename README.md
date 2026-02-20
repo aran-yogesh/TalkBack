@@ -147,28 +147,33 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
 
-2. **Run your code with the MCP tester**:
+2. **Optionally verify the MCP connection**:
    ```bash
-   # Test with a script that has errors (will trigger full roast 🔥)
-   python3 test_mcp_roast.py 'python3 your_broken_script.py'
-   
-   # Test with successful code (will get sassy compliment 💅)
-   python3 test_mcp_roast.py 'python3 your_working_script.py'
-   
-   # Test with any command
-   python3 test_mcp_roast.py 'swift your_code.swift'
+   python3 test_mcp_connection.py
    ```
 
-3. **TalkBack will roast you based on errors**:
+3. **Run your code with the monitor**:
+   ```bash
+   # Test with a script that has errors (will trigger full roast 🔥)
+   python3 cursor_code_monitor.py run "python3 your_broken_script.py"
+
+   # Test with successful code (will get sassy compliment 💅)
+   python3 cursor_code_monitor.py run "python3 your_working_script.py"
+
+   # Test with any command
+   python3 cursor_code_monitor.py run "swift your_code.swift"
+   ```
+
+4. **TalkBack will roast you based on errors**:
    - ✅ **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
    - 😏 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
    - 🔥 **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
 
-4. **Example test**:
+5. **Example test**:
    ```bash
    # This will trigger a savage roast
-   python3 test_mcp_roast.py 'python3 broken_code.py'
-   
+   python3 cursor_code_monitor.py run "python3 broken_code.py"
+
    # TalkBack will speak the roast with Ivanna's voice!
    ```
 
