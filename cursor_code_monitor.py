@@ -10,10 +10,18 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+
+warnings.warn(
+    "cursor_code_monitor is deprecated and will be removed in a future version. "
+    "Use cursor_mcp_server instead for MCP-based code monitoring.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):

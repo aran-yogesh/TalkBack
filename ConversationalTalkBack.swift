@@ -30,6 +30,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
+    @available(*, deprecated, message: "speechSynthesizer is unused. ElevenLabs TTS is used instead.")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
@@ -81,7 +82,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var pendingOpenAIPrompt: String?
     var openAIRetryTimer: Timer?
     
-    // Legacy audio recording variables removed - continuous listening handles all audio
+    // DEPRECATED: Legacy audio recording variables removed - continuous listening handles all audio
     
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
@@ -223,7 +224,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         """
         
         let process = Process()
-        process.launchPath = "/usr/bin/osascript"
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         process.arguments = ["-e", script]
         
         let pipe = Pipe()
@@ -639,9 +640,9 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         window.setFrameOrigin(frame.origin)
     }
     
-    // Legacy recording functions removed - continuous listening handles all audio processing
+    // DEPRECATED: Legacy recording functions removed - continuous listening handles all audio processing
     
-    // Legacy transcribeAudio function removed - using transcribeAudioWithElevenLabs instead
+    // DEPRECATED: Legacy transcribeAudio function removed - using transcribeAudioWithElevenLabs instead
     
     func processUserSpeech(_ text: String) {
         print("💬 User said: \(text)")
@@ -2472,7 +2473,11 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 14.0, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
         
         // Start Lens controller (menu bar toggle + option key)
         lensController = LensController(

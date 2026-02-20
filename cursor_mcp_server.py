@@ -7,15 +7,22 @@ Sends roasts to TalkBack avatar based on errors/success
 import asyncio
 import json
 import os
-import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
+
+warnings.warn(
+    "cursor_mcp_server is deprecated and will be removed in a future version. "
+    "Use the new TalkBack plugin system instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # TalkBack MCP Server
 app = Server("talkback-monitor")
