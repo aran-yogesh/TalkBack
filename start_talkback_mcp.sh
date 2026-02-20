@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# TalkBack MCP Starter Script
+# DEPRECATED: This script references the old MCPTalkBack binary.
+# Use start_integration.sh with ConversationalTalkBack.swift instead.
 
+echo "⚠️  WARNING: start_talkback_mcp.sh is deprecated. Use start_integration.sh instead."
+echo ""
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
 
