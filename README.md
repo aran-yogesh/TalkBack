@@ -77,6 +77,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
    - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
+4. **Python 3.10+** (required for MCP code monitoring scripts)
 
 ### Installation
 
@@ -152,9 +153,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Install MCP dependencies**:
+   ```bash
+   pip3 install mcp watchdog
+   ```
 
-2. **Run your code with the MCP tester**:
+2. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+
+3. **Run your code with the MCP tester**:
    ```bash
    # Test with a script that has errors (will trigger full roast 🔥)
    python3 test_mcp_roast.py 'python3 your_broken_script.py'
@@ -166,12 +172,12 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
    python3 test_mcp_roast.py 'swift your_code.swift'
    ```
 
-3. **TalkBack will roast you based on errors**:
+4. **TalkBack will roast you based on errors**:
    - ✅ **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
    - 😏 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
    - 🔥 **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
 
-4. **Example test**:
+5. **Example test**:
    ```bash
    # This will trigger a savage roast
    python3 test_mcp_roast.py 'python3 broken_code.py'
