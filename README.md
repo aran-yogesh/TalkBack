@@ -71,6 +71,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ### Prerequisites
 
+If you want step-by-step setup help, check these guides first:
+- [Quick Start](QUICK_START.md)
+- [API Key Setup](API_KEY_SETUP.md)
+- [MCP Integration](MCP_INTEGRATION.md)
+- [MCP Setup](MCP_SETUP.md)
+
+
 1. **macOS 13.0+** (developed on macOS 26.0.1 beta)
 2. **Xcode Command Line Tools** installed
 3. **API Keys**:
@@ -260,7 +267,7 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for GPT-4o-mini API
+- **OpenAI** for GPT-4o API
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
