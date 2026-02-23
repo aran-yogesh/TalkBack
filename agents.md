@@ -25,6 +25,15 @@ This file gives quick context and working rules for AI coding agents in this rep
 - Prefer updating docs when behavior or setup changes.
 - Avoid destructive git commands unless explicitly requested.
 
+## README.md Guidelines
+
+- Update `README.md` whenever setup, commands, features, or user-visible behavior changes.
+- Keep `Quick Start`, prerequisites, and troubleshooting steps aligned with current code.
+- Ensure all command snippets are copy-paste ready and valid from repo root unless noted.
+- When adding new scripts or integrations, add at least one concrete usage example.
+- Use concise, actionable language and avoid vague instructions.
+- If no README changes are needed for a code change, explicitly state why in your task notes.
+
 ## Validation Checklist
 
 - Confirm Swift and Python scripts still run after edits.
