@@ -27,6 +27,8 @@ This file gives quick context and working rules for AI coding agents in this rep
 
 ## README.md Guidelines
 
+- Always include a `Table of Contents` section in `README.md` for quick navigation.
+- Update the table of contents whenever headings are added, removed, or renamed.
 - Update `README.md` whenever setup, commands, features, or user-visible behavior changes.
 - Keep `Quick Start`, prerequisites, and troubleshooting steps aligned with current code.
 - Ensure all command snippets are copy-paste ready and valid from repo root unless noted.
