@@ -6,6 +6,23 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## 📚 Table of Contents
+
+- [🎯 Features](#-features)
+- [🛠️ Tech Stack](#-tech-stack)
+- [🚀 Quick Start](#-quick-start)
+- [🎮 How to Use](#-how-to-use)
+- [📋 API Endpoints Used](#-api-endpoints-used)
+- [🎭 Personality](#-personality)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [📝 Development Notes](#-development-notes)
+- [🔮 Future Features](#-future-features)
+- [🤝 Contributing](#-contributing)
+- [👥 Authors](#-authors)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [💬 Questions or Feedback?](#-questions-or-feedback)
+
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
@@ -88,32 +105,26 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 2. **Configure API Keys**:
    
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+   Copy the template and add your API keys in `config.swift`:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+   Then edit `config.swift`:
    ```swift
    struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
+       static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+       static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+
+   > **Note**: `config.swift` is gitignored. Keep real keys out of version control.
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
@@ -183,7 +194,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
 ### OpenAI GPT-4o
@@ -254,13 +265,18 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+## 👥 Authors
+
+- [@aran-yogesh](https://github.com/aran-yogesh)
+- Yogesh Mahendran
+
 ## 📄 License
 
 MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for GPT-4o-mini API
+- **OpenAI** for GPT-4o API
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
@@ -270,5 +286,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh) and Yogesh Mahendran
 
