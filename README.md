@@ -6,6 +6,23 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## 📚 Table of Contents
+
+- [🎯 Features](#-features)
+- [🛠️ Tech Stack](#-tech-stack)
+- [🚀 Quick Start](#-quick-start)
+- [🎮 How to Use](#-how-to-use)
+- [📋 API Endpoints Used](#-api-endpoints-used)
+- [🎭 Personality](#-personality)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [📝 Development Notes](#-development-notes)
+- [🔮 Future Features](#-future-features)
+- [🤝 Contributing](#-contributing)
+- [👥 Authors](#-authors)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [💬 Questions or Feedback?](#-questions-or-feedback)
+
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
@@ -248,6 +265,11 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+## 👥 Authors
+
+- [@aran-yogesh](https://github.com/aran-yogesh)
+- Yogesh Mahendran
+
 ## 📄 License
 
 MIT License - feel free to use, modify, and distribute.
@@ -264,5 +286,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh) and Yogesh Mahendran
 
