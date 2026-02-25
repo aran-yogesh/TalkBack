@@ -37,9 +37,10 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 8. [Development Notes](#development-notes)
 9. [Future Features](#future-features)
 10. [Contributing](#contributing)
-11. [License](#license)
-12. [Acknowledgments](#acknowledgments)
-13. [Questions or Feedback?](#questions-or-feedback)
+11. [Authors](#authors)
+12. [License](#license)
+13. [Acknowledgments](#acknowledgments)
+14. [Questions or Feedback?](#questions-or-feedback)
 
 ## 🎯 Features
 
@@ -289,6 +290,12 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+## 👥 Authors
+
+TalkBack is built by a pair of builders who love sharp UX and even sharper banter:
+- **Aran Yogesh** — Original creator, Swift engineer, and voice of the project.
+- **Yogesh Mahendran** — Co-author and product shaper who keeps the experience polished.
+
 ## 📄 License
 
 MIT License - feel free to use, modify, and distribute.
@@ -305,5 +312,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh) and Yogesh Mahendran
 
