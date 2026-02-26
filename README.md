@@ -38,7 +38,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Adds a fun, mischievous interaction
 
 ### 👁️ **Vision-Based Behavior Monitoring**
-- **Gemini 2.5 Flash** watches you through your webcam
+- **Gemini 2.0 Flash** watches you through your webcam
 - Detects when you're:
   - 👀 Looking away from the screen
   - 😊😤😐 Your emotions (happy, frustrated, confused)
@@ -62,7 +62,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
   - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
-  - [Gemini 2.5 Flash](https://aistudio.google.com/) - Vision & behavior analysis
+  - [Gemini 2.0 Flash](https://aistudio.google.com/) - Vision & behavior analysis
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
 - **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
@@ -87,33 +87,27 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```
 
 2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+
+   Copy the template and add your keys in `config.swift`:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+   Update `config.swift` with your API keys:
    ```swift
    struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
+       static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+       static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+
+   `config.swift` is gitignored so your keys stay local.
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
@@ -147,16 +141,16 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
 
-2. **Run your code with the MCP tester**:
+2. **Run your code with the monitor**:
    ```bash
    # Test with a script that has errors (will trigger full roast 🔥)
-   python3 test_mcp_roast.py 'python3 your_broken_script.py'
-   
+   python3 cursor_code_monitor.py run "python3 your_broken_script.py"
+
    # Test with successful code (will get sassy compliment 💅)
-   python3 test_mcp_roast.py 'python3 your_working_script.py'
-   
+   python3 cursor_code_monitor.py run "python3 your_working_script.py"
+
    # Test with any command
-   python3 test_mcp_roast.py 'swift your_code.swift'
+   python3 cursor_code_monitor.py run "swift your_code.swift"
    ```
 
 3. **TalkBack will roast you based on errors**:
@@ -167,8 +161,8 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 4. **Example test**:
    ```bash
    # This will trigger a savage roast
-   python3 test_mcp_roast.py 'python3 broken_code.py'
-   
+   python3 cursor_code_monitor.py run "python3 broken_code.py"
+
    # TalkBack will speak the roast with Ivanna's voice!
    ```
 
@@ -183,7 +177,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
 ### OpenAI GPT-4o
@@ -192,7 +186,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Temperature**: 0.9 (for sassy responses)
 - **Max Tokens**: 50 (short, snappy replies)
 
-### Gemini 2.5 Flash (Vision)
+### Gemini 2.0 Flash (Vision)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - **Model**: `gemini-2.0-flash-exp`
 - **Input**: Base64-encoded JPEG images from webcam
@@ -260,7 +254,7 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for GPT-4o-mini API
+- **OpenAI** for GPT-4o and GPT-4.1 APIs
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
