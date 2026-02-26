@@ -38,6 +38,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [Development Notes](#development-notes)
 - [Future Features](#future-features)
 - [Contributing](#contributing)
+- [Author](#author)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 - [Questions or Feedback?](#questions-or-feedback)
@@ -295,6 +296,10 @@ Contributions are welcome! Feel free to:
 - Suggest new features
 - Submit pull requests
 - Improve documentation
+
+## ✍️ Author
+
+Yogesh Mahendran is the main author of TalkBack.
 
 ## 📄 License
 
