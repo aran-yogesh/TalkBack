@@ -6,6 +6,28 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## Table of Contents
+
+- [🎯 Features](#features)
+- [🛠️ Tech Stack](#tech-stack)
+- [🚀 Quick Start](#quick-start)
+- [🎮 How to Use](#how-to-use)
+  - [🔥 MCP Code Monitoring (Cursor IDE Integration)](#mcp-code-monitoring-cursor-ide-integration)
+- [📋 API Endpoints Used](#api-endpoints-used)
+  - [ElevenLabs Speech-to-Text](#elevenlabs-speech-to-text)
+  - [ElevenLabs Text-to-Speech](#elevenlabs-text-to-speech)
+  - [OpenAI GPT-4o](#openai-gpt-4o)
+  - [Anthropic Claude](#anthropic-claude)
+  - [Gemini 2.5 Flash (Vision)](#gemini-25-flash-vision)
+- [🎭 Personality](#personality)
+- [🐛 Troubleshooting](#troubleshooting)
+- [📝 Development Notes](#development-notes)
+- [🔮 Future Features](#future-features)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
+- [🙏 Acknowledgments](#acknowledgments)
+- [💬 Questions or Feedback?](#questions-or-feedback)
+
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
@@ -15,7 +37,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Natural conversation flow with real-time transcription
 
 ### 🗣️ **Sassy AI Responses**
-- **OpenAI GPT-4o** powered responses
+- **OpenAI GPT-4o** and **Anthropic Claude** powered responses
 - **ElevenLabs Text-to-Speech** with Ivanna's voice
 - Attitude-filled, personality-driven replies
 - Short, snappy responses that pack a punch
@@ -62,6 +84,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
   - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
+  - [Anthropic Claude](https://www.anthropic.com/) - Conversational AI
   - [Gemini 2.5 Flash](https://aistudio.google.com/) - Vision & behavior analysis
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
@@ -192,6 +215,11 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Temperature**: 0.9 (for sassy responses)
 - **Max Tokens**: 50 (short, snappy replies)
 
+### Anthropic Claude
+- **Endpoint**: `https://api.anthropic.com/v1/messages`
+- **Model**: `claude-3-5-sonnet-20240620`
+- **Max Tokens**: 50 (short, snappy replies)
+
 ### Gemini 2.5 Flash (Vision)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - **Model**: `gemini-2.0-flash-exp`
@@ -261,6 +289,7 @@ MIT License - feel free to use, modify, and distribute.
 ## 🙏 Acknowledgments
 
 - **OpenAI** for GPT-4o-mini API
+- **Anthropic** for Claude APIs
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
@@ -270,5 +299,7 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Main author:** Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
+
+**Made with 💻 and a lot of sass** by the TalkBack team
 
