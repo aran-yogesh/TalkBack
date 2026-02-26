@@ -23,6 +23,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [How to Use](#how-to-use)
   - [Basic Usage](#basic-usage)
   - [MCP Code Monitoring (Cursor IDE Integration)](#mcp-code-monitoring-cursor-ide-integration)
+  - [MCP Setup Guides](#mcp-setup-guides)
 - [API Endpoints Used](#api-endpoints-used)
   - [ElevenLabs Speech-to-Text](#elevenlabs-speech-to-text)
   - [ElevenLabs Text-to-Speech](#elevenlabs-text-to-speech)
@@ -206,6 +207,12 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
    
    # TalkBack will speak the roast with Ivanna's voice!
    ```
+
+### 📚 MCP Setup Guides
+
+- [MCP_SETUP.md](MCP_SETUP.md) for full installation and configuration steps
+- [QUICK_START.md](QUICK_START.md) for a short guided walkthrough
+- [MCP_INTEGRATION.md](MCP_INTEGRATION.md) for integration details
 
 ## 📋 API Endpoints Used
 
