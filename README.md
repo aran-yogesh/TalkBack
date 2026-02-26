@@ -305,5 +305,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
 
