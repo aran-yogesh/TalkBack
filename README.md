@@ -2,6 +2,10 @@
 
 A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
 
+## Deprecation Warning
+
+TalkBack is deprecated and no longer maintained. Use at your own risk.
+
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -12,6 +16,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## Table of Contents
 
+- [Deprecation Warning](#deprecation-warning)
 - [🎯 Features](#features)
   - [🎤 Real Voice Interaction](#real-voice-interaction)
   - [🗣️ Sassy AI Responses](#sassy-ai-responses)
