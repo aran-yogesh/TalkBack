@@ -7,6 +7,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 **Main author:** Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
+**GitHub ID:** aran-yogesh
 **Model:** GPT-4o
 
 ## Table of Contents
