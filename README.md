@@ -6,6 +6,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+**Main author:** Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
+
 ## Table of Contents
 
 - [🎯 Features](#features)
@@ -299,6 +301,4 @@ MIT License - feel free to use, modify, and distribute.
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
 ---
-
-**Main author:** Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
 
