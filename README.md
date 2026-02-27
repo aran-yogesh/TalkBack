@@ -39,7 +39,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🤝 Contributing](#contributing)
 - [📄 License](#license)
 - [🙏 Acknowledgments](#acknowledgments)
-- [💬 Questions or Feedback?](#questions-or-feedback)
 
 ## 🎯 Features
 
@@ -299,11 +298,7 @@ MIT License - feel free to use, modify, and distribute.
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
-## 💬 Questions or Feedback?
-
-Open an issue or reach out! TalkBack loves to chat (obviously). 😉
-
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Main author:** Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
 
