@@ -12,7 +12,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
 - [How to Use](#how-to-use)
-  - [MCP Code Monitoring (Cursor IDE Integration)](#mcp-code-monitoring-cursor-ide-integration)
 - [API Endpoints Used](#api-endpoints-used)
 - [Personality](#personality)
 - [Troubleshooting](#troubleshooting)
@@ -22,6 +21,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 - [Questions or Feedback?](#questions-or-feedback)
+
+Yogesh Mahendran is the main author.
 
 ## 🎯 Features
 
