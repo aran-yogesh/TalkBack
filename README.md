@@ -39,6 +39,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
+- [Author](#author)
 - [Questions or Feedback?](#questions-or-feedback)
 
 ## 🎯 Features
@@ -298,6 +299,10 @@ MIT License - feel free to use, modify, and distribute.
 - **OpenAI** for GPT-4o-mini API
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
+
+## 👤 Author
+
+Yogesh Mahendran is the main author.
 
 ## 💬 Questions or Feedback?
 
