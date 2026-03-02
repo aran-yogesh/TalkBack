@@ -5,15 +5,33 @@ This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
 import json
-import os
+import logging
 import re
 import subprocess
 import sys
 import time
-from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+
+def setup_logging() -> logging.Logger:
+    """Set up logging for the code monitor."""
+    logger = logging.getLogger("talkback_code_monitor")
+    if logger.handlers:
+        return logger
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler("/tmp/talkback_code_monitor.log")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    logger.propagate = False
+    return logger
+
+
+logger = setup_logging()
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):
@@ -75,72 +93,69 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         try:
             with open(self.talkback_message_file, "w") as f:
                 json.dump(message, f, indent=2)
-            
-            print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
-        except Exception as e:
-            print(f"❌ Error sending to TalkBack: {e}")
+
+            logger.info(
+                "Sent to TalkBack: %s (errors: %s)",
+                response_type,
+                error_count,
+            )
+        except Exception as exc:
+            logger.exception("Error sending to TalkBack: %s", exc)
     
     def monitor_terminal_command(self, command: str):
         """Run a command and monitor its output"""
-        print(f"🔍 Monitoring command: {command}")
-        
+        logger.info("Monitoring command: %s", command)
+
         try:
-            # Run command and capture output
             result = subprocess.run(
                 command,
                 shell=True,
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
-            
+
             output = result.stdout + result.stderr
             error_count = self.count_errors_in_output(output)
             success = result.returncode == 0 and error_count == 0
-            
-            print(f"📊 Command finished: {error_count} errors, success={success}")
-            print(f"📄 Output preview: {output[:200]}")
-            
-            # Send to TalkBack
+
+            logger.info("Command finished: %s errors, success=%s", error_count, success)
+            logger.info("Output preview: %s", output[:200])
+
             self.send_to_talkback(output, error_count, success)
-            
+
         except subprocess.TimeoutExpired:
-            print("⏱️  Command timed out")
+            logger.warning("Command timed out")
             self.send_to_talkback("Command timed out!", 1, False)
-        except Exception as e:
-            print(f"❌ Error running command: {e}")
-            self.send_to_talkback(str(e), 1, False)
+        except Exception as exc:
+            logger.exception("Error running command: %s", exc)
+            self.send_to_talkback(str(exc), 1, False)
 
 def main():
-    print("🤖 TalkBack Cursor Monitor Started!")
-    print("   - Monitoring your code execution")
-    print("   - Will trigger TalkBack roasts on errors")
-    print("")
-    
+    logger.info("TalkBack Cursor Monitor Started")
+    logger.info("Monitoring your code execution")
+    logger.info("Will trigger TalkBack roasts on errors")
+
     monitor = CodeExecutionMonitor()
-    
-    # Example usage - you can customize this
-    print("📝 Usage examples:")
-    print("   1. Run Python: python cursor_code_monitor.py run 'python your_script.py'")
-    print("   2. Run Swift: python cursor_code_monitor.py run 'swift your_file.swift'")
-    print("   3. Run tests: python cursor_code_monitor.py run 'npm test'")
-    print("")
-    
+
+    logger.info("Usage examples:")
+    logger.info("1. Run Python: python cursor_code_monitor.py run 'python your_script.py'")
+    logger.info("2. Run Swift: python cursor_code_monitor.py run 'swift your_file.swift'")
+    logger.info("3. Run tests: python cursor_code_monitor.py run 'npm test'")
+
     if len(sys.argv) > 2 and sys.argv[1] == "run":
         command = " ".join(sys.argv[2:])
         monitor.monitor_terminal_command(command)
     else:
-        print("💡 Tip: Run this script with 'run' followed by your command")
-        print("   Example: python cursor_code_monitor.py run 'python test.py'")
-        print("")
-        print("🎤 TalkBack is watching... Ready to roast! 🔥")
-        
-        # Keep running to monitor (you can extend this with file watching)
+        logger.info("Tip: Run this script with 'run' followed by your command")
+        logger.info("Example: python cursor_code_monitor.py run 'python test.py'")
+        logger.info("TalkBack is watching... Ready to roast")
+
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
-            print("\n👋 Monitor stopped")
+            logger.info("Monitor stopped")
 
 if __name__ == "__main__":
     main()

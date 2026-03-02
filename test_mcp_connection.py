@@ -4,9 +4,28 @@ Test script to verify MCP server connection
 """
 
 import json
-import subprocess
-import sys
+import logging
 import time
+
+
+def setup_logging() -> logging.Logger:
+    """Set up logging for the MCP connection test."""
+    logger = logging.getLogger("talkback_mcp_test")
+    if logger.handlers:
+        return logger
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler("/tmp/talkback_mcp_test.log")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    logger.propagate = False
+    return logger
+
+
+logger = setup_logging()
 
 
 def test_mcp_server():
@@ -19,15 +38,18 @@ def test_mcp_server():
         "timestamp": time.time()
     }
     
-    # Write to the file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(test_message, f)
-    
-    print("✅ Test message sent to TalkBack!")
-    print(f"📁 Message file: {message_file}")
-    print(f"📝 Message content: {json.dumps(test_message, indent=2)}")
-    
+    try:
+        with open(message_file, "w") as f:
+            json.dump(test_message, f)
+    except OSError as exc:
+        logger.exception("Failed to write test message: %s", exc)
+        return False
+
+    logger.info("Test message sent to TalkBack")
+    logger.info("Message file: %s", message_file)
+    logger.info("Message content: %s", json.dumps(test_message, indent=2))
+
     return True
 
 if __name__ == "__main__":
