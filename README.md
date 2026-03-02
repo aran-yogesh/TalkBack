@@ -6,6 +6,28 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## Table of Contents
+
+- [🎯 Features](#-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🚀 Quick Start](#-quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [🎮 How to Use](#-how-to-use)
+  - [Basic Usage](#basic-usage)
+  - [🔥 MCP Code Monitoring (Cursor IDE Integration)](#-mcp-code-monitoring-cursor-ide-integration)
+- [📋 API Endpoints Used](#-api-endpoints-used)
+  - [ElevenLabs Speech-to-Text](#elevenlabs-speech-to-text)
+  - [ElevenLabs Text-to-Speech](#elevenlabs-text-to-speech)
+  - [OpenAI GPT-4o](#openai-gpt-4o)
+  - [Gemini 2.5 Flash (Vision)](#gemini-25-flash-vision)
+- [🎭 Personality](#-personality)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [📝 Development Notes](#-development-notes)
+- [🔮 Future Features](#-future-features)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
