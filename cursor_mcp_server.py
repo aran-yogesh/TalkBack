@@ -6,11 +6,11 @@ Sends roasts to TalkBack avatar based on errors/success
 
 import asyncio
 import json
-import os
-import subprocess
+import logging
 import sys
 import time
-from typing import Any, Dict, List
+from typing import Any
+
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
@@ -19,6 +19,26 @@ from mcp.server.stdio import stdio_server
 
 # TalkBack MCP Server
 app = Server("talkback-monitor")
+
+
+def setup_logging() -> logging.Logger:
+    """Set up logging for the MCP server."""
+    logger = logging.getLogger("talkback_mcp_server")
+    if logger.handlers:
+        return logger
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    stream_handler = logging.StreamHandler(sys.stderr)
+    stream_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler("/tmp/talkback_mcp_server.log")
+    file_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    logger.propagate = False
+    return logger
+
+
+logger = setup_logging()
 
 # Global state to track code execution results
 execution_results = {
@@ -120,9 +140,13 @@ async def handle_call_tool(
         execution_results["linter_errors"] = arguments.get("linter_errors", [])
         execution_results["success"] = arguments.get("success", False)
         
-        # Generate roast message based on error count
         error_count = execution_results["error_count"]
-        
+        logger.info(
+            "Received execution report: errors=%s success=%s",
+            error_count,
+            execution_results["success"],
+        )
+
         if error_count >= 2:
             # ROAST MODE 🔥
             roast_prompt = f"ROAST ME HARD! My code just failed with {error_count} errors. Here's the output: {execution_results['last_output'][:500]}"
@@ -155,6 +179,7 @@ async def handle_call_tool(
         force = arguments.get("force", False) if arguments else False
         
         if not execution_results["last_run_time"] and not force:
+            logger.warning("No recent code execution available for roasting")
             return [
                 types.TextContent(
                     type="text",
@@ -186,29 +211,36 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
         "timestamp": time.time()
     }
     
-    # Write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    try:
+        with open(message_file, "w") as f:
+            json.dump(talkback_message, f)
+    except OSError as exc:
+        logger.error("Failed to write TalkBack message file: %s", exc)
+        return
+
+    logger.info("TalkBack message sent: %s", response_type)
 
 async def main():
-    """Main entry point"""
-    # Run the server using stdin/stdout streams
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="talkback-monitor",
-                server_version="1.0.0",
-                capabilities=app.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={}
-                )
+    """Main entry point."""
+    logger.info("Starting TalkBack MCP server")
+    try:
+        async with stdio_server() as (read_stream, write_stream):
+            await app.run(
+                read_stream,
+                write_stream,
+                InitializationOptions(
+                    server_name="talkback-monitor",
+                    server_version="1.0.0",
+                    capabilities=app.get_capabilities(
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
+                    ),
+                ),
             )
-        )
+    except Exception as exc:
+        logger.exception("MCP server crashed: %s", exc)
+        raise
 
 if __name__ == "__main__":
     asyncio.run(main())
