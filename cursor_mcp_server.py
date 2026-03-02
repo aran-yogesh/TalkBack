@@ -6,16 +6,18 @@ Sends roasts to TalkBack avatar based on errors/success
 
 import asyncio
 import json
-import os
-import subprocess
-import sys
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
+
+from talkback_logging import setup_logger
+
+
+logger = setup_logger("talkback.mcp_server")
 
 # TalkBack MCP Server
 app = Server("talkback-monitor")
@@ -52,13 +54,14 @@ async def handle_read_resource(uri: str) -> str:
     """Read resource data"""
     if uri == "talkback://execution-results":
         return json.dumps(execution_results, indent=2)
-    elif uri == "talkback://linter-errors":
+    if uri == "talkback://linter-errors":
         return json.dumps({
             "linter_errors": execution_results["linter_errors"],
             "error_count": execution_results["error_count"]
         }, indent=2)
-    else:
-        raise ValueError(f"Unknown resource: {uri}")
+
+    logger.error("Unknown resource requested: %s", uri)
+    raise ValueError(f"Unknown resource: {uri}")
 
 @app.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
@@ -111,14 +114,20 @@ async def handle_call_tool(
     name: str, arguments: dict[str, Any] | None
 ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     """Handle tool calls"""
-    
+    arguments = arguments or {}
+
     if name == "report_code_execution":
-        # Update execution results
         execution_results["last_run_time"] = time.time()
         execution_results["last_output"] = arguments.get("output", "")
         execution_results["error_count"] = arguments.get("error_count", 0)
         execution_results["linter_errors"] = arguments.get("linter_errors", [])
         execution_results["success"] = arguments.get("success", False)
+
+        logger.info(
+            "Received execution report: errors=%s success=%s",
+            execution_results["error_count"],
+            execution_results["success"]
+        )
         
         # Generate roast message based on error count
         error_count = execution_results["error_count"]
@@ -152,9 +161,10 @@ async def handle_call_tool(
         ]
     
     elif name == "trigger_talkback_roast":
-        force = arguments.get("force", False) if arguments else False
-        
+        force = arguments.get("force", False)
+
         if not execution_results["last_run_time"] and not force:
+            logger.info("No recent execution available for roast")
             return [
                 types.TextContent(
                     type="text",
@@ -173,29 +183,29 @@ async def handle_call_tool(
             )
         ]
     
+    logger.error("Unknown tool requested: %s", name)
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
     """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
-    
-    # Write to a file that TalkBack monitors
+
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    try:
+        with open(message_file, "w") as f:
+            json.dump(talkback_message, f)
+        logger.info("TalkBack message sent: %s", response_type)
+    except Exception:
+        logger.exception("Failed to write TalkBack message to %s", message_file)
+        raise
 
 async def main():
     """Main entry point"""
-    # Run the server using stdin/stdout streams
+    logger.info("Starting TalkBack MCP server")
     async with stdio_server() as (read_stream, write_stream):
         await app.run(
             read_stream,
@@ -211,5 +221,9 @@ async def main():
         )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception:
+        logger.exception("MCP server crashed")
+        raise
 
