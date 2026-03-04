@@ -7,7 +7,11 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🎯 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [🚀 Quick Start](#-quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
 - [🎮 How to Use](#-how-to-use)
+  - [Basic Usage](#basic-usage)
+  - [🔥 MCP Code Monitoring (Cursor IDE Integration)](#-mcp-code-monitoring-cursor-ide-integration)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
@@ -17,6 +21,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
+
+> Need a minimal setup path? See [`QUICK_START.md`](./QUICK_START.md).
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
