@@ -104,29 +104,17 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```
 
 2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
-   ```swift
-   struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
-   }
+
+   Copy the template and fill in your keys:
+   ```bash
+   cp config.swift.template config.swift
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+
+   Then update `config.swift` with your values for:
+   - `OPENAI_API_KEY`
+   - `ELEVENLABS_API_KEY`
+   - `GEMINI_API_KEY`
+   - Optional: `ELEVENLABS_VOICE_ID`
 
 3. **Compile the app**:
    ```bash
@@ -139,6 +127,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```bash
    ./ConversationalTalkBack
    ```
+
+5. **Optional: Verify MCP Integration**:
+   ```bash
+   python3 test_mcp_connection.py
+   python3 test_mcp_roast.py 'python3 broken_code.py'
+   ```
+
+   For full MCP setup details, see [MCP_SETUP.md](./MCP_SETUP.md) and [MCP_INTEGRATION.md](./MCP_INTEGRATION.md).
 
 ## 🎮 How to Use
 
