@@ -5,14 +5,13 @@ Sends roasts to TalkBack avatar based on errors/success
 """
 
 import asyncio
-import json
 import os
-import yaml
-from yaml.representer import SafeRepresenter
-import subprocess
 import sys
 import time
 from typing import Any, Dict
+
+import yaml
+from yaml.representer import SafeRepresenter
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
@@ -195,9 +194,9 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
     }
     
     # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
+    message_file = "/tmp/talkback_message.yaml"
     with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
+        f.write(_to_yaml(talkback_message))
     
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 

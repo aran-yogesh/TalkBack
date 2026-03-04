@@ -162,7 +162,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code with the MCP tester**:
    ```bash
