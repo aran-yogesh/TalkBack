@@ -86,7 +86,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
-    let mcpMessageFile = "/tmp/talkback_message.json"
+    let mcpMessageFile = "/tmp/talkback_message.yaml"
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
@@ -1600,9 +1600,40 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+
+
+    func convertYAMLToJSONData(_ yaml: String) -> Data? {
+        var result: [String: Any] = [:]
+        for line in yaml.split(separator: "
+") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+            guard let idx = trimmed.firstIndex(of: ":") else { continue }
+            let key = String(trimmed[..<idx]).trimmingCharacters(in: .whitespaces)
+            var value = String(trimmed[trimmed.index(after: idx)...]).trimmingCharacters(in: .whitespaces)
+            if value == "null" || value == "~" {
+                result[key] = NSNull()
+            } else if value == "true" || value == "false" {
+                result[key] = value == "true"
+            } else if let intVal = Int(value) {
+                result[key] = intVal
+            } else if let dblVal = Double(value) {
+                result[key] = dblVal
+            } else {
+                if (value.hasPrefix(""") && value.hasSuffix(""")) || (value.hasPrefix("'") && value.hasSuffix("'")) {
+                    value = String(value.dropFirst().dropLast())
+                }
+                result[key] = value
+            }
+        }
+        return try? JSONSerialization.data(withJSONObject: result)
+    }
+
     func checkForMCPMessages() {
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let yamlString = String(data: data, encoding: .utf8),
+              let jsonData = convertYAMLToJSONData(yamlString),
+              let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
               let timestamp = json["timestamp"] as? TimeInterval else {
             return
         }
