@@ -7,10 +7,12 @@ Sends roasts to TalkBack avatar based on errors/success
 import asyncio
 import json
 import os
+import yaml
+from yaml.representer import SafeRepresenter
 import subprocess
 import sys
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
@@ -29,6 +31,12 @@ execution_results = {
     "success": False
 }
 
+
+def _to_yaml(data: Dict[str, Any]) -> str:
+    """Serialize response payloads as YAML."""
+    yaml.SafeDumper.add_representer(str, SafeRepresenter.represent_str)
+    return yaml.safe_dump(data, sort_keys=False)
+
 @app.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
     """List available resources from TalkBack monitor"""
@@ -37,13 +45,13 @@ async def handle_list_resources() -> list[types.Resource]:
             uri="talkback://execution-results",
             name="Latest Code Execution Results",
             description="Most recent code execution output and error count",
-            mimeType="application/json"
+            mimeType="application/x-yaml"
         ),
         types.Resource(
             uri="talkback://linter-errors",
             name="Current Linter Errors",
             description="Active linter/compiler errors in the workspace",
-            mimeType="application/json"
+            mimeType="application/x-yaml"
         )
     ]
 
@@ -51,12 +59,12 @@ async def handle_list_resources() -> list[types.Resource]:
 async def handle_read_resource(uri: str) -> str:
     """Read resource data"""
     if uri == "talkback://execution-results":
-        return json.dumps(execution_results, indent=2)
+        return _to_yaml(execution_results)
     elif uri == "talkback://linter-errors":
-        return json.dumps({
+        return _to_yaml({
             "linter_errors": execution_results["linter_errors"],
             "error_count": execution_results["error_count"]
-        }, indent=2)
+        })
     else:
         raise ValueError(f"Unknown resource: {uri}")
 
@@ -142,7 +150,7 @@ async def handle_call_tool(
         return [
             types.TextContent(
                 type="text",
-                text=json.dumps({
+                text=_to_yaml({
                     "status": "success",
                     "error_count": error_count,
                     "response_type": response_type,
