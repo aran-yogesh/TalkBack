@@ -200,7 +200,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
 ### OpenAI GPT-4o
@@ -210,8 +210,8 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Max Tokens**: 50 (short, snappy replies)
 
 ### Gemini 2.5 Flash (Vision)
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
-- **Model**: `gemini-2.0-flash-exp`
+- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
+- **Model**: `gemini-2.5-flash`
 - **Input**: Base64-encoded JPEG images from webcam
 - **Output**: Behavior analysis (gaze, emotion, focus, distraction detection)
 - **Frequency**: Every 15 seconds
