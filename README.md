@@ -5,7 +5,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ## Table of Contents
 
 - [🎯 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
+- [🛠️ Tech Stack](#-tech-stack)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
 - [📋 API Endpoints Used](#-api-endpoints-used)
