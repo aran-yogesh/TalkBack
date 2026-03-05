@@ -10,19 +10,10 @@ import re
 import subprocess
 import sys
 import time
-import warnings
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
-
-warnings.warn(
-    "watchdog.observers.Observer is imported but never used in this module. "
-    "The Observer-based file watching pattern is unused dead code and will be "
-    "removed in a future version. Use the MCP-based monitor instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):
@@ -90,14 +81,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             print(f"❌ Error sending to TalkBack: {e}")
     
     def monitor_terminal_command(self, command: str):
-        """Run a command and monitor its output."""
-        warnings.warn(
-            "monitor_terminal_command() uses subprocess.run(shell=True) which is "
-            "deprecated for security reasons. A future version will use "
-            "subprocess.run(shlex.split(command)) instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
+        """Run a command and monitor its output"""
         print(f"🔍 Monitoring command: {command}")
         
         try:

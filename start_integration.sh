@@ -15,7 +15,6 @@ source .venv/bin/activate
 
 # Check if MCP is installed
 echo "🔍 Checking MCP installation..."
-echo "⚠️  DEPRECATION WARNING: 'python' and 'pip' commands are deprecated on many systems where they may refer to Python 2. Use 'python3' and 'pip3' instead."
 python3 -c "import mcp; print('✅ MCP package is installed!')" || {
     echo "❌ MCP package not found. Installing..."
     pip3 install mcp

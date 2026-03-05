@@ -22,7 +22,6 @@ class ConversationalFloatingAvatarWindow: NSWindow {
     }
 }
 
-#warning("NSSoundDelegate conformance is unused — this class uses AVAudioPlayer, not NSSound. Remove NSSoundDelegate in a future version.")
 class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var message = "I'm listening... 👂"
     var eyeOffset: NSPoint = NSPoint(x: 0, y: 0)
@@ -31,7 +30,6 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
-    @available(*, deprecated, message: "AVSpeechSynthesizer is unused. TTS is handled by ElevenLabs. Remove in a future version.")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
@@ -83,7 +81,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var pendingOpenAIPrompt: String?
     var openAIRetryTimer: Timer?
     
-    #warning("Legacy audio recording code has been removed. Remaining references to AVSpeechSynthesizer and NSSoundDelegate are deprecated dead code.")
+    // Legacy audio recording variables removed - continuous listening handles all audio
     
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
@@ -2438,7 +2436,6 @@ Rewrite the following excerpt in a more concise, easy-to-read way while preservi
             return true
         }
         if !permissionPrompted {
-            #warning("kAXTrustedCheckOptionPrompt.takeRetainedValue() is a deprecated CF bridging pattern. Use kAXTrustedCheckOptionPrompt as String directly.")
             let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true] as CFDictionary
             _ = AXIsProcessTrustedWithOptions(options)
             permissionPrompted = true
@@ -2475,7 +2472,6 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
-        #warning("NSApp.activate(ignoringOtherApps:) is deprecated in macOS 14.0+. Use NSApp.activate() instead.")
         NSApp.activate(ignoringOtherApps: true)
         
         // Start Lens controller (menu bar toggle + option key)
