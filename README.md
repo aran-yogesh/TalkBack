@@ -200,8 +200,14 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
+
+### MCP Roast Endpoint (Local)
+- **Endpoint**: `http://localhost:8000/roast`
+- **Method**: `POST`
+- **Input**: Command output, error count, and execution metadata
+- **Output**: Roast text for TalkBack voice playback
 
 ### OpenAI GPT-4o
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
@@ -209,7 +215,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Temperature**: 0.9 (for sassy responses)
 - **Max Tokens**: 50 (short, snappy replies)
 
-### Gemini 2.5 Flash (Vision)
+### Gemini Flash (Vision)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - **Model**: `gemini-2.0-flash-exp`
 - **Input**: Base64-encoded JPEG images from webcam
