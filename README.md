@@ -88,14 +88,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ### Prerequisites
 
-1. **macOS 13.0+** (developed on macOS 26.0.1 beta)
+1. **macOS 13.0+**
 2. **Xcode Command Line Tools** installed
 3. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
    - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
 
-### Installation
+### Setup
 
 1. **Clone the repository**:
    ```bash
@@ -103,43 +103,47 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    cd TalkBack
    ```
 
-2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
-   ```swift
-   struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
-   }
+2. **Create your config file**:
+   ```bash
+   cp config.swift.template config.swift
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
 
-3. **Compile the app**:
+3. **Add your API keys** in `config.swift`.
+
+4. **Compile the app**:
    ```bash
    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
 
-4. **Run TalkBack**:
+5. **Run TalkBack**:
    ```bash
    ./ConversationalTalkBack
    ```
 
+### MCP Quick Check
+
+From the repo root:
+
+```bash
+python3 test_mcp_connection.py
+python3 test_mcp_roast.py 'python3 broken_code.py'
+```
+
+If both commands work, your TalkBack + MCP path is configured correctly.
+
+> For complete MCP setup details, see `MCP_SETUP.md` and `MCP_INTEGRATION.md`.
+
+### More setup docs
+
+- `API_KEY_SETUP.md`
+- `QUICK_START.md`
+- `MCP_SETUP_COMPLETE.md`
+- `MCP_SETUP.md`
+- `MCP_INTEGRATION.md`
+
+> README changes were required because setup and usage guidance is user-visible behavior and should stay aligned with current project files.
 ## 🎮 How to Use
 
 ### Basic Usage
