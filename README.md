@@ -206,7 +206,6 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### Gemini 2.5 Flash (Vision)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
 - **Model**: `gemini-2.5-flash`
-- **Input**: Base64-encoded JPEG images from webcam
 - **Output**: Behavior analysis (gaze, emotion, focus, distraction detection)
 - **Frequency**: Every 15 seconds
 
