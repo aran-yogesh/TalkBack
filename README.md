@@ -103,42 +103,62 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    cd TalkBack
    ```
 
-2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+2. **Create your local config file**:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+3. **Configure API Keys**:
+
+   Edit `config.swift` and add your API keys:
    ```swift
    struct Config {
        static let openAIAPIKey: String = {
            return "YOUR_OPENAI_API_KEY_HERE"
        }()
-       
+
        static let elevenLabsAPIKey: String = {
            return "YOUR_ELEVENLABS_API_KEY_HERE"
        }()
-       
+
        static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
+           return "cgSgspJ2msm6clMCkdW9"
        }()
-       
+
        static let geminiAPIKey: String = {
            return "YOUR_GEMINI_API_KEY_HERE"
        }()
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
 
-3. **Compile the app**:
+4. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift config.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
 
-4. **Run TalkBack**:
+5. **Run TalkBack**:
    ```bash
    ./ConversationalTalkBack
    ```
+
+6. **Optional: Start MCP integration helper**:
+   ```bash
+   ./start_talkback_mcp.sh
+   ```
+
+   > Keep this script running in a separate terminal if you want Cursor MCP monitoring.
+
+### Alternative Setup Paths
+
+- `QUICK_START.md`: Fast setup guide for first run.
+- `MCP_SETUP.md`: Full MCP setup and troubleshooting.
+- `MCP_INTEGRATION.md`: Integration details and command examples.
+
+### Security Note
+
+`config.swift` is listed in `.gitignore`, so your API keys stay local and are not committed.
 
 ## 🎮 How to Use
 
