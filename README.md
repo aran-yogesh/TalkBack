@@ -15,14 +15,12 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## 🎯 Features
 
@@ -40,7 +38,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Natural conversation flow with real-time transcription
 
 ### 🗣️ **Sassy AI Responses**
-- **OpenAI GPT-4o** powered responses
+- **Gemini** powered responses
 - **ElevenLabs Text-to-Speech** with Ivanna's voice
 - Attitude-filled, personality-driven replies
 - Short, snappy responses that pack a punch
@@ -276,10 +274,6 @@ Contributions are welcome! Feel free to:
 - Suggest new features
 - Submit pull requests
 - Improve documentation
-
-## 📄 License
-
-MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
