@@ -4,8 +4,6 @@ Test script to verify MCP server connection
 """
 
 import json
-import subprocess
-import sys
 import time
 
 
