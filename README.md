@@ -8,6 +8,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
+- [🔧 Alternative Setup Paths](#-alternative-setup-paths)
+- [🔐 Security Note](#-security-note)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
@@ -150,13 +152,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
    > Keep this script running in a separate terminal if you want Cursor MCP monitoring.
 
-### Alternative Setup Paths
+## 🔧 Alternative Setup Paths
 
 - `QUICK_START.md`: Fast setup guide for first run.
 - `MCP_SETUP.md`: Full MCP setup and troubleshooting.
 - `MCP_INTEGRATION.md`: Integration details and command examples.
 
-### Security Note
+## 🔐 Security Note
 
 `config.swift` is listed in `.gitignore`, so your API keys stay local and are not committed.
 
