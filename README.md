@@ -4,19 +4,33 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## Table of Contents
 
-- [🎯 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [🎮 How to Use](#-how-to-use)
-- [📋 API Endpoints Used](#-api-endpoints-used)
-- [🎭 Personality](#-personality)
-- [🐛 Troubleshooting](#-troubleshooting)
-- [📝 Development Notes](#-development-notes)
-- [🔮 Future Features](#-future-features)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [🙏 Acknowledgments](#-acknowledgments)
-- [💬 Questions or Feedback?](#-questions-or-feedback)
+- [Features](#-features)
+  - [Real Voice Interaction](#-real-voice-interaction)
+  - [Sassy AI Responses](#️-sassy-ai-responses)
+  - [Conversational Memory](#-conversational-memory)
+  - [Custom Floating Avatar](#-custom-floating-avatar)
+  - ["The Great Escape" Feature](#️-the-great-escape-feature)
+  - [Vision-Based Behavior Monitoring](#️-vision-based-behavior-monitoring)
+  - [MCP Code Monitor (Cursor IDE Integration) (NEW!)](#-mcp-code-monitor-cursor-ide-integration-new)
+- [Tech Stack](#️-tech-stack)
+- [Quick Start](#-quick-start)
+- [How to Use](#-how-to-use)
+  - [Basic Usage](#basic-usage)
+  - [MCP Code Monitoring (Cursor IDE Integration)](#-mcp-code-monitoring-cursor-ide-integration)
+- [API Endpoints Used](#-api-endpoints-used)
+  - [ElevenLabs Speech-to-Text](#elevenlabs-speech-to-text)
+  - [ElevenLabs Text-to-Speech](#elevenlabs-text-to-speech)
+  - [MCP Roast Endpoint (Local)](#mcp-roast-endpoint-local)
+  - [OpenAI GPT-4o](#openai-gpt-4o)
+  - [Gemini Flash (Vision)](#gemini-flash-vision)
+- [Personality](#-personality)
+- [Troubleshooting](#-troubleshooting)
+- [Development Notes](#-development-notes)
+- [Future Features](#-future-features)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+- [Questions or Feedback?](#-questions-or-feedback)
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
@@ -200,8 +214,14 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
+
+### MCP Roast Endpoint (Local)
+- **Endpoint**: `http://localhost:8000/roast`
+- **Method**: `POST`
+- **Input**: Command output, error count, and execution metadata
+- **Output**: Roast text for TalkBack voice playback
 
 ### OpenAI GPT-4o
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
@@ -209,7 +229,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Temperature**: 0.9 (for sassy responses)
 - **Max Tokens**: 50 (short, snappy replies)
 
-### Gemini 2.5 Flash (Vision)
+### Gemini Flash (Vision)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - **Model**: `gemini-2.0-flash-exp`
 - **Input**: Base64-encoded JPEG images from webcam
@@ -288,4 +308,6 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 ---
 
 **Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+
+**Author**: Yogesh Mahendran
 
