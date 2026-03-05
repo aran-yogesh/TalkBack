@@ -287,5 +287,6 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Main author:** Yogesh Mahendran ([github.com/aran-yogesh](https://github.com/aran-yogesh))
+**Main author:** Yogesh Mahendran (@aran-yogesh)
+https://github.com/aran-yogesh
 
