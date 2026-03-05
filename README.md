@@ -7,6 +7,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🎯 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [🚀 Quick Start](#-quick-start)
+- [🔐 API Key Setup](#-api-key-setup)
 - [🎮 How to Use](#-how-to-use)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
@@ -14,16 +15,21 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## 🎯 Features
+
+### ✅ **At a Glance**
+- Works on `macOS 13.0+` with Swift command-line tooling
+- Floating always-on-top avatar with cursor-tracking eyes
+- Voice conversation powered by OpenAI + ElevenLabs
+- Behavior monitoring with Gemini-driven vision analysis
+- Cursor MCP integration for terminal-aware roast feedback
 
 ### 🎤 **Real Voice Interaction**
 - **Click and Hold** the avatar to speak your mind
@@ -32,7 +38,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Natural conversation flow with real-time transcription
 
 ### 🗣️ **Sassy AI Responses**
-- **OpenAI GPT-4o** powered responses
+- **Gemini** powered responses
 - **ElevenLabs Text-to-Speech** with Ivanna's voice
 - Attitude-filled, personality-driven replies
 - Short, snappy responses that pack a punch
@@ -104,29 +110,23 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```
 
 2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+
+   Create a local `config.swift` from the template:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+   Edit `config.swift` and set your keys:
    ```swift
    struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
+       static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+       static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+       static let elevenLabsVoiceID = "XB0fDUnXU5powFXDhCwa"
+       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+
+   > **Security note**: `config.swift` is gitignored. Keep real keys only in your local file.
 
 3. **Compile the app**:
    ```bash
@@ -139,6 +139,10 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```bash
    ./ConversationalTalkBack
    ```
+
+## 🔐 API Key Setup
+
+For a full walkthrough of key setup options and troubleshooting, see `API_KEY_SETUP.md`.
 
 ## 🎮 How to Use
 
@@ -271,10 +275,6 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
-## 📄 License
-
-MIT License - feel free to use, modify, and distribute.
-
 ## 🙏 Acknowledgments
 
 - **OpenAI** for GPT-4o-mini API
@@ -286,6 +286,8 @@ MIT License - feel free to use, modify, and distribute.
 Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
+
+**Main author:** Yogesh Mahendran
 
 **Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
 
