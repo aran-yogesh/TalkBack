@@ -293,5 +293,7 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
+**Main author:** Yogesh Mahendran
+
 **Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
 
