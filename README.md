@@ -4,19 +4,20 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## Table of Contents
 
-- [🎯 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [🎮 How to Use](#-how-to-use)
-- [📋 API Endpoints Used](#-api-endpoints-used)
-- [🎭 Personality](#-personality)
-- [🐛 Troubleshooting](#-troubleshooting)
-- [📝 Development Notes](#-development-notes)
-- [🔮 Future Features](#-future-features)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [🙏 Acknowledgments](#-acknowledgments)
-- [💬 Questions or Feedback?](#-questions-or-feedback)
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Quick Start](#-quick-start)
+- [How to Use](#-how-to-use)
+- [API Endpoints Used](#-api-endpoints-used)
+- [Personality](#-personality)
+- [Troubleshooting](#-troubleshooting)
+- [Development Notes](#-development-notes)
+- [Future Features](#-future-features)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+- [Questions or Feedback?](#-questions-or-feedback)
+- [Author](#author)
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
@@ -286,6 +287,8 @@ MIT License - feel free to use, modify, and distribute.
 Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
+
+### Author
 
 **Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
 
