@@ -1,6 +1,6 @@
 # TalkBack - Annoying But Useful AI Companion 🤖
 
-A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
+A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that continuously listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
 
 ## Table of Contents
 
@@ -19,23 +19,23 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
-![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
+![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## 🎯 Features
 
-### 🎤 **Real Voice Interaction**
-- **Click and Hold** the avatar to speak your mind
+### 🎤 **Continuous Voice Interaction**
+- **Always-on listening** — TalkBack continuously listens for your voice (no button press needed)
 - **ElevenLabs Speech-to-Text** for accurate voice recognition
 - Supports multiple languages (English, Bengali, Hindi, and more!)
-- Natural conversation flow with real-time transcription
+- Automatic silence detection stops recording after 2 seconds of quiet
 
 ### 🗣️ **Sassy AI Responses**
 - **OpenAI GPT-4o** powered responses
 - **ElevenLabs Text-to-Speech** with Ivanna's voice
 - Attitude-filled, personality-driven replies
-- Short, snappy responses that pack a punch
+- Short, snappy responses (max 2 sentences)
 
 ### 🧠 **Conversational Memory**
 - Remembers your chat history
@@ -46,7 +46,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Transparent floating window (always on top)
 - Custom purse/wallet icon design
 - Animated eyes that follow your cursor
-- Dynamic expressions based on mood
+- Bouncing zigzag motion when idle (resumes 5 seconds after interaction)
 - Draggable anywhere on your screen
 
 ### 🗑️ **"The Great Escape" Feature**
@@ -54,17 +54,27 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Drop in trash to quit (the only way to close it!)
 - Adds a fun, mischievous interaction
 
-### 👁️ **Vision-Based Behavior Monitoring**
-- **Gemini 2.5 Flash** watches you through your webcam
-- Detects when you're:
-  - 👀 Looking away from the screen
-  - 😊😤😐 Your emotions (happy, frustrated, confused)
-  - 🧐 Focus level (distracted, working seriously)
-  - 📱 Using your phone
-- Delivers sassy roasts based on your behavior
-- Automatic analysis every 15 seconds
+### 👩‍🏫 **Teacher Mode**
+- Toggle via the menu bar to enable/disable
+- Watches your terminal command results and provides teaching feedback
+- On success: celebrates and suggests a productive next step
+- On failure: diagnoses the error, explains what went wrong, and gives actionable fixes
+- Witty, supportive tone with light sass
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 📬 **Assignment Alerts**
+- Toggle via the menu bar
+- Monitors your Mail app for assignment-related emails (homework, projects, due dates, etc.)
+- Checks every 3 minutes for new messages from `.edu`, Canvas, or Blackboard domains
+- Alerts you with a sassy nudge when a new assignment lands
+
+### 🔍 **TalkBack Lens**
+- Menu bar icon to toggle Lens mode, or hold **⌥ Option** for temporary activation
+- Hover over any text on screen to get an overlay with two actions:
+  - **Summarize** — GPT-4.1 powered summary of the hovered text
+  - **Make Concise** — rewrites the text in fewer words
+- Results are cached per element to avoid redundant API calls
+
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -78,11 +88,11 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Language**: Swift 6.2
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
-  - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
-  - [Gemini 2.5 Flash](https://aistudio.google.com/) - Vision & behavior analysis
-  - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
-  - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
-- **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+  - [OpenAI GPT-4o](https://platform.openai.com/) — Conversational AI & teacher feedback
+  - [OpenAI GPT-4.1](https://platform.openai.com/) — TalkBack Lens summarization
+  - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) — Voice recognition
+  - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) — Voice synthesis (Ivanna voice)
+- **Audio**: AVFoundation (NSSound, AVAudioEngine for continuous listening)
 
 ## 🚀 Quick Start
 
@@ -93,7 +103,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 3. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
-   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -104,33 +113,27 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```
 
 2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+
+   Copy the template and add your keys:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+   Edit `config.swift` with your actual API keys:
    ```swift
    struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
+       static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+       static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+
+   > **Note**: `config.swift` is gitignored so your keys stay local. See [API_KEY_SETUP.md](API_KEY_SETUP.md) for more details.
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
@@ -145,18 +148,24 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ### Basic Usage
 
 1. **Start the App**: Run `./ConversationalTalkBack`
-2. **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
-3. **Talk to TalkBack**:
-   - **Click and HOLD** the avatar
-   - **Speak** your message
-   - **Release** to send
+2. **Grant Microphone Permission**: Allow microphone access when prompted
+3. **Talk to TalkBack**: Just speak — continuous listening is always active. TalkBack detects silence and processes your speech automatically.
 4. **Listen**: TalkBack responds with Ivanna's voice and attitude
-5. **Get Roasted**: TalkBack monitors your behavior every 15 seconds:
-   - Looking away? → "HEY! Where are you going?"
-   - Using your phone? → "Seriously? TikTok is more important than me?"
-   - Looking stressed? → "Uh oh, code not compiling?"
-6. **Drag**: Move the avatar anywhere on your screen
-7. **Quit**: Drag avatar near the menu bar → drop in trash can
+5. **Drag**: Move the avatar anywhere on your screen (it bounces around on its own when idle)
+6. **Quit**: Drag avatar near the menu bar → drop in trash can
+
+### 👩‍🏫 Teacher Mode & Assignment Alerts
+
+Both features are toggled from the **menu bar**:
+
+- **Teacher Mode** (on by default): after any terminal command, TalkBack reviews the output and gives teaching feedback — celebrates successes and diagnoses failures.
+- **Assignment Alerts** (off by default): monitors your Mail app for assignment-related emails and nudges you when something new arrives.
+
+### 🔍 TalkBack Lens
+
+- Click the **Lens** icon in the menu bar to toggle, or hold **⌥ Option** for temporary activation.
+- Hover over text on screen → an overlay appears with **Summarize** and **Make Concise** buttons.
+- Results are powered by GPT-4.1 and cached per element.
 
 ### 🔥 MCP Code Monitoring (Cursor IDE Integration)
 
@@ -164,16 +173,13 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
 
-2. **Run your code with the MCP tester**:
+2. **Run your code with the monitor**:
    ```bash
-   # Test with a script that has errors (will trigger full roast 🔥)
-   python3 test_mcp_roast.py 'python3 your_broken_script.py'
-   
-   # Test with successful code (will get sassy compliment 💅)
-   python3 test_mcp_roast.py 'python3 your_working_script.py'
-   
-   # Test with any command
-   python3 test_mcp_roast.py 'swift your_code.swift'
+   python3 cursor_code_monitor.py run 'python3 your_broken_script.py'
+
+   python3 cursor_code_monitor.py run 'python3 your_working_script.py'
+
+   python3 cursor_code_monitor.py run 'swift your_code.swift'
    ```
 
 3. **TalkBack will roast you based on errors**:
@@ -183,10 +189,12 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 4. **Example test**:
    ```bash
-   # This will trigger a savage roast
-   python3 test_mcp_roast.py 'python3 broken_code.py'
-   
-   # TalkBack will speak the roast with Ivanna's voice!
+   python3 cursor_code_monitor.py run 'python3 broken_code.py'
+   ```
+
+5. **Test MCP connection**:
+   ```bash
+   python3 test_mcp_connection.py
    ```
 
 ## 📋 API Endpoints Used
@@ -200,21 +208,20 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
-### OpenAI GPT-4o
+### OpenAI GPT-4o (Chat & Teacher Mode)
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
 - **Model**: `gpt-4o`
-- **Temperature**: 0.9 (for sassy responses)
-- **Max Tokens**: 50 (short, snappy replies)
+- **Temperature**: 0.9 (sassy chat) / 0.6–0.7 (teacher feedback)
+- **Max Tokens**: 80 (chat) / 120 (teacher feedback)
 
-### Gemini 2.5 Flash (Vision)
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
-- **Model**: `gemini-2.0-flash-exp`
-- **Input**: Base64-encoded JPEG images from webcam
-- **Output**: Behavior analysis (gaze, emotion, focus, distraction detection)
-- **Frequency**: Every 15 seconds
+### OpenAI GPT-4.1 (TalkBack Lens)
+- **Endpoint**: `https://api.openai.com/v1/chat/completions`
+- **Model**: `gpt-4.1`
+- **Temperature**: 0.3
+- **Max Tokens**: 120
 
 ## 🎭 Personality
 
@@ -233,7 +240,7 @@ TalkBack is designed to be:
 - Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
 
 ### Empty Transcriptions?
-- Ensure you're holding the mouse button while speaking
+- Ensure continuous listening is active (check terminal for `🎤 Starting continuous listening...`)
 - Check microphone permissions (System Settings → Privacy & Security → Microphone)
 - Verify ElevenLabs API key is valid
 
@@ -256,8 +263,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🔮 Future Features
 
-- [ ] Screen monitoring (detect what user is doing)
-- [ ] Context-aware productivity tips
+- [ ] Vision-based behavior monitoring (webcam gaze/emotion detection)
 - [ ] Custom voice selection
 - [ ] Multiple personality modes
 - [ ] Scheduled check-ins
@@ -277,7 +283,7 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for GPT-4o-mini API
+- **OpenAI** for GPT-4o and GPT-4.1 APIs
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
