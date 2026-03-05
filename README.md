@@ -268,7 +268,3 @@ MIT License - feel free to use, modify, and distribute.
 
 Open an issue or reach out! TalkBack loves to chat (obviously).
 
----
-
-**Made with code and a lot of sass** by [Yogesh Mahendran](https://github.com/aran-yogesh)
-
