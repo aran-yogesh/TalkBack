@@ -4,19 +4,25 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## Table of Contents
 
-- [🎯 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [🎮 How to Use](#-how-to-use)
-- [📋 API Endpoints Used](#-api-endpoints-used)
-- [🎭 Personality](#-personality)
-- [🐛 Troubleshooting](#-troubleshooting)
-- [📝 Development Notes](#-development-notes)
-- [🔮 Future Features](#-future-features)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [🙏 Acknowledgments](#-acknowledgments)
-- [💬 Questions or Feedback?](#-questions-or-feedback)
+- [Features](#-features)
+- [Tech Stack](#️-tech-stack)
+- [Quick Start](#-quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [How to Use](#-how-to-use)
+  - [Basic Usage](#basic-usage)
+  - [MCP Code Monitoring (Cursor IDE Integration)](#-mcp-code-monitoring-cursor-ide-integration)
+- [API Endpoints Used](#-api-endpoints-used)
+- [Personality](#-personality)
+- [Troubleshooting](#-troubleshooting)
+- [Development Notes](#-development-notes)
+- [Future Features](#-future-features)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+- [Questions or Feedback?](#-questions-or-feedback)
+
+> Need a minimal setup path? See [`QUICK_START.md`](./QUICK_START.md).
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
@@ -287,5 +293,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
 
