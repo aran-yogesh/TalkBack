@@ -4,9 +4,7 @@
 Your MCP server is ready! Test it:
 
 ```bash
-cd /Users/aran/Desktop/talkback
-source .venv/bin/activate
-python test_mcp_connection.py
+python3 test_mcp_connection.py
 ```
 
 ## ✅ **Step 2: Configure Cursor IDE**
@@ -16,46 +14,41 @@ python test_mcp_connection.py
 2. **Copy the MCP settings file to Cursor's config:**
    ```bash
    mkdir -p ~/.cursor
-   cp /Users/aran/Desktop/talkback/cline_mcp_settings.json ~/.cursor/cline_mcp_settings.json
+   cp cline_mcp_settings.json ~/.cursor/cline_mcp_settings.json
    ```
-3. **Restart Cursor** - it will automatically start the MCP server
+3. **Restart Cursor** — it will automatically start the MCP server
 
 ### **Option B: Manual Server (For Debugging)**
 1. **Keep server running in terminal:**
    ```bash
-   cd /Users/aran/Desktop/talkback
-   source .venv/bin/activate
-   python cursor_mcp_server.py
+   python3 cursor_mcp_server.py
    ```
-2. **Ignore the initial JSON errors** - they stop when Cursor connects
-3. **Start Cursor** - it will connect to your running server
+2. **Ignore the initial JSON errors** — they stop when Cursor connects
+3. **Start Cursor** — it will connect to your running server
 
 ## ✅ **Step 3: Test the Integration**
 
 ### **Test 1: Basic Connection**
 ```bash
-# Run this to send a test message to TalkBack
-python test_mcp_connection.py
+python3 test_mcp_connection.py
 ```
 
 ### **Test 2: Code Execution Monitoring**
 1. **Start TalkBack:**
    ```bash
-   swift ConversationalTalkBack.swift
+   ./ConversationalTalkBack
    ```
-2. **In Cursor's terminal, run:**
+2. **In another terminal, run:**
    ```bash
    # This should trigger a success message
-   echo "Hello World"
-   
+   python3 cursor_code_monitor.py run 'echo "Hello World"'
+
    # This should trigger an error roast
-   python -c "print('This will work')"
-   python -c "print(undefined_variable)"  # This will fail
+   python3 cursor_code_monitor.py run 'python3 -c "print(undefined_variable)"'
    ```
 
 ### **Test 3: Monitor the Message File**
 ```bash
-# Watch the message file in real-time
 tail -f /tmp/talkback_message.json
 ```
 
@@ -71,18 +64,14 @@ tail -f /tmp/talkback_message.json
 
 ### **If MCP server won't start:**
 ```bash
-# Check Python path
-which python
-# Should show: /Users/aran/Desktop/talkback/.venv/bin/python
-
 # Reinstall MCP if needed
-pip install mcp
+pip3 install mcp
 ```
 
 ### **If Cursor can't connect:**
 1. Check `~/.cursor/cline_mcp_settings.json` exists
 2. Verify the Python path is correct
-3. Make sure virtual environment is activated
+3. Make sure dependencies are installed (`pip3 install mcp watchdog`)
 
 ### **If TalkBack doesn't respond:**
 1. Check `/tmp/talkback_message.json` exists
@@ -103,6 +92,5 @@ Once this is working, you can:
 - **Enhance error detection** for specific languages
 - **Add more sophisticated roasting** based on error types
 - **Integrate with file watching** for real-time feedback
-- **Add calendar integration** for student email features
 
 Your coding assistant is ready to roast you! 🎈🔥

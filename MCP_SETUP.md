@@ -2,7 +2,7 @@
 
 ## Overview
 
-TalkBack now integrates with Cursor IDE via MCP (Model Context Protocol) to monitor your code execution and roast you when you mess up!
+TalkBack integrates with Cursor IDE via MCP (Model Context Protocol) to monitor your code execution and roast you when you mess up!
 
 ### How It Works:
 
@@ -18,51 +18,44 @@ Your Code → Cursor IDE → MCP Monitor → TalkBack Avatar → Ivanna's Voice 
 
 ## Quick Start
 
-### 1. Install Python Dependencies
+### 1. Configure API Keys
 
 ```bash
-cd /Users/aran/Desktop/talkback
-pip3 install mcp watchdog
+cp config.swift.template config.swift
 ```
 
-### 2. Add Your API Keys
+Edit `config.swift` with your OpenAI and ElevenLabs keys. See [API_KEY_SETUP.md](API_KEY_SETUP.md) for details.
 
-Edit `MCPTalkBack.swift` and replace:
-- Line 40: `YOUR_OPENAI_API_KEY_HERE` with your OpenAI key
-- Line 43: `YOUR_ELEVENLABS_API_KEY_HERE` with your ElevenLabs key
-
-### 3. Compile TalkBack with MCP Support
+### 2. Compile TalkBack
 
 ```bash
-swiftc -o MCPTalkBack MCPTalkBack.swift \
+swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
   -framework Cocoa -framework Foundation -framework AVFoundation \
   -target arm64-apple-macosx13.0
 ```
 
-### 4. Run TalkBack Avatar
+### 3. Run TalkBack Avatar
 
 ```bash
-./MCPTalkBack &
+./ConversationalTalkBack
 ```
 
 The avatar will appear on your screen, watching your code! 👀
 
-### 5. Run Code with Monitoring
-
-Now when you run code in Cursor, use the monitor script:
+### 4. Run Code with Monitoring
 
 ```bash
 # Python example
-python3 cursor_code_monitor.py run "python your_script.py"
+python3 cursor_code_monitor.py run 'python your_script.py'
 
 # Swift example
-python3 cursor_code_monitor.py run "swift your_file.swift"
+python3 cursor_code_monitor.py run 'swift your_file.swift'
 
 # npm/node example
-python3 cursor_code_monitor.py run "npm test"
+python3 cursor_code_monitor.py run 'npm test'
 
 # Any command
-python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
+python3 cursor_code_monitor.py run 'YOUR_COMMAND_HERE'
 ```
 
 ## Integration with Cursor IDE
@@ -73,15 +66,15 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 2. Run your code in the terminal
 3. In another terminal, run:
    ```bash
-   python3 cursor_code_monitor.py run "YOUR_COMMAND"
+   python3 cursor_code_monitor.py run 'YOUR_COMMAND'
    ```
 
 ### Option 2: MCP Server Integration (Advanced)
 
 1. Add MCP server to Cursor settings:
-   
+
    Copy the contents of `mcp_config.json` to your Cursor MCP settings:
-   
+
    **Mac**: `~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
 
 2. Restart Cursor
@@ -98,78 +91,3 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ### Success (Sassy Success 💅):
 > "Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now. 💅✨"
-
-## How to Use
-
-1. **Start TalkBack**: Run `./MCPTalkBack`
-2. **Code in Cursor**: Write your code as usual
-3. **Run with Monitor**: Use `cursor_code_monitor.py run "your_command"`
-4. **Get Roasted**: TalkBack watches the output and roasts you accordingly! 🔥
-
-## Features
-
-✅ Real-time code execution monitoring  
-✅ Error counting and analysis  
-✅ Smart roasting based on error count  
-✅ ElevenLabs voice (Ivanna) for maximum sass  
-✅ OpenAI GPT-4o-mini for witty roasts  
-✅ Works with any programming language  
-✅ Draggable avatar (drag to trash to quit)  
-✅ Always on top - can't escape the judgment! 😈  
-
-## Troubleshooting
-
-### TalkBack not roasting?
-- Check that `MCPTalkBack` is running (`ps aux | grep MCP`)
-- Check that `/tmp/talkback_message.json` exists and is being written
-- Check terminal output for errors
-
-### No voice output?
-- Verify ElevenLabs API key is correct
-- Check system volume
-- Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
-
-### Errors not detected?
-- Check the output of your command manually
-- The monitor looks for common error patterns (see `cursor_code_monitor.py`)
-- You can customize error detection in the Python script
-
-## Customization
-
-### Change Roast Severity
-
-Edit `MCPTalkBack.swift`, find the `generateRoastResponse` function and modify the prompts:
-
-```swift
-case "roast":
-    systemPrompt = """
-    Your custom ROAST prompt here! Make it BRUTAL! 🔥
-    """
-```
-
-### Add More Error Patterns
-
-Edit `cursor_code_monitor.py`, find `count_errors_in_output` and add patterns:
-
-```python
-error_patterns = [
-    r'your_custom_error_pattern',
-    # ... add more
-]
-```
-
-## What's Next?
-
-Future features:
-- [ ] Automatic Cursor terminal monitoring (no manual script needed)
-- [ ] Code suggestion roasts
-- [ ] Productivity tracking
-- [ ] Custom roast personalities
-- [ ] Integration with GitHub for commit roasts
-
----
-
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
-
-🔥 **Now go code and get roasted!** 🔥
-
