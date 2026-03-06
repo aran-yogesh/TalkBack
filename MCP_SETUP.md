@@ -22,7 +22,7 @@ Your Code → Cursor IDE → MCP Monitor → TalkBack Avatar → Ivanna's Voice 
 
 ```bash
 cd /Users/aran/Desktop/talkback
-pip3 install mcp watchdog
+pip3 install -r requirements.txt
 ```
 
 ### 2. Add Your API Keys
@@ -121,7 +121,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ### TalkBack not roasting?
 - Check that `MCPTalkBack` is running (`ps aux | grep MCP`)
-- Check that `/tmp/talkback_message.json` exists and is being written
+- Check that `/tmp/talkback_message.yaml` exists and is being written
 - Check terminal output for errors
 
 ### No voice output?

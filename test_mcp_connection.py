@@ -3,10 +3,11 @@
 Test script to verify MCP server connection
 """
 
-import json
 import subprocess
 import sys
 import time
+
+import yaml
 
 
 def test_mcp_server():
@@ -20,13 +21,13 @@ def test_mcp_server():
     }
     
     # Write to the file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
+    message_file = "/tmp/talkback_message.yaml"
     with open(message_file, "w") as f:
-        json.dump(test_message, f)
+        yaml.dump(test_message, f, default_flow_style=False)
     
     print("✅ Test message sent to TalkBack!")
     print(f"📁 Message file: {message_file}")
-    print(f"📝 Message content: {json.dumps(test_message, indent=2)}")
+    print(f"📝 Message content:\n{yaml.dump(test_message, default_flow_style=False)}")
     
     return True
 
