@@ -25,9 +25,9 @@ echo "🧪 Testing MCP server..."
 python test_mcp_connection.py
 
 # Check if message file was created
-if [ -f "/tmp/talkback_message.json" ]; then
+if [ -f "/tmp/talkback_message.yaml" ]; then
     echo "✅ MCP server test successful!"
-    echo "📁 Message file created at: /tmp/talkback_message.json"
+    echo "📁 Message file created at: /tmp/talkback_message.yaml"
 else
     echo "❌ MCP server test failed!"
     exit 1

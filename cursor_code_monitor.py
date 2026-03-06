@@ -4,7 +4,7 @@ Cursor Code Monitor - Watches for code execution and triggers TalkBack roasts
 This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
-import json
+import yaml
 import os
 import re
 import subprocess
@@ -17,7 +17,7 @@ from watchdog.observers import Observer
 
 
 class CodeExecutionMonitor(FileSystemEventHandler):
-    def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
+    def __init__(self, talkback_message_file="/tmp/talkback_message.yaml"):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
@@ -74,7 +74,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         # Write to file that TalkBack monitors
         try:
             with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
+                yaml.dump(message, f, default_flow_style=False)
             
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:

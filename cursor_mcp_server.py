@@ -5,7 +5,7 @@ Sends roasts to TalkBack avatar based on errors/success
 """
 
 import asyncio
-import json
+import yaml
 import os
 import subprocess
 import sys
@@ -37,13 +37,13 @@ async def handle_list_resources() -> list[types.Resource]:
             uri="talkback://execution-results",
             name="Latest Code Execution Results",
             description="Most recent code execution output and error count",
-            mimeType="application/json"
+            mimeType="application/yaml"
         ),
         types.Resource(
             uri="talkback://linter-errors",
             name="Current Linter Errors",
             description="Active linter/compiler errors in the workspace",
-            mimeType="application/json"
+            mimeType="application/yaml"
         )
     ]
 
@@ -51,12 +51,12 @@ async def handle_list_resources() -> list[types.Resource]:
 async def handle_read_resource(uri: str) -> str:
     """Read resource data"""
     if uri == "talkback://execution-results":
-        return json.dumps(execution_results, indent=2)
+        return yaml.dump(execution_results, default_flow_style=False)
     elif uri == "talkback://linter-errors":
-        return json.dumps({
+        return yaml.dump({
             "linter_errors": execution_results["linter_errors"],
             "error_count": execution_results["error_count"]
-        }, indent=2)
+        }, default_flow_style=False)
     else:
         raise ValueError(f"Unknown resource: {uri}")
 
@@ -142,12 +142,12 @@ async def handle_call_tool(
         return [
             types.TextContent(
                 type="text",
-                text=json.dumps({
+                text=yaml.dump({
                     "status": "success",
                     "error_count": error_count,
                     "response_type": response_type,
                     "message": f"TalkBack triggered with {response_type}"
-                })
+                }, default_flow_style=False)
             )
         ]
     
@@ -187,9 +187,9 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
     }
     
     # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
+    message_file = "/tmp/talkback_message.yaml"
     with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
+        yaml.dump(talkback_message, f, default_flow_style=False)
     
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 
