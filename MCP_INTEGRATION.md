@@ -28,7 +28,7 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│          /tmp/talkback_message.json (IPC File)               │
+│          /tmp/talkback_message.yaml (IPC File)               │
 │  {                                                           │
 │    "prompt": "ROAST ME! 5 errors...",                        │
 │    "type": "roast",                                          │
@@ -215,7 +215,7 @@ The MCP monitor looks for these error patterns in terminal output:
 - `AttributeError`, `ImportError`, `ModuleNotFoundError`
 
 ### Polling Mechanism
-- **Frequency**: TalkBack checks `/tmp/talkback_message.json` every **0.5 seconds**
+- **Frequency**: TalkBack checks `/tmp/talkback_message.yaml` every **0.5 seconds**
 - **Debouncing**: Only processes new messages (checks timestamp)
 - **Non-blocking**: Runs on a separate timer, doesn't interfere with other features
 
@@ -265,7 +265,7 @@ Keep it under 30 words. Be dramatic.
 
 ### TalkBack not roasting?
 1. Check if TalkBack is running: `ps aux | grep ConversationalTalkBack`
-2. Verify the JSON file is being created: `cat /tmp/talkback_message.json`
+2. Verify the YAML file is being created: `cat /tmp/talkback_message.yaml`
 3. Check TalkBack terminal output for "📬 New MCP message" logs
 
 ### Roasts are too harsh/mild?

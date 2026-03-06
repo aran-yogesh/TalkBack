@@ -86,7 +86,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
-    let mcpMessageFile = "/tmp/talkback_message.json"
+    let mcpMessageFile = "/tmp/talkback_message.yaml"
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
@@ -1589,6 +1589,65 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         context.fillEllipse(in: speakingRect)
     }
     
+    // MARK: - YAML Parsing
+    
+    func parseSimpleYAML(_ text: String) -> [String: Any] {
+        var result: [String: Any] = [:]
+        var currentKey: String?
+        var currentValue: String = ""
+        var inMultiline = false
+
+        for line in text.components(separatedBy: "\n") {
+            if inMultiline {
+                if line.hasPrefix("  ") || line.hasPrefix("\t") {
+                    currentValue += (currentValue.isEmpty ? "" : "\n") + line.trimmingCharacters(in: .whitespaces)
+                    continue
+                } else {
+                    if let key = currentKey {
+                        result[key] = convertYAMLValue(currentValue)
+                    }
+                    inMultiline = false
+                }
+            }
+
+            guard let colonRange = line.range(of: ": ") ?? (line.hasSuffix(":") ? line.range(of: ":", options: .backwards) : nil) else {
+                continue
+            }
+
+            let key = String(line[line.startIndex..<colonRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+            let rawValue = String(line[colonRange.upperBound...]).trimmingCharacters(in: .whitespaces)
+
+            if rawValue.isEmpty {
+                currentKey = key
+                currentValue = ""
+                inMultiline = true
+                continue
+            }
+
+            result[key] = convertYAMLValue(rawValue)
+        }
+
+        if inMultiline, let key = currentKey {
+            result[key] = convertYAMLValue(currentValue)
+        }
+
+        return result
+    }
+
+    func convertYAMLValue(_ value: String) -> Any {
+        let trimmed = value.trimmingCharacters(in: .whitespaces)
+        if trimmed == "true" { return true }
+        if trimmed == "false" { return false }
+        if trimmed == "null" || trimmed == "~" { return NSNull() }
+        if let intVal = Int(trimmed) { return intVal }
+        if let doubleVal = Double(trimmed) { return doubleVal }
+        if (trimmed.hasPrefix("'") && trimmed.hasSuffix("'")) ||
+           (trimmed.hasPrefix("\"") && trimmed.hasSuffix("\"")) {
+            return String(trimmed.dropFirst().dropLast())
+        }
+        return trimmed
+    }
+
     // MARK: - MCP Monitoring for Cursor IDE Roasting 🔥
     
     func startMCPMonitoring() {
@@ -1601,9 +1660,13 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        guard let text = try? String(contentsOfFile: mcpMessageFile, encoding: .utf8) else {
+            return
+        }
+
+        let yaml = parseSimpleYAML(text)
+
+        guard let timestamp = yaml["timestamp"] as? TimeInterval else {
             return
         }
         
@@ -1614,17 +1677,17 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         lastMCPMessageTime = timestamp
         
-        if let event = json["event"] as? String {
+        if let event = yaml["event"] as? String {
             switch event {
             case "command_started":
-                let command = json["command"] as? String ?? "command"
+                let command = yaml["command"] as? String ?? "command"
                 self.handleCommandStarted(command: command)
             case "command_finished":
-                let command = json["command"] as? String ?? "command"
-                let exitCode = json["exit_code"] as? Int ?? (json["status"] as? String == "success" ? 0 : 1)
-                let status = json["status"] as? String ?? (exitCode == 0 ? "success" : "failed")
-                let output = json["output"] as? String ?? ""
-                let duration = json["duration"] as? Double
+                let command = yaml["command"] as? String ?? "command"
+                let exitCode = yaml["exit_code"] as? Int ?? (yaml["status"] as? String == "success" ? 0 : 1)
+                let status = yaml["status"] as? String ?? (exitCode == 0 ? "success" : "failed")
+                let output = yaml["output"] as? String ?? ""
+                let duration = yaml["duration"] as? Double
                 self.handleCommandFinished(command: command, status: status, exitCode: exitCode, output: output, duration: duration)
             default:
                 print("ℹ️ Unhandled MCP event: \(event)")
@@ -1632,8 +1695,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             return
         }
         
-        guard let prompt = json["prompt"] as? String,
-              let type = json["type"] as? String else {
+        guard let prompt = yaml["prompt"] as? String,
+              let type = yaml["type"] as? String else {
             return
         }
         

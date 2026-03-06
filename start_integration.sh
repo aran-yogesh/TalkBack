@@ -14,10 +14,10 @@ echo "🔧 Activating virtual environment..."
 source .venv/bin/activate
 
 # Check if MCP is installed
-echo "🔍 Checking MCP installation..."
-python -c "import mcp; print('✅ MCP package is installed!')" || {
-    echo "❌ MCP package not found. Installing..."
-    pip install mcp
+echo "🔍 Checking dependencies..."
+python -c "import mcp; import yaml; print('✅ Dependencies are installed!')" || {
+    echo "❌ Dependencies not found. Installing..."
+    pip install -r requirements.txt
 }
 
 # Test MCP server
@@ -25,9 +25,9 @@ echo "🧪 Testing MCP server..."
 python test_mcp_connection.py
 
 # Check if message file was created
-if [ -f "/tmp/talkback_message.json" ]; then
+if [ -f "/tmp/talkback_message.yaml" ]; then
     echo "✅ MCP server test successful!"
-    echo "📁 Message file created at: /tmp/talkback_message.json"
+    echo "📁 Message file created at: /tmp/talkback_message.yaml"
 else
     echo "❌ MCP server test failed!"
     exit 1
