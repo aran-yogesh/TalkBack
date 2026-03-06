@@ -86,7 +86,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
-    let mcpMessageFile = "/tmp/talkback_message.json"
+    let mcpMessageFile = "/tmp/talkback_message.yaml"
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
@@ -1600,10 +1600,34 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         }
     }
     
+    func parseSimpleYAML(_ text: String) -> [String: Any] {
+        var result: [String: Any] = [:]
+        for line in text.components(separatedBy: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard let separatorRange = trimmed.range(of: ": ") else { continue }
+            let key = String(trimmed[trimmed.startIndex..<separatorRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+            var value = String(trimmed[separatorRange.upperBound...]).trimmingCharacters(in: .whitespaces)
+            if key.isEmpty { continue }
+            if (value.hasPrefix("\"") && value.hasSuffix("\"")) || (value.hasPrefix("'") && value.hasSuffix("'")) {
+                value = String(value.dropFirst().dropLast())
+                result[key] = value
+                continue
+            }
+            if value == "true" { result[key] = true; continue }
+            if value == "false" { result[key] = false; continue }
+            if let intVal = Int(value) { result[key] = intVal; continue }
+            if let doubleVal = Double(value) { result[key] = doubleVal; continue }
+            result[key] = value
+        }
+        return result
+    }
+    
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        guard let text = try? String(contentsOfFile: mcpMessageFile, encoding: .utf8) else {
+            return
+        }
+        let yaml = parseSimpleYAML(text)
+        guard let timestamp = yaml["timestamp"] as? TimeInterval else {
             return
         }
         
@@ -1614,17 +1638,17 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         lastMCPMessageTime = timestamp
         
-        if let event = json["event"] as? String {
+        if let event = yaml["event"] as? String {
             switch event {
             case "command_started":
-                let command = json["command"] as? String ?? "command"
+                let command = yaml["command"] as? String ?? "command"
                 self.handleCommandStarted(command: command)
             case "command_finished":
-                let command = json["command"] as? String ?? "command"
-                let exitCode = json["exit_code"] as? Int ?? (json["status"] as? String == "success" ? 0 : 1)
-                let status = json["status"] as? String ?? (exitCode == 0 ? "success" : "failed")
-                let output = json["output"] as? String ?? ""
-                let duration = json["duration"] as? Double
+                let command = yaml["command"] as? String ?? "command"
+                let exitCode = yaml["exit_code"] as? Int ?? (yaml["status"] as? String == "success" ? 0 : 1)
+                let status = yaml["status"] as? String ?? (exitCode == 0 ? "success" : "failed")
+                let output = yaml["output"] as? String ?? ""
+                let duration = yaml["duration"] as? Double
                 self.handleCommandFinished(command: command, status: status, exitCode: exitCode, output: output, duration: duration)
             default:
                 print("ℹ️ Unhandled MCP event: \(event)")
@@ -1632,8 +1656,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             return
         }
         
-        guard let prompt = json["prompt"] as? String,
-              let type = json["type"] as? String else {
+        guard let prompt = yaml["prompt"] as? String,
+              let type = yaml["type"] as? String else {
             return
         }
         
