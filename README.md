@@ -105,28 +105,22 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 2. **Configure API Keys**:
    
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+   Copy the template and add your keys:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+   
+   Then edit `config.swift` with your actual API keys:
    ```swift
    struct Config {
-       static let openAIAPIKey: String = {
-           return "YOUR_OPENAI_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsAPIKey: String = {
-           return "YOUR_ELEVENLABS_API_KEY_HERE"
-       }()
-       
-       static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
-       }()
-       
-       static let geminiAPIKey: String = {
-           return "YOUR_GEMINI_API_KEY_HERE"
-       }()
+       static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+       static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
    
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
+   > **Note**: `config.swift` is gitignored so your keys stay out of version control.
 
 3. **Compile the app**:
    ```bash
@@ -200,19 +194,18 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 ### ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
 - **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`XB0fDUnXU5powFXDhCwa`)
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
 ### OpenAI GPT-4o
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
 - **Model**: `gpt-4o`
 - **Temperature**: 0.9 (for sassy responses)
-- **Max Tokens**: 50 (short, snappy replies)
+- **Max Tokens**: 80 (short, snappy replies)
 
 ### Gemini 2.5 Flash (Vision)
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
-- **Model**: `gemini-2.0-flash-exp`
-- **Input**: Base64-encoded JPEG images from webcam
+- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
+- **Model**: `gemini-2.5-flash`
 - **Output**: Behavior analysis (gaze, emotion, focus, distraction detection)
 - **Frequency**: Every 15 seconds
 
@@ -277,7 +270,7 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for GPT-4o-mini API
+- **OpenAI** for GPT-4o API
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
@@ -287,5 +280,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by Yogesh Mahendran ([@aran-yogesh](https://github.com/aran-yogesh))
 
