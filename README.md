@@ -103,32 +103,37 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    cd TalkBack
    ```
 
-2. **Configure API Keys**:
-   
-   Edit the `Config` struct at the top of `ConversationalTalkBack.swift` (around line 8):
+2. **Create your local config file from template**:
+   ```bash
+   cp config.swift.template config.swift
+   ```
+
+3. **Configure API Keys**:
+
+   Edit `config.swift` and replace placeholder values:
    ```swift
    struct Config {
        static let openAIAPIKey: String = {
            return "YOUR_OPENAI_API_KEY_HERE"
        }()
-       
+
        static let elevenLabsAPIKey: String = {
            return "YOUR_ELEVENLABS_API_KEY_HERE"
        }()
-       
+
        static let elevenLabsVoiceID: String = {
-           return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
+           return "cgSgspJ2msm6clMCkdW9"
        }()
-       
+
        static let geminiAPIKey: String = {
            return "YOUR_GEMINI_API_KEY_HERE"
        }()
    }
    ```
-   
-   > **Note**: API keys are embedded in the code for simplicity. For production use, consider using environment variables or a secure keychain.
 
-3. **Compile the app**:
+   > **Note**: `config.swift` is gitignored. Do not commit real API keys.
+
+4. **Compile the app**:
    ```bash
    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
