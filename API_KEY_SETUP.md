@@ -8,7 +8,6 @@ API keys are now stored in a `Config` struct at the **top of each Swift file** (
 
 ### Files with Config:
 - `ConversationalTalkBack.swift` - Main avatar app
-- `GeminiVisionTest.swift` - Standalone vision test tool
 
 ## 🔧 How to Update Your API Keys
 
@@ -29,10 +28,6 @@ struct Config {
     static let elevenLabsVoiceID: String = {
         return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice (keep this)
     }()
-    
-    static let geminiAPIKey: String = {
-        return "YOUR_GEMINI_API_KEY_HERE"  // ← Replace this
-    }()
 }
 ```
 
@@ -42,7 +37,6 @@ struct Config {
 |---------|----------------|------|
 | **OpenAI** | Platform dashboard | [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys) |
 | **ElevenLabs** | Profile settings | [https://elevenlabs.io/](https://elevenlabs.io/) |
-| **Gemini** | Google AI Studio | [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) |
 
 ### 3. Recompile After Changes
 
@@ -95,16 +89,11 @@ The repo currently has:
    - Added `Config` struct at the top
    - Replaced hardcoded keys with `Config.keyName`
 
-2. **GeminiVisionTest.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
-
 3. **.gitignore**
    - Added `.env`, `config.swift`
 
 4. **README.md**
    - Updated installation instructions
-   - Added Gemini API key requirement
    - Documented new vision monitoring features
 
 5. **config.swift** (gitignored)

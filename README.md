@@ -6,6 +6,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 - [🎯 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
+- [🤖 Model — GPT-4o](#-model--gpt-4o)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
 - [📂 Project Structure](#-project-structure)
@@ -56,7 +57,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Adds a fun, mischievous interaction
 
 ### 👁️ **Vision-Based Behavior Monitoring** *(Planned)*
-- Gemini API key slot is included in the config for future vision features
 - Planned capabilities:
   - 👀 Detecting when you look away from the screen
   - 😊😤😐 Emotion recognition (happy, frustrated, confused)
@@ -78,10 +78,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
   - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
-  - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
 - **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+
+## 🤖 Model — GPT-4o
+
+TalkBack uses **OpenAI GPT-4o** as its core language model for all conversational AI features, including sassy responses, MCP code roasting, and context-aware follow-ups. The model is configured with a temperature of **0.9** for maximum sass and a max token limit of **80** to keep replies short and punchy.
 
 ## 🚀 Quick Start
 
@@ -92,7 +95,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 3. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
-   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -115,7 +117,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
        static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
        static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
        static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"  // Ivanna's voice
-       static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
    
@@ -212,10 +213,6 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Temperature**: 0.9 (for sassy responses)
 - **Max Tokens**: 80 (short, snappy replies)
 
-### Gemini (Vision) — *Planned*
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
-- A Gemini API key slot is included in `config.swift.template` for future vision-based behavior monitoring
-
 ## 🎭 Personality
 
 TalkBack is designed to be:
@@ -265,7 +262,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🔮 Future Features
 
-- [ ] Gemini vision-based behavior monitoring (webcam gaze/emotion detection)
+- [ ] Vision-based behavior monitoring (webcam gaze/emotion detection)
 - [ ] Screen monitoring (detect what user is doing)
 - [ ] Context-aware productivity tips
 - [ ] Custom voice selection
@@ -288,7 +285,6 @@ MIT License - feel free to use, modify, and distribute.
 ## 🙏 Acknowledgments
 
 - **OpenAI** for GPT-4o API
-- **Google** for Gemini API (planned vision features)
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
