@@ -14,9 +14,5 @@ struct Config {
     
     // ElevenLabs Voice ID (Ivanna's voice)
     static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
-    
-    // Gemini API Key (for vision/behavior monitoring)
-    // Get it from: https://aistudio.google.com/app/apikey
-    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
 }
 
