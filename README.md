@@ -10,6 +10,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🎮 How to Use](#-how-to-use)
 - [📂 Project Structure](#-project-structure)
 - [📋 API Endpoints Used](#-api-endpoints-used)
+- [🔍 Lens Summarization](#-lens-summarization)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
@@ -20,7 +21,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
-![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
+![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -63,7 +64,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 🔍 **Lens Summarization**
+- **GPT-4.1** powered text summarization overlay
+- Hold **⌥ Option** for temporary Lens mode or toggle via menu bar
+- Three rewrite styles: Explain, Simplify, Concise
+- Hover over any on-screen text to get instant summaries
+- Results are cached per element to avoid redundant API calls
+
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -77,11 +85,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Language**: Swift 6.2
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
-  - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
+  - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI & MCP roasts
+  - [OpenAI GPT-4.1](https://platform.openai.com/) - Lens summarization
   - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
-  - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
-  - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
+  - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition (`scribe_v1`)
+  - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (`eleven_multilingual_v2`, Ivanna voice)
 - **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+- **MCP Integration**: Python-based code monitor and MCP server for Cursor IDE
 
 ## 🚀 Quick Start
 
@@ -123,7 +133,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
@@ -151,9 +161,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Install Python dependencies** (needed for the code monitor):
+   ```bash
+   pip3 install watchdog mcp
+   ```
 
-2. **Run your code through the monitor**:
+2. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json` every 0.5s)
+
+3. **Run your code through the monitor**:
    ```bash
    # Test with a script that has errors (will trigger full roast 🔥)
    python3 cursor_code_monitor.py run 'python3 your_broken_script.py'
@@ -165,12 +180,12 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
    python3 cursor_code_monitor.py run 'swift your_code.swift'
    ```
 
-3. **TalkBack will roast you based on errors**:
+4. **TalkBack will roast you based on errors**:
    - ✅ **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
    - 😏 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
    - 🔥 **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
 
-4. **Example test**:
+5. **Example test**:
    ```bash
    # This will trigger a savage roast
    python3 cursor_code_monitor.py run 'python3 broken_code.py'
@@ -182,7 +197,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 | File | Purpose |
 |---|---|
-| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
+| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, Lens summarization, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
@@ -191,6 +206,13 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline/Cursor MCP settings for auto-starting the server |
+| `API_KEY_SETUP.md` | Detailed guide for configuring API keys |
+| `MCP_INTEGRATION.md` | Architecture and integration details for MCP code monitoring |
+| `MCP_SETUP.md` | Step-by-step MCP setup instructions |
+| `MCP_SETUP_COMPLETE.md` | Complete MCP integration setup guide with Cursor IDE |
+| `QUICK_START.md` | Quick-start guide for MCP roasting features |
+| `AGENTS.md` | Guidelines and conventions for AI coding agents |
 
 ## 📋 API Endpoints Used
 
@@ -206,15 +228,28 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
-### OpenAI GPT-4o
+### OpenAI GPT-4o (Conversational AI)
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
 - **Model**: `gpt-4o`
-- **Temperature**: 0.9 (for sassy responses)
-- **Max Tokens**: 80 (short, snappy replies)
+- **Temperature**: 0.9 (for sassy responses), 0.7 (MCP roasts), 0.6 (assignment help)
+- **Max Tokens**: 80 (chat replies), 120 (MCP roasts / assignment help)
+
+### OpenAI GPT-4.1 (Lens Summarization)
+- **Endpoint**: `https://api.openai.com/v1/chat/completions`
+- **Model**: `gpt-4.1`
+- **Temperature**: 0.3 (for accurate summaries)
+- **Max Tokens**: 120
 
 ### Gemini (Vision) — *Planned*
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - A Gemini API key slot is included in `config.swift.template` for future vision-based behavior monitoring
+
+## 🔍 Lens Summarization
+
+TalkBack includes a **Lens** feature that uses **GPT-4.1** to summarize and rewrite text:
+- Select text on screen and use the Lens overlay to get concise summaries
+- Supports multiple rewrite styles (explain, simplify, concise)
+- Low temperature (0.3) for accurate, faithful rewrites
 
 ## 🎭 Personality
 
@@ -287,7 +322,7 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for GPT-4o API
+- **OpenAI** for GPT-4o and GPT-4.1 APIs
 - **Google** for Gemini API (planned vision features)
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
