@@ -50,11 +50,6 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Dynamic expressions based on mood
 - Draggable anywhere on your screen
 
-### 🗑️ **"The Great Escape" Feature**
-- Drag avatar near the menu bar to reveal trash can
-- Drop in trash to quit (the only way to close it!)
-- Adds a fun, mischievous interaction
-
 ### 👁️ **Vision-Based Behavior Monitoring** *(Planned)*
 - Gemini API key slot is included in the config for future vision features
 - Planned capabilities:
