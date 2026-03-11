@@ -6,22 +6,21 @@ Sends roasts to TalkBack avatar based on errors/success
 
 import asyncio
 import json
-import os
-import subprocess
 import sys
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 
-# TalkBack MCP Server
+TALKBACK_MESSAGE_FILE = "/tmp/talkback_message.json"
+MAX_OUTPUT_PREVIEW = 500
+
 app = Server("talkback-monitor")
 
-# Global state to track code execution results
-execution_results = {
+execution_results: dict[str, Any] = {
     "last_run_time": None,
     "last_output": "",
     "error_count": 0,
@@ -113,32 +112,29 @@ async def handle_call_tool(
     """Handle tool calls"""
     
     if name == "report_code_execution":
-        # Update execution results
+        if not arguments:
+            raise ValueError("report_code_execution requires arguments")
+
+        output = str(arguments.get("output", ""))
+        raw_error_count = arguments.get("error_count", 0)
+        if not isinstance(raw_error_count, int) or raw_error_count < 0:
+            raw_error_count = 0
+        linter_errors = arguments.get("linter_errors", [])
+        if not isinstance(linter_errors, list):
+            linter_errors = []
+        success = bool(arguments.get("success", False))
+
         execution_results["last_run_time"] = time.time()
-        execution_results["last_output"] = arguments.get("output", "")
-        execution_results["error_count"] = arguments.get("error_count", 0)
-        execution_results["linter_errors"] = arguments.get("linter_errors", [])
-        execution_results["success"] = arguments.get("success", False)
-        
-        # Generate roast message based on error count
-        error_count = execution_results["error_count"]
-        
-        if error_count >= 2:
-            # ROAST MODE 🔥
-            roast_prompt = f"ROAST ME HARD! My code just failed with {error_count} errors. Here's the output: {execution_results['last_output'][:500]}"
-            response_type = "roast"
-        elif error_count == 1:
-            # Minor sass
-            roast_prompt = f"I got 1 error. Give me a little attitude about it: {execution_results['last_output'][:300]}"
-            response_type = "minor_sass"
-        else:
-            # Success with attitude
-            roast_prompt = f"My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass."
-            response_type = "sassy_success"
-        
-        # Call TalkBack to speak
+        execution_results["last_output"] = output
+        execution_results["error_count"] = raw_error_count
+        execution_results["linter_errors"] = linter_errors
+        execution_results["success"] = success
+
+        error_count = raw_error_count
+        roast_prompt, response_type = _build_roast_prompt(error_count, output)
+
         await trigger_talkback_speech(roast_prompt, response_type)
-        
+
         return [
             types.TextContent(
                 type="text",
@@ -150,10 +146,10 @@ async def handle_call_tool(
                 })
             )
         ]
-    
+
     elif name == "trigger_talkback_roast":
         force = arguments.get("force", False) if arguments else False
-        
+
         if not execution_results["last_run_time"] and not force:
             return [
                 types.TextContent(
@@ -161,37 +157,53 @@ async def handle_call_tool(
                     text="No recent code execution to roast about!"
                 )
             ]
-        
+
         error_count = execution_results["error_count"]
         roast_prompt = f"ROAST ME about my code with {error_count} errors!"
         await trigger_talkback_speech(roast_prompt, "roast")
-        
+
         return [
             types.TextContent(
                 type="text",
                 text="TalkBack roast triggered!"
             )
         ]
-    
+
     raise ValueError(f"Unknown tool: {name}")
 
-async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+def _build_roast_prompt(error_count: int, output: str) -> tuple[str, str]:
+    """Return (prompt, response_type) based on error severity."""
+    if error_count >= 2:
+        return (
+            f"ROAST ME HARD! My code just failed with {error_count} errors. "
+            f"Here's the output: {output[:MAX_OUTPUT_PREVIEW]}",
+            "roast",
+        )
+    elif error_count == 1:
+        return (
+            f"I got 1 error. Give me a little attitude about it: {output[:300]}",
+            "minor_sass",
+        )
+    return (
+        "My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass.",
+        "sassy_success",
+    )
+
+
+async def trigger_talkback_speech(prompt: str, response_type: str) -> None:
+    """Write a JSON message to the file TalkBack monitors."""
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
-    
-    # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+
+    try:
+        with open(TALKBACK_MESSAGE_FILE, "w") as f:
+            json.dump(talkback_message, f)
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except OSError as exc:
+        print(f"❌ Failed to write TalkBack message: {exc}", file=sys.stderr)
 
 async def main():
     """Main entry point"""
