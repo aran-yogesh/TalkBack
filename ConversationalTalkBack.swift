@@ -30,6 +30,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
+    @available(*, deprecated, message: "Use ElevenLabs TTS via speakWithElevenLabs instead")
     var speechSynthesizer = AVSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
@@ -2472,7 +2473,11 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 14.0, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
         
         // Start Lens controller (menu bar toggle + option key)
         lensController = LensController(

@@ -10,12 +10,20 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
+
+warnings.warn(
+    "The MCP server API (InitializationOptions, NotificationOptions) is experimental "
+    "and may change in future versions of the mcp package.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # TalkBack MCP Server
 app = Server("talkback-monitor")
