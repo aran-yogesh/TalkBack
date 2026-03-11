@@ -27,6 +27,7 @@ WorkingTalkBack
 # Temporary files
 *.swp
 *.tmp
+*.talkback.tmp
 *~
 .*.sw[a-p]
 

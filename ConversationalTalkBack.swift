@@ -86,6 +86,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
+    var lastMCPMessageID: String = ""
     let mcpMessageFile = "/tmp/talkback_message.json"
     
     // APIs
@@ -1601,19 +1602,31 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        let fileURL = URL(fileURLWithPath: mcpMessageFile)
+        guard FileManager.default.fileExists(atPath: mcpMessageFile) else { return }
+
+        guard let data = try? Data(contentsOf: fileURL), !data.isEmpty else {
+            return
+        }
+
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message file exists but contains invalid JSON — skipping")
             return
         }
-        
-        // Only process new messages
-        if timestamp <= lastMCPMessageTime {
-            return
+
+        let msgID = json["msg_id"] as? String ?? ""
+
+        if !msgID.isEmpty {
+            if msgID == lastMCPMessageID { return }
+            lastMCPMessageID = msgID
+        } else {
+            if timestamp <= lastMCPMessageTime { return }
         }
-        
         lastMCPMessageTime = timestamp
-        
+
+        try? FileManager.default.removeItem(at: fileURL)
+
         if let event = json["event"] as? String {
             switch event {
             case "command_started":

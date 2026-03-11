@@ -15,6 +15,8 @@ from pathlib import Path
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+from talkback_ipc import send_message as _send_talkback
+
 
 class CodeExecutionMonitor(FileSystemEventHandler):
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
@@ -49,9 +51,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Send code execution results to TalkBack."""
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
@@ -61,24 +61,17 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
-        # Create message for TalkBack
-        message = {
-            "prompt": prompt,
-            "type": response_type,
-            "timestamp": time.time(),
-            "error_count": error_count,
-            "success": success
-        }
-        
-        # Write to file that TalkBack monitors
-        try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+
+        ok = _send_talkback(
+            prompt,
+            response_type,
+            message_file=self.talkback_message_file,
+            extra_fields={"error_count": error_count, "success": success},
+        )
+        if ok:
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
-        except Exception as e:
-            print(f"❌ Error sending to TalkBack: {e}")
+        else:
+            print(f"❌ Failed to send to TalkBack: {response_type}")
     
     def monitor_terminal_command(self, command: str):
         """Run a command and monitor its output"""
