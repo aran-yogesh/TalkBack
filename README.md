@@ -1,6 +1,12 @@
 # TalkBack - Annoying But Useful AI Companion 🤖
 
-A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
+> **⚠️ Private Repository** — This is solely a private project owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). All source code, assets, and documentation are proprietary and confidential. Unauthorized distribution, reproduction, or use of any part of this repository is strictly prohibited. Access is granted only to explicitly authorized collaborators.
+
+| | |
+|---|---|
+| **Author** | Yogesh Mahendran ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)) |
+| **GitHub** | [@aran-yogesh](https://github.com/aran-yogesh) |
+| **Visibility** | Private |
 
 ## Table of Contents
 
@@ -23,6 +29,16 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+## 📖 About
+
+TalkBack is a native macOS desktop application that brings an opinionated, personality-driven AI companion directly onto your screen as a floating, interactive avatar. Built entirely in Swift 6.2 using AppKit, TalkBack combines real-time voice interaction, conversational AI, webcam-based behavior monitoring, and IDE-integrated code feedback into a single cohesive experience.
+
+At its core, TalkBack is designed to keep developers engaged and productive through a unique blend of humor and utility. The avatar listens to you via ElevenLabs Speech-to-Text, processes your input through OpenAI GPT-4o for context-aware responses, and speaks back using ElevenLabs Text-to-Speech with a distinctive sassy personality. It remembers your conversation history, maintains context across sessions, and delivers short, punchy replies that balance genuine helpfulness with witty attitude.
+
+Beyond conversation, TalkBack leverages Gemini 2.5 Flash for real-time webcam analysis — detecting gaze direction, emotional state, focus level, and distractions like phone usage — and delivers voice-based commentary every 15 seconds to keep you on track. The MCP (Model Context Protocol) integration with Cursor IDE monitors your terminal output in real time, automatically counting errors and delivering tiered voice feedback: savage roasts for multiple failures, light sarcasm for single errors, and backhanded compliments for clean runs.
+
+The avatar itself is a transparent, always-on-top floating window with animated eyes that track your cursor, dynamic expressions based on mood, and a playful drag-to-trash quit mechanism. TalkBack is solely a private, self-hosted developer tool that runs locally on your Mac with your own API keys.
 
 ## 🎯 Features
 
@@ -275,15 +291,17 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
-- Report bugs
+This is solely a **private repository** owned by **Yogesh Mahendran**. Contributions are limited to authorized collaborators only. If you have been granted access, feel free to:
+- Report bugs via issues
 - Suggest new features
-- Submit pull requests
+- Submit pull requests for review
 - Improve documentation
+
+Please do not share, fork, or redistribute any part of this codebase without explicit written permission from the maintainer at [Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev).
 
 ## 📄 License
 
-MIT License - feel free to use, modify, and distribute.
+MIT License — Copyright (c) 2025 Yogesh Mahendran. See [LICENSE](LICENSE) for full terms. This license does not grant public access; the repository remains solely private.
 
 ## 🙏 Acknowledgments
 
@@ -294,9 +312,13 @@ MIT License - feel free to use, modify, and distribute.
 
 ## 💬 Questions or Feedback?
 
-Open an issue or reach out! TalkBack loves to chat (obviously). 😉
+This is solely a private project. For questions, feedback, or access requests, reach out to the maintainer directly:
+
+- **Maintainer**: Yogesh Mahendran
+- **Email**: [Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)
+- **GitHub**: [@aran-yogesh](https://github.com/aran-yogesh)
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by [Yogesh Mahendran](https://github.com/aran-yogesh) ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev))
 

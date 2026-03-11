@@ -2,6 +2,8 @@
 """
 Cursor Code Monitor - Watches for code execution and triggers TalkBack roasts
 This script monitors terminal output and linter errors, then sends to TalkBack
+
+Private Repository — Author: Yogesh Mahendran (Yogesh.mahendran@langchain.dev)
 """
 
 import json

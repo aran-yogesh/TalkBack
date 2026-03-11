@@ -1,5 +1,7 @@
 # TalkBack + Cursor MCP - Quick Start 🚀
 
+> **⚠️ Private Repository** — Solely owned and maintained by **Yogesh Mahendran** ([Yogesh.mahendran@langchain.dev](mailto:Yogesh.mahendran@langchain.dev)). Do not distribute.
+
 ## 🎯 What You Just Got
 
 TalkBack now watches your code in Cursor IDE and roasts you when you mess up! 🔥
