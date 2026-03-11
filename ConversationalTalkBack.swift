@@ -30,7 +30,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var isRecording = false
     var isSpeaking = false
     var lastActivity = Date()
-    var speechSynthesizer = AVSpeechSynthesizer()
+    var speechSynthesizer = NSSpeechSynthesizer()
     var audioPlayer: AVAudioPlayer?
     var chatHistory: [[String: String]] = []
     var trashCanVisible = false
@@ -361,8 +361,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         let leftEye = NSRect(x: leftCompartment.origin.x + eyeOffset.x, y: leftCompartment.origin.y + eyeOffset.y, width: leftCompartment.width, height: leftCompartment.height)
         let rightEye = NSRect(x: rightCompartment.origin.x + eyeOffset.x, y: rightCompartment.origin.y + eyeOffset.y, width: rightCompartment.width, height: rightCompartment.height)
         
-            context.fill(leftEye)
-            context.fill(rightEye)
+        context.fill(leftEye)
+        context.fill(rightEye)
         
         // Draw mouth based on state
         let mouthY = centerY - size/3 - 10
@@ -674,9 +674,6 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         let timeSinceLastActivity = now.timeIntervalSince(lastActivity)
         let timeSinceLastResponse = now.timeIntervalSince(lastResponseTime)
         
-        // Only send idle messages if:
-        // 1. No activity for 60+ seconds AND
-        // 2. No response sent in last 10 seconds (to prevent spam during active conversation)
         if timeSinceLastActivity > 60 && timeSinceLastResponse > responseTimeout {
             let messages = [
                 "Hello? Anyone there? I'm getting bored! 😴",
@@ -687,9 +684,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             
             let randomMessage = messages.randomElement() ?? "I'm still here!"
             askOpenAI(prompt: randomMessage)
+            lastActivity = Date()
         }
-        
-        lastActivity = Date()
     }
     
     func askOpenAI(prompt: String, bypassCooldown: Bool = false) {
@@ -1112,6 +1108,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
         }.resume()
     }
+    
     private func scheduleOpenAIRequest(prompt: String, delay: TimeInterval) {
         guard !prompt.isEmpty else { return }
         DispatchQueue.main.async {
@@ -1283,10 +1280,10 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         // Request microphone permission
         AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
-                DispatchQueue.main.async {
-                    if granted {
+            DispatchQueue.main.async {
+                if granted {
                     self?.setupAudioEngine()
-                    } else {
+                } else {
                     print("❌ Microphone permission denied!")
                     self?.message = "Microphone access denied! 😤"
                     self?.needsDisplay = true
@@ -1548,7 +1545,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                    let text = json["text"] as? String {
                     print("🎤 Transcribed: \(text)")
                     completion(text)
-                    } else {
+                } else {
                     print("🎤 No text in response")
                     completion(nil)
                 }
@@ -2436,7 +2433,7 @@ Rewrite the following excerpt in a more concise, easy-to-read way while preservi
             return true
         }
         if !permissionPrompted {
-            let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true] as CFDictionary
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
             _ = AXIsProcessTrustedWithOptions(options)
             permissionPrompted = true
         }
