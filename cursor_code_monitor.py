@@ -5,18 +5,13 @@ This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
 import time
-from pathlib import Path
-
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
 
 
-class CodeExecutionMonitor(FileSystemEventHandler):
+class CodeExecutionMonitor:
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
