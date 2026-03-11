@@ -184,6 +184,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 |---|---|
 | `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
+| `talkback_ipc.py` | Shared IPC module — atomic writes, file locking, retry logic |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
 | `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
@@ -262,6 +263,19 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+
+### Message Delivery Pipeline
+
+Python writers communicate with the Swift app through `/tmp/talkback_message.json`.
+All writes go through `talkback_ipc.py` which provides:
+- **Atomic writes** — temp file + `os.replace()` prevents torn reads
+- **File locking** — `fcntl.flock()` serialises concurrent writers
+- **Unique message IDs** — `msg_id` field for reliable deduplication
+- **Retry logic** — transient I/O failures are retried automatically
+- **Explicit UTF-8 encoding** and `fsync` for data integrity
+
+The Swift consumer deletes the file after processing to prevent replay on restart.
+Override the default path with the `TALKBACK_MESSAGE_FILE` environment variable.
 
 ## 🔮 Future Features
 
