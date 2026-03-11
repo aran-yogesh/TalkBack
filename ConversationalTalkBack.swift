@@ -87,6 +87,9 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
+    var pendingRoastPrompt: String?
+    var pendingRoastSystemPrompt: String?
+    var roastRetryTimer: Timer?
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
@@ -1601,13 +1604,22 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        let fileURL = URL(fileURLWithPath: mcpMessageFile)
+        
+        guard let data = try? Data(contentsOf: fileURL), !data.isEmpty else {
             return
         }
         
-        // Only process new messages
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            print("⚠️ MCP message file contains invalid JSON, skipping.")
+            return
+        }
+        
+        guard let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message missing timestamp field.")
+            return
+        }
+        
         if timestamp <= lastMCPMessageTime {
             return
         }
@@ -1634,6 +1646,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         guard let prompt = json["prompt"] as? String,
               let type = json["type"] as? String else {
+            print("⚠️ MCP message missing 'prompt' or 'type' field: \(json.keys.sorted())")
             return
         }
         
@@ -1698,19 +1711,27 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
-        guard !isThinking else { return }
+        if isThinking {
+            print("⏳ Roast queued: avatar is busy, will retry.")
+            scheduleRoastRetry(prompt: prompt, systemPrompt: systemPrompt, delay: openAICooldown)
+            return
+        }
         
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Roast skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Roast queued: cooldown active, retrying in \(wait)s.")
+            scheduleRoastRetry(prompt: prompt, systemPrompt: systemPrompt, delay: wait)
             return
         }
         
         isThinking = true
         needsDisplay = true
         lastOpenAICall = Date()
+        pendingRoastPrompt = nil
+        pendingRoastSystemPrompt = nil
+        roastRetryTimer?.invalidate()
         
-        // Build roast message
         let messages: [[String: String]] = [
             ["role": "system", "content": systemPrompt],
             ["role": "user", "content": prompt]
@@ -1719,11 +1740,11 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         let requestBody: [String: Any] = [
             "model": "gpt-4o",
             "messages": messages,
-            "max_tokens": 80,  // Reduced for shorter responses
-            "temperature": 0.9,  // Higher for more personality
-            "stop": ["\n\n", "User:", "Human:"],  // Stop sequences to prevent long responses
-            "presence_penalty": 0.3,  // Encourage creativity
-            "frequency_penalty": 0.1   // Reduce repetition
+            "max_tokens": 80,
+            "temperature": 0.9,
+            "stop": ["\n\n", "User:", "Human:"],
+            "presence_penalty": 0.3,
+            "frequency_penalty": 0.1
         ]
         
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
@@ -1760,6 +1781,14 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                 
                 if let httpResponse = response as? HTTPURLResponse {
                     print("OpenAI Roast HTTP Status: \(httpResponse.statusCode)")
+                    if httpResponse.statusCode == 429 {
+                        if let strongSelf = self {
+                            strongSelf.scheduleRoastRetry(prompt: prompt, systemPrompt: systemPrompt, delay: strongSelf.rateLimitBackoff)
+                            strongSelf.message = "Cooling off... 😴"
+                            strongSelf.needsDisplay = true
+                        }
+                        return
+                    }
                 }
                 
                 guard let data = data else {
@@ -1779,10 +1808,6 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                             
                             let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
                             self?.message = cleanText
-                            
-                            // Don't add roasts to chat history (they're triggered events, not conversations)
-                            
-                            // Speak with Ivanna's voice
                             self?.speakWithElevenLabs(cleanText)
                         } else if let error = json["error"] as? [String: Any],
                                   let errorMessage = error["message"] as? String {
@@ -1801,6 +1826,26 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                 self?.needsDisplay = true
             }
         }.resume()
+    }
+    
+    private func scheduleRoastRetry(prompt: String, systemPrompt: String, delay: TimeInterval) {
+        DispatchQueue.main.async {
+            self.pendingRoastPrompt = prompt
+            self.pendingRoastSystemPrompt = systemPrompt
+            self.roastRetryTimer?.invalidate()
+            let clampedDelay = max(1.0, delay)
+            self.roastRetryTimer = Timer.scheduledTimer(withTimeInterval: clampedDelay, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                let nextPrompt = self.pendingRoastPrompt
+                let nextSystem = self.pendingRoastSystemPrompt
+                self.pendingRoastPrompt = nil
+                self.pendingRoastSystemPrompt = nil
+                self.roastRetryTimer = nil
+                if let nextPrompt = nextPrompt, let nextSystem = nextSystem {
+                    self.askOpenAIForRoast(prompt: nextPrompt, systemPrompt: nextSystem)
+                }
+            }
+        }
     }
     
 }

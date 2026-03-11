@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -177,8 +178,6 @@ async def handle_call_tool(
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
     """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
     
     talkback_message = {
         "prompt": prompt,
@@ -186,10 +185,22 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
         "timestamp": time.time()
     }
     
-    # Write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
+    try:
+        fd, tmp_path = tempfile.mkstemp(dir="/tmp", suffix=".json")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(talkback_message, f)
+            os.replace(tmp_path, message_file)
+        except BaseException:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+    except Exception as e:
+        print(f"❌ Failed to write TalkBack message: {e}", file=sys.stderr)
+        return
     
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 
