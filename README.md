@@ -24,6 +24,42 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## Table of Contents
+
+1. [Features](#features)
+   1. [Real Voice Interaction](#real-voice-interaction)
+   2. [Sassy AI Responses](#sassy-ai-responses)
+   3. [Conversational Memory](#conversational-memory)
+   4. [Custom Floating Avatar](#custom-floating-avatar)
+   5. ["The Great Escape" Feature](#the-great-escape-feature)
+   6. [Vision-Based Behavior Monitoring](#vision-based-behavior-monitoring)
+   7. [MCP Code Monitor (Cursor IDE Integration) (NEW!)](#mcp-code-monitor-cursor-ide-integration-new)
+2. [Tech Stack](#tech-stack)
+3. [Quick Start](#quick-start)
+   1. [Prerequisites](#prerequisites)
+   2. [Installation](#installation)
+4. [How to Use](#how-to-use)
+   1. [Basic Usage](#basic-usage)
+   2. [MCP Code Monitoring (Cursor IDE Integration)](#mcp-code-monitor-cursor-ide-integration)
+5. [API Endpoints Used](#api-endpoints-used)
+   1. [ElevenLabs Speech-to-Text](#elevenlabs-speech-to-text)
+   2. [ElevenLabs Text-to-Speech](#elevenlabs-text-to-speech)
+   3. [OpenAI GPT-4o](#openai-gpt-4o)
+   4. [Gemini 2.5 Flash (Vision)](#gemini-25-flash-vision)
+6. [Personality](#personality)
+7. [Troubleshooting](#troubleshooting)
+   1. [No Voice Output?](#no-voice-output)
+   2. [Empty Transcriptions?](#empty-transcriptions)
+   3. [Rate Limit Errors?](#rate-limit-errors)
+   4. [Crashes on Launch?](#crashes-on-launch)
+8. [Development Notes](#development-notes)
+9. [Future Features](#future-features)
+10. [Contributing](#contributing)
+11. [Authors](#authors)
+12. [License](#license)
+13. [Acknowledgments](#acknowledgments)
+14. [Questions or Feedback?](#questions-or-feedback)
+
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
@@ -281,6 +317,12 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+## 👥 Authors
+
+TalkBack is built by a pair of builders who love sharp UX and even sharper banter:
+- **Aran Yogesh** — Original creator, Swift engineer, and voice of the project.
+- **Yogesh Mahendran** — Co-author and product shaper who keeps the experience polished.
+
 ## 📄 License
 
 MIT License - feel free to use, modify, and distribute.
@@ -298,5 +340,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously). 😉
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh) and Yogesh Mahendran
 
