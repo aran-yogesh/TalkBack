@@ -29,6 +29,18 @@ execution_results = {
     "success": False
 }
 
+def _fresh_execution_results(**overrides) -> dict:
+    """Return a clean execution-results dict, optionally merged with overrides."""
+    base = {
+        "last_run_time": None,
+        "last_output": "",
+        "error_count": 0,
+        "linter_errors": [],
+        "success": False,
+    }
+    base.update(overrides)
+    return base
+
 @app.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
     """List available resources from TalkBack monitor"""
@@ -113,12 +125,15 @@ async def handle_call_tool(
     """Handle tool calls"""
     
     if name == "report_code_execution":
-        # Update execution results
-        execution_results["last_run_time"] = time.time()
-        execution_results["last_output"] = arguments.get("output", "")
-        execution_results["error_count"] = arguments.get("error_count", 0)
-        execution_results["linter_errors"] = arguments.get("linter_errors", [])
-        execution_results["success"] = arguments.get("success", False)
+        new_state = _fresh_execution_results(
+            last_run_time=time.time(),
+            last_output=arguments.get("output", ""),
+            error_count=arguments.get("error_count", 0),
+            linter_errors=arguments.get("linter_errors", []),
+            success=arguments.get("success", False),
+        )
+        execution_results.clear()
+        execution_results.update(new_state)
         
         # Generate roast message based on error count
         error_count = execution_results["error_count"]
