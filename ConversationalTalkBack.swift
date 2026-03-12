@@ -78,7 +78,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     let STTCooldown: TimeInterval = 5.0 // 5 seconds between STT calls
     let responseTimeout: TimeInterval = 10.0 // 10 seconds before allowing idle responses
     let rateLimitBackoff: TimeInterval = 25.0
-    var pendingOpenAIPrompt: String?
+    var pendingOpenAIPrompts: [String] = []
     var openAIRetryTimer: Timer?
     
     // Legacy audio recording variables removed - continuous listening handles all audio
@@ -715,7 +715,6 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         message = "Thinking... 🤔"
         needsDisplay = true
         lastOpenAICall = Date()
-        pendingOpenAIPrompt = nil
         openAIRetryTimer?.invalidate()
         
         // Build conversation history in OpenAI format with optimized system prompt
@@ -763,30 +762,31 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.isThinking = false
+                guard let self = self else { return }
+                self.isThinking = false
+                
+                defer { self.drainPendingPrompts() }
                 
                 if let error = error {
                     print("OpenAI Error: \(error)")
-                    self?.message = "Network Error! 😤"
-                    self?.needsDisplay = true
+                    self.message = "Network Error! 😤"
+                    self.needsDisplay = true
                     return
                 }
                 
                 if let httpResponse = response as? HTTPURLResponse {
                     print("OpenAI HTTP Status: \(httpResponse.statusCode)")
                     if httpResponse.statusCode == 429 {
-                        if let strongSelf = self {
-                            strongSelf.scheduleOpenAIRequest(prompt: prompt, delay: strongSelf.rateLimitBackoff)
-                            strongSelf.message = "Cooling off... 😴"
-                            strongSelf.needsDisplay = true
-                        }
+                        self.scheduleOpenAIRequest(prompt: prompt, delay: self.rateLimitBackoff)
+                        self.message = "Cooling off... 😴"
+                        self.needsDisplay = true
                         return
                     }
                 }
                 
                 guard let data = data else {
-                    self?.message = "No Data! 😤"
-                    self?.needsDisplay = true
+                    self.message = "No Data! 😤"
+                    self.needsDisplay = true
                     return
                 }
                 
@@ -800,28 +800,24 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                            let text = message["content"] as? String {
                             
                             let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                            self?.message = cleanText
-                            
-                            // Add assistant response to chat history
-                            self?.chatHistory.append(["role": "assistant", "content": cleanText])
-                            
-                            // Speak with Ivanna's voice
-                            self?.speakWithElevenLabs(cleanText)
+                            self.message = cleanText
+                            self.chatHistory.append(["role": "assistant", "content": cleanText])
+                            self.speakWithElevenLabs(cleanText)
                         } else if let error = json["error"] as? [String: Any],
                                   let errorMessage = error["message"] as? String {
-                            self?.message = "OpenAI Error: \(errorMessage) 😤"
+                            self.message = "OpenAI Error: \(errorMessage) 😤"
                         } else {
-                            self?.message = "I'm confused! 😤"
+                            self.message = "I'm confused! 😤"
                         }
                     } else {
-                        self?.message = "Parse Error! 😤"
+                        self.message = "Parse Error! 😤"
                     }
                 } catch {
                     print("JSON Error: \(error)")
-                    self?.message = "JSON Parse Error! 😤"
+                    self.message = "JSON Parse Error! 😤"
                 }
                 
-                self?.needsDisplay = true
+                self.needsDisplay = true
             }
         }.resume()
     }
@@ -909,6 +905,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.isThinking = false
+                
+                defer { self.drainPendingPrompts() }
                 
                 if let error = error {
                     print("OpenAI Assignment Error: \(error)")
@@ -1002,14 +1000,22 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
         guard teacherModeEnabled else { return }
-        guard !isThinking else {
-            print("⌛ Teacher feedback skipped: already processing another response.")
+        
+        let durationText = duration.map { String(format: "%.2f seconds", $0) } ?? "unknown duration"
+        let successText = success ? "success" : "failure"
+        let teacherPrompt = "Command: \(command) | Result: \(successText) (exit \(exitCode), \(durationText)) | Output: \(outputSnippet)"
+        
+        if isThinking {
+            print("⌛ Teacher feedback queued: already processing another response.")
+            scheduleOpenAIRequest(prompt: teacherPrompt, delay: openAICooldown)
             return
         }
         
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Teacher feedback skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Teacher feedback queued to respect OpenAI cooldown (\(wait)s).")
+            scheduleOpenAIRequest(prompt: teacherPrompt, delay: wait)
             return
         }
         
@@ -1018,9 +1024,6 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         lastOpenAICall = Date()
         message = "Reviewing results... 🧠"
         needsDisplay = true
-        
-        let durationText = duration.map { String(format: "%.2f seconds", $0) } ?? "unknown duration"
-        let successText = success ? "success" : "failure"
         
         let systemPrompt = success
         ? """
@@ -1077,6 +1080,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                 guard let self = self else { return }
                 self.isThinking = false
                 
+                defer { self.drainPendingPrompts() }
+                
                 if let error = error {
                     print("OpenAI Teacher Error: \(error)")
                     self.message = success ? "All done! ✅" : "Command failed. 😤"
@@ -1115,21 +1120,31 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     private func scheduleOpenAIRequest(prompt: String, delay: TimeInterval) {
         guard !prompt.isEmpty else { return }
         DispatchQueue.main.async {
-            self.pendingOpenAIPrompt = prompt
-            self.openAIRetryTimer?.invalidate()
-            let clampedDelay = max(1.0, delay)
-            self.openAIRetryTimer = Timer.scheduledTimer(withTimeInterval: clampedDelay, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                let nextPrompt = self.pendingOpenAIPrompt
-                self.pendingOpenAIPrompt = nil
-                self.openAIRetryTimer = nil
-                if let nextPrompt = nextPrompt {
-                    self.askOpenAI(prompt: nextPrompt, bypassCooldown: true)
+            let maxQueued = 5
+            if self.pendingOpenAIPrompts.count < maxQueued {
+                self.pendingOpenAIPrompts.append(prompt)
+            } else {
+                print("⚠️ Prompt queue full (\(maxQueued)), dropping oldest prompt.")
+                self.pendingOpenAIPrompts.removeFirst()
+                self.pendingOpenAIPrompts.append(prompt)
+            }
+            
+            if self.openAIRetryTimer == nil {
+                let clampedDelay = max(1.0, delay)
+                self.openAIRetryTimer = Timer.scheduledTimer(withTimeInterval: clampedDelay, repeats: false) { [weak self] _ in
+                    self?.drainPendingPrompts()
                 }
             }
             self.message = "Hold up... cooling down. 😴"
             self.needsDisplay = true
         }
+    }
+    
+    private func drainPendingPrompts() {
+        openAIRetryTimer = nil
+        guard !pendingOpenAIPrompts.isEmpty else { return }
+        let nextPrompt = pendingOpenAIPrompts.removeFirst()
+        askOpenAI(prompt: nextPrompt, bypassCooldown: true)
     }
     
     func speakWithElevenLabs(_ text: String) {
@@ -1205,15 +1220,17 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             
             print("🎤 Received audio data: \(data.count) bytes")
             
-            // Play the audio
             DispatchQueue.main.async {
                 self.playAudioData(data)
                 
-                // Reset speaking state after audio finishes
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    self.isSpeaking = false
-                    self.message = "I'm listening... 👂"
-                    self.needsDisplay = true
+                let estimatedDuration = max(5.0, Double(data.count) / 24000.0)
+                DispatchQueue.main.asyncAfter(deadline: .now() + estimatedDuration) {
+                    if self.isSpeaking {
+                        print("⚠️ Speaking safety timeout fired after \(estimatedDuration)s")
+                        self.isSpeaking = false
+                        self.message = "I'm listening... 👂"
+                        self.needsDisplay = true
+                    }
                 }
             }
         }.resume()
@@ -1601,17 +1618,39 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        let fileURL = URL(fileURLWithPath: mcpMessageFile)
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: mcpMessageFile) else { return }
+
+        let data: Data
+        do {
+            data = try Data(contentsOf: fileURL)
+        } catch {
+            print("⚠️ MCP file read error: \(error.localizedDescription)")
             return
         }
-        
-        // Only process new messages
+
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("⚠️ MCP file is not a JSON object")
+                return
+            }
+            json = parsed
+        } catch {
+            print("⚠️ MCP JSON parse error (partial write?): \(error.localizedDescription)")
+            return
+        }
+
+        guard let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message missing timestamp field")
+            return
+        }
+
         if timestamp <= lastMCPMessageTime {
             return
         }
-        
+
         lastMCPMessageTime = timestamp
         
         if let event = json["event"] as? String {
@@ -1634,13 +1673,13 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         guard let prompt = json["prompt"] as? String,
               let type = json["type"] as? String else {
+            print("⚠️ MCP message missing prompt/type fields")
             return
         }
         
         print("📬 New MCP message: \(type)")
         print("   Prompt: \(prompt)")
         
-        // Update message based on type
         DispatchQueue.main.async {
             switch type {
             case "roast":
@@ -1655,7 +1694,6 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             self.needsDisplay = true
         }
         
-        // Generate AI response with appropriate attitude
         self.generateRoastResponse(prompt: prompt, type: type)
     }
     
@@ -1698,11 +1736,17 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
-        guard !isThinking else { return }
+        if isThinking {
+            print("⏳ Roast queued: still processing another response.")
+            scheduleOpenAIRequest(prompt: prompt, delay: openAICooldown)
+            return
+        }
         
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Roast skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Roast queued to respect OpenAI cooldown (\(wait)s).")
+            scheduleOpenAIRequest(prompt: prompt, delay: wait)
             return
         }
         
@@ -1749,12 +1793,15 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.isThinking = false
+                guard let self = self else { return }
+                self.isThinking = false
+                
+                defer { self.drainPendingPrompts() }
                 
                 if let error = error {
                     print("OpenAI Roast Error: \(error)")
-                    self?.message = "Network Error! 😤"
-                    self?.needsDisplay = true
+                    self.message = "Network Error! 😤"
+                    self.needsDisplay = true
                     return
                 }
                 
@@ -1763,8 +1810,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                 }
                 
                 guard let data = data else {
-                    self?.message = "No Data! 😤"
-                    self?.needsDisplay = true
+                    self.message = "No Data! 😤"
+                    self.needsDisplay = true
                     return
                 }
                 
@@ -1778,27 +1825,23 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                            let text = message["content"] as? String {
                             
                             let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                            self?.message = cleanText
-                            
-                            // Don't add roasts to chat history (they're triggered events, not conversations)
-                            
-                            // Speak with Ivanna's voice
-                            self?.speakWithElevenLabs(cleanText)
+                            self.message = cleanText
+                            self.speakWithElevenLabs(cleanText)
                         } else if let error = json["error"] as? [String: Any],
                                   let errorMessage = error["message"] as? String {
-                            self?.message = "OpenAI Error: \(errorMessage) 😤"
+                            self.message = "OpenAI Error: \(errorMessage) 😤"
                         } else {
-                            self?.message = "I'm confused! 😤"
+                            self.message = "I'm confused! 😤"
                         }
                     } else {
-                        self?.message = "Parse Error! 😤"
+                        self.message = "Parse Error! 😤"
                     }
                 } catch {
                     print("JSON Error: \(error)")
-                    self?.message = "JSON Parse Error! 😤"
+                    self.message = "JSON Parse Error! 😤"
                 }
                 
-                self?.needsDisplay = true
+                self.needsDisplay = true
             }
         }.resume()
     }
