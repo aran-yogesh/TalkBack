@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -49,9 +50,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Send code execution results to TalkBack via atomic file write."""
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
@@ -62,7 +61,6 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
         
-        # Create message for TalkBack
         message = {
             "prompt": prompt,
             "type": response_type,
@@ -71,13 +69,18 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "success": success
         }
         
-        # Write to file that TalkBack monitors
+        dir_name = os.path.dirname(self.talkback_message_file) or "/tmp"
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+            fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".tmp")
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(message, f, indent=2)
+            except BaseException:
+                os.unlink(tmp_path)
+                raise
+            os.replace(tmp_path, self.talkback_message_file)
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
-        except Exception as e:
+        except OSError as e:
             print(f"❌ Error sending to TalkBack: {e}")
     
     def monitor_terminal_command(self, command: str):
