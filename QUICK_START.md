@@ -16,21 +16,18 @@ TalkBack now watches your code in Cursor IDE and roasts you when you mess up! �
 ### 1️⃣ Start TalkBack Avatar
 
 ```bash
-cd /Users/aran/Desktop/talkback
+cd TalkBack
 ./start_talkback_mcp.sh
 ```
 
 ### 2️⃣ Test the Roasting
 
 ```bash
-# Test sassy success (0 errors)
-python3 test_roast.py 1
+# Send a test message to verify IPC works
+python3 test_mcp_connection.py
 
-# Test minor sass (1 error)
-python3 test_roast.py 2
-
-# Test FULL ROAST (2+ errors)
-python3 test_roast.py 3
+# Trigger a roast with intentionally broken code
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 
 ### 3️⃣ Run Your Code with Monitoring
@@ -53,23 +50,17 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND"
 
 ## 🧪 Demo Scripts
 
-### Test with Success (0 errors)
-```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py success"
-```
-**Expected**: "Okay you made it this time, darling! 💅"
-
-### Test with 1 Error
-```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py one_error"
-```
-**Expected**: "ONE error? Cute. 😏"
-
 ### Test with Multiple Errors (ROAST MODE)
 ```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py roast"
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 **Expected**: "OH HONEY, what is this hot mess?! 🔥💀"
+
+### Test with Success (0 errors)
+```bash
+python3 cursor_code_monitor.py run 'echo "Hello World"'
+```
+**Expected**: "Okay you made it this time, darling! 💅"
 
 ---
 
@@ -77,12 +68,12 @@ python3 cursor_code_monitor.py run "python test_with_errors.py roast"
 
 | File | Purpose |
 |------|---------|
-| `MCPTalkBack.swift` | Main TalkBack avatar with MCP monitoring |
-| `MCPTalkBack` | Compiled binary (run this!) |
+| `ConversationalTalkBack.swift` | Main TalkBack avatar with MCP monitoring |
+| `ConversationalTalkBack` | Compiled binary (run this!) |
 | `cursor_code_monitor.py` | Monitors code execution, counts errors |
 | `cursor_mcp_server.py` | MCP server for Cursor integration |
-| `test_roast.py` | Manual roast trigger (testing) |
-| `test_with_errors.py` | Demo script with intentional errors |
+| `test_mcp_connection.py` | Quick IPC test |
+| `broken_code.py` | Intentionally broken script for testing roasts |
 | `start_talkback_mcp.sh` | Easy start script |
 | `MCP_SETUP.md` | Detailed setup guide |
 

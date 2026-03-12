@@ -26,11 +26,12 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## 🎯 Features
 
-### 🎤 **Real Voice Interaction**
-- **Click and Hold** the avatar to speak your mind
-- **ElevenLabs Speech-to-Text** for accurate voice recognition
+### 🎤 **Continuous Voice Interaction**
+- **Always-on listening** — just speak and TalkBack hears you automatically
+- **Voice activity detection** with automatic silence detection (2-second threshold)
+- **ElevenLabs Speech-to-Text** (`scribe_v1`) for accurate voice recognition
 - Supports multiple languages (English, Bengali, Hindi, and more!)
-- Natural conversation flow with real-time transcription
+- Smart background noise filtering to ignore non-speech audio
 
 ### 🗣️ **Sassy AI Responses**
 - **OpenAI GPT-4o** powered responses
@@ -47,13 +48,25 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Transparent floating window (always on top)
 - Custom purse/wallet icon design
 - Animated eyes that follow your cursor
-- Dynamic expressions based on mood
+- Dynamic expressions based on mood (listening, thinking, speaking)
+- Bouncing zigzag motion across the screen (pauses during interactions)
 - Draggable anywhere on your screen
 
 ### 🗑️ **"The Great Escape" Feature**
 - Drag avatar near the menu bar to reveal trash can
 - Drop in trash to quit (the only way to close it!)
 - Adds a fun, mischievous interaction
+
+### 👩‍🏫 **Teaching Assistant Mode**
+- Analyzes command output when your code succeeds or fails
+- Provides actionable feedback: diagnoses errors, suggests fixes, celebrates wins
+- Togglable at runtime via `toggleTeacherMode()`
+
+### 📬 **Assignment Email Monitoring**
+- Polls Apple Mail for new assignment-related emails (every 3 minutes)
+- Detects keywords like "assignment", "homework", "due", "exam" and educational domains
+- Summarizes relevant emails with GPT-4o and reads the summary aloud
+- Togglable via `toggleAssignmentAlerts()`
 
 ### 👁️ **Vision-Based Behavior Monitoring** *(Planned)*
 - Gemini API key slot is included in the config for future vision features
@@ -63,7 +76,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -81,7 +94,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
-- **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+- **Audio**: AVFoundation (AVAudioPlayer, AVAudioEngine, AVCaptureSession)
 
 ## 🚀 Quick Start
 
@@ -138,11 +151,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ### Basic Usage
 
 1. **Start the App**: Run `./ConversationalTalkBack`
-2. **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
-3. **Talk to TalkBack**:
-   - **Click and HOLD** the avatar
-   - **Speak** your message
-   - **Release** to send
+2. **Grant Microphone Permission**: Allow microphone access when prompted
+3. **Talk to TalkBack**: Just speak — continuous listening is always active. TalkBack detects your voice automatically and stops recording after 2 seconds of silence.
 4. **Listen**: TalkBack responds with Ivanna's voice and attitude
 5. **Drag**: Move the avatar anywhere on your screen
 6. **Quit**: Drag avatar near the menu bar → drop in trash can
@@ -182,7 +192,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 | File | Purpose |
 |---|---|
-| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
+| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, teaching mode, assignment alerts, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
@@ -191,13 +201,20 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline MCP client settings |
+| `MCP_INTEGRATION.md` | Detailed MCP architecture and integration guide |
+| `MCP_SETUP.md` | Step-by-step MCP setup instructions |
+| `MCP_SETUP_COMPLETE.md` | Post-setup verification checklist |
+| `QUICK_START.md` | Quick-start guide for MCP code monitoring |
+| `API_KEY_SETUP.md` | API key configuration guide |
+| `AGENTS.md` | Guidelines for AI coding agents working on this repo |
 
 ## 📋 API Endpoints Used
 
 ### ElevenLabs Speech-to-Text
 - **Endpoint**: `https://api.elevenlabs.io/v1/speech-to-text`
 - **Model**: `scribe_v1`
-- **Input**: WAV audio (16kHz, mono, PCM)
+- **Input**: WAV audio (PCM16, native device sample rate)
 - **Output**: Transcribed text with language detection
 
 ### ElevenLabs Text-to-Speech
@@ -233,7 +250,7 @@ TalkBack is designed to be:
 - Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
 
 ### Empty Transcriptions?
-- Ensure you're holding the mouse button while speaking
+- Speak clearly — TalkBack uses voice activity detection and filters short/quiet sounds
 - Check microphone permissions (System Settings → Privacy & Security → Microphone)
 - Verify ElevenLabs API key is valid
 
@@ -261,7 +278,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Explicit compilation target (`-target arm64-apple-macosx13.0`)
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
-- Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+- Uses `AVAudioPlayer` for MP3 playback and `AVAudioEngine` for continuous microphone input
 
 ## 🔮 Future Features
 
