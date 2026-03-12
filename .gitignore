@@ -24,6 +24,10 @@ WorkingTalkBack
 .AppleDouble
 .LSOverride
 
+# Python
+__pycache__/
+*.pyc
+
 # Temporary files
 *.swp
 *.tmp
