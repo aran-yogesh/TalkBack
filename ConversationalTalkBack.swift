@@ -1002,14 +1002,22 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
         guard teacherModeEnabled else { return }
-        guard !isThinking else {
-            print("⌛ Teacher feedback skipped: already processing another response.")
+        if isThinking {
+            let delay = openAICooldown
+            print("⌛ Teacher feedback deferred: already processing. Retrying in \(delay)s.")
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.askOpenAIForTeachingMoment(command: command, outputSnippet: outputSnippet, success: success, exitCode: exitCode, duration: duration)
+            }
             return
         }
-        
+
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Teacher feedback skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Teacher feedback deferred: cooldown active. Retrying in \(wait)s.")
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
+                self?.askOpenAIForTeachingMoment(command: command, outputSnippet: outputSnippet, success: success, exitCode: exitCode, duration: duration)
+            }
             return
         }
         
@@ -1601,19 +1609,41 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        let fileURL = URL(fileURLWithPath: mcpMessageFile)
+
+        let data: Data
+        do {
+            data = try Data(contentsOf: fileURL)
+        } catch {
             return
         }
-        
-        // Only process new messages
+
+        let parsed: Any
+        do {
+            parsed = try JSONSerialization.jsonObject(with: data)
+        } catch {
+            print("⚠️ MCP message file contains invalid JSON – skipping: \(error.localizedDescription)")
+            return
+        }
+
+        guard let json = parsed as? [String: Any] else {
+            print("⚠️ MCP message is not a JSON object – skipping")
+            return
+        }
+
+        guard let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message missing 'timestamp' field – skipping")
+            return
+        }
+
         if timestamp <= lastMCPMessageTime {
             return
         }
-        
+
         lastMCPMessageTime = timestamp
-        
+
+        try? FileManager.default.removeItem(at: fileURL)
+
         if let event = json["event"] as? String {
             switch event {
             case "command_started":
@@ -1631,16 +1661,16 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
             return
         }
-        
-        guard let prompt = json["prompt"] as? String,
-              let type = json["type"] as? String else {
+
+        guard let prompt = json["prompt"] as? String else {
+            print("⚠️ MCP message missing 'prompt' field – skipping")
             return
         }
-        
+        let type = json["type"] as? String ?? "roast"
+
         print("📬 New MCP message: \(type)")
         print("   Prompt: \(prompt)")
-        
-        // Update message based on type
+
         DispatchQueue.main.async {
             switch type {
             case "roast":
@@ -1654,8 +1684,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
             self.needsDisplay = true
         }
-        
-        // Generate AI response with appropriate attitude
+
         self.generateRoastResponse(prompt: prompt, type: type)
     }
     
@@ -1698,11 +1727,22 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
-        guard !isThinking else { return }
-        
+        if isThinking {
+            let delay = openAICooldown
+            print("⏳ Roast deferred: already processing. Retrying in \(delay)s.")
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.askOpenAIForRoast(prompt: prompt, systemPrompt: systemPrompt)
+            }
+            return
+        }
+
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Roast skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Roast deferred: cooldown active. Retrying in \(wait)s.")
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
+                self?.askOpenAIForRoast(prompt: prompt, systemPrompt: systemPrompt)
+            }
             return
         }
         

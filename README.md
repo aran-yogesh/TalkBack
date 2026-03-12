@@ -186,6 +186,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
+| `talkback_ipc.py` | Shared atomic-write helper used by all Python writers for reliable IPC |
 | `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
@@ -249,6 +250,8 @@ TalkBack is designed to be:
 - Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
+- Look for `⚠️ MCP message` warnings in the TalkBack console — these indicate malformed or incomplete messages
+- If roasts are deferred due to cooldown, you'll see `⏰ Roast deferred` in the console — they will auto-retry
 
 ### Crashes on Launch?
 - Compile with explicit target: `-target arm64-apple-macosx13.0`
