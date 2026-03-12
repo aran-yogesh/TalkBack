@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -20,7 +21,8 @@ from mcp.server.stdio import stdio_server
 # TalkBack MCP Server
 app = Server("talkback-monitor")
 
-# Global state to track code execution results
+_results_lock = asyncio.Lock()
+
 execution_results = {
     "last_run_time": None,
     "last_output": "",
@@ -28,6 +30,24 @@ execution_results = {
     "linter_errors": [],
     "success": False
 }
+
+
+def atomic_write_json(filepath: str, data: dict) -> None:
+    """Write JSON to filepath atomically using write-to-temp + rename."""
+    dir_name = os.path.dirname(filepath) or "/tmp"
+    fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, filepath)
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 @app.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
@@ -113,15 +133,13 @@ async def handle_call_tool(
     """Handle tool calls"""
     
     if name == "report_code_execution":
-        # Update execution results
-        execution_results["last_run_time"] = time.time()
-        execution_results["last_output"] = arguments.get("output", "")
-        execution_results["error_count"] = arguments.get("error_count", 0)
-        execution_results["linter_errors"] = arguments.get("linter_errors", [])
-        execution_results["success"] = arguments.get("success", False)
-        
-        # Generate roast message based on error count
-        error_count = execution_results["error_count"]
+        async with _results_lock:
+            execution_results["last_run_time"] = time.time()
+            execution_results["last_output"] = arguments.get("output", "")
+            execution_results["error_count"] = arguments.get("error_count", 0)
+            execution_results["linter_errors"] = arguments.get("linter_errors", [])
+            execution_results["success"] = arguments.get("success", False)
+            error_count = execution_results["error_count"]
         
         if error_count >= 2:
             # ROAST MODE 🔥
@@ -176,22 +194,19 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via atomic file write."""
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
-    
-    # Write to a file that TalkBack monitors
+
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    try:
+        atomic_write_json(message_file, talkback_message)
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except Exception as e:
+        print(f"❌ Failed to write TalkBack message: {e}", file=sys.stderr)
 
 async def main():
     """Main entry point"""
