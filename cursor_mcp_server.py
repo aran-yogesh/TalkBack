@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -175,21 +176,33 @@ async def handle_call_tool(
     
     raise ValueError(f"Unknown tool: {name}")
 
+def atomic_write_message(message_file: str, payload: dict):
+    """Atomically write a JSON message via temp file + rename to prevent partial reads."""
+    dir_name = os.path.dirname(message_file) or "/tmp"
+    try:
+        fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(payload, f)
+        except BaseException:
+            os.unlink(tmp_path)
+            raise
+        os.replace(tmp_path, message_file)
+    except OSError as exc:
+        print(f"❌ Failed to write message to {message_file}: {exc}", file=sys.stderr)
+        raise
+
+
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via file that TalkBack monitors."""
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
     
-    # Write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
+    atomic_write_message(message_file, talkback_message)
     
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 
