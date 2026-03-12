@@ -115,11 +115,11 @@ pkill MCPTalkBack
 
 ### Roasts not triggering?
 ```bash
-# Check message file exists
-cat /tmp/talkback_message.json
+# Check message queue has files
+ls /tmp/talkback_queue/
 
 # Try manual test
-python3 test_roast.py 3
+python3 test_mcp_connection.py
 ```
 
 ### Python dependencies missing?

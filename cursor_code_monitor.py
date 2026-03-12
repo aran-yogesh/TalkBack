@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -49,9 +50,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Send code execution results to TalkBack via the message queue."""
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
@@ -61,8 +60,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
-        # Create message for TalkBack
+
         message = {
             "prompt": prompt,
             "type": response_type,
@@ -70,15 +68,39 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "error_count": error_count,
             "success": success
         }
-        
-        # Write to file that TalkBack monitors
+
+        queue_dir = "/tmp/talkback_queue"
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+            os.makedirs(queue_dir, exist_ok=True)
+
+            fd, tmp_path = tempfile.mkstemp(dir=queue_dir, suffix=".json.tmp")
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(message, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                final_path = tmp_path.replace(".json.tmp", ".json")
+                os.rename(tmp_path, final_path)
+            except BaseException:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                raise
+
+            try:
+                fd2, tmp_legacy = tempfile.mkstemp(
+                    dir=os.path.dirname(self.talkback_message_file), suffix=".tmp"
+                )
+                with os.fdopen(fd2, "w") as f:
+                    json.dump(message, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.rename(tmp_legacy, self.talkback_message_file)
+            except OSError as exc:
+                print(f"⚠️ Legacy file write failed (non-fatal): {exc}")
+
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
-        except Exception as e:
-            print(f"❌ Error sending to TalkBack: {e}")
+        except OSError as exc:
+            print(f"❌ Error sending to TalkBack: {exc}")
     
     def monitor_terminal_command(self, command: str):
         """Run a command and monitor its output"""

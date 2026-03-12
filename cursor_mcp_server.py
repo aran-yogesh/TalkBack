@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -176,22 +177,47 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via the message queue directory."""
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
-    
-    # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+
+    queue_dir = "/tmp/talkback_queue"
+    legacy_file = "/tmp/talkback_message.json"
+
+    try:
+        os.makedirs(queue_dir, exist_ok=True)
+
+        fd, tmp_path = tempfile.mkstemp(dir=queue_dir, suffix=".json.tmp")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(talkback_message, f)
+                f.flush()
+                os.fsync(f.fileno())
+            final_path = tmp_path.replace(".json.tmp", ".json")
+            os.rename(tmp_path, final_path)
+        except BaseException:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            raise
+
+        try:
+            fd2, tmp_legacy = tempfile.mkstemp(
+                dir=os.path.dirname(legacy_file), suffix=".tmp"
+            )
+            with os.fdopen(fd2, "w") as f:
+                json.dump(talkback_message, f)
+                f.flush()
+                os.fsync(f.fileno())
+            os.rename(tmp_legacy, legacy_file)
+        except OSError as exc:
+            print(f"⚠️ Legacy file write failed (non-fatal): {exc}", file=sys.stderr)
+
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except OSError as exc:
+        print(f"❌ Failed to send TalkBack message: {exc}", file=sys.stderr)
 
 async def main():
     """Main entry point"""
