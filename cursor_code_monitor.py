@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -22,24 +23,39 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         self.last_error_count = 0
         self.monitoring = True
         
+    @staticmethod
+    def _atomic_write_json(filepath: str, data: dict) -> None:
+        """Write JSON to filepath atomically using write-to-temp + rename."""
+        dir_name = os.path.dirname(filepath) or "/tmp"
+        fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(data, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, filepath)
+        except BaseException:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+
     def count_errors_in_output(self, output: str) -> int:
         """Count errors in terminal output"""
         error_patterns = [
             r'error:',
-            r'Error:',
-            r'ERROR:',
             r'compilation failed',
             r'build failed',
             r'test failed',
             r'exception',
-            r'Exception',
-            r'Traceback',
-            r'SyntaxError',
-            r'TypeError',
-            r'ValueError',
-            r'AttributeError',
-            r'ImportError',
-            r'ModuleNotFoundError',
+            r'traceback',
+            r'syntaxerror',
+            r'typeerror',
+            r'valueerror',
+            r'attributeerror',
+            r'importerror',
+            r'modulenotfounderror',
         ]
         
         error_count = 0
@@ -71,11 +87,8 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "success": success
         }
         
-        # Write to file that TalkBack monitors
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+            self._atomic_write_json(self.talkback_message_file, message)
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:
             print(f"❌ Error sending to TalkBack: {e}")
