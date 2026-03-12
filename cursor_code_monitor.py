@@ -4,11 +4,13 @@ Cursor Code Monitor - Watches for code execution and triggers TalkBack roasts
 This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
+import fcntl
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -21,6 +23,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
+        self._message_sequence = 0
         
     def count_errors_in_output(self, output: str) -> int:
         """Count errors in terminal output"""
@@ -49,9 +52,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Send code execution results to TalkBack via atomic file write."""
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
@@ -61,24 +62,43 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
-        # Create message for TalkBack
+
+        self._message_sequence += 1
         message = {
             "prompt": prompt,
             "type": response_type,
             "timestamp": time.time(),
+            "seq": self._message_sequence,
             "error_count": error_count,
-            "success": success
+            "success": success,
         }
-        
-        # Write to file that TalkBack monitors
-        try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
-            print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
-        except Exception as e:
-            print(f"❌ Error sending to TalkBack: {e}")
+
+        self._atomic_write(message)
+
+    def _atomic_write(self, payload: dict, retries: int = 2):
+        """Write JSON payload atomically using temp-file + rename with retries."""
+        msg_dir = os.path.dirname(self.talkback_message_file) or "/tmp"
+        last_err = None
+        for attempt in range(1 + retries):
+            fd, tmp_path = tempfile.mkstemp(dir=msg_dir, suffix=".json.tmp")
+            try:
+                with os.fdopen(fd, "w") as f:
+                    fcntl.flock(f, fcntl.LOCK_EX)
+                    json.dump(payload, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.rename(tmp_path, self.talkback_message_file)
+                print(f"✅ Sent to TalkBack: {payload.get('type', '?')} (errors: {payload.get('error_count', '?')})")
+                return
+            except Exception as e:
+                last_err = e
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                if attempt < retries:
+                    time.sleep(0.1)
+        print(f"❌ Error sending to TalkBack after {1 + retries} attempts: {last_err}")
     
     def monitor_terminal_command(self, command: str):
         """Run a command and monitor its output"""

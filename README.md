@@ -263,6 +263,16 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
 
+### Message Delivery Reliability
+
+The MCP message pipeline (Python writers → `/tmp/talkback_message.json` → Swift consumer) uses several safeguards:
+
+- **Atomic writes**: Python producers write to a temp file, `fsync`, then `os.rename()` to prevent the consumer from reading partial/corrupt JSON.
+- **File locking**: `fcntl.flock(LOCK_EX)` prevents concurrent writers from interleaving.
+- **Sequence counters**: Each message carries a monotonic `seq` field so the consumer can distinguish two messages with identical timestamps.
+- **Retry with backoff**: `cursor_code_monitor.py` retries failed writes up to 2 times.
+- **Deferred delivery**: The Swift consumer queues roast and teaching-moment messages when busy (`isThinking`) instead of silently dropping them.
+
 ## 🔮 Future Features
 
 - [ ] Gemini vision-based behavior monitoring (webcam gaze/emotion detection)
