@@ -15,6 +15,8 @@ from pathlib import Path
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+from talkback_ipc import atomic_write_message, atomic_write_legacy
+
 
 class CodeExecutionMonitor(FileSystemEventHandler):
     def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
@@ -71,14 +73,12 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "success": success
         }
         
-        # Write to file that TalkBack monitors
-        try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+        result = atomic_write_message(message)
+        if result:
+            atomic_write_legacy(message, self.talkback_message_file)
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
-        except Exception as e:
-            print(f"❌ Error sending to TalkBack: {e}")
+        else:
+            print(f"❌ Failed to send message to TalkBack")
     
     def monitor_terminal_command(self, command: str):
         """Run a command and monitor its output"""
