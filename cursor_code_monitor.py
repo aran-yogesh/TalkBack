@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -49,9 +50,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Send code execution results to TalkBack via atomic file write."""
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
@@ -61,8 +60,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
-        # Create message for TalkBack
+
         message = {
             "prompt": prompt,
             "type": response_type,
@@ -70,12 +68,22 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "error_count": error_count,
             "success": success
         }
-        
-        # Write to file that TalkBack monitors
+
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+            dir_name = os.path.dirname(self.talkback_message_file)
+            fd, tmp_path = tempfile.mkstemp(suffix=".tmp", dir=dir_name)
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(message, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tmp_path, self.talkback_message_file)
+            except BaseException:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:
             print(f"❌ Error sending to TalkBack: {e}")
