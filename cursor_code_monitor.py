@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -71,10 +72,21 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "success": success
         }
         
-        # Write to file that TalkBack monitors
+        # Atomic write: write to temp file then rename to avoid partial reads
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
+            dir_name = os.path.dirname(self.talkback_message_file)
+            fd, tmp_path = tempfile.mkstemp(
+                suffix=".tmp", dir=dir_name
+            )
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(message, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tmp_path, self.talkback_message_file)
+            except BaseException:
+                os.unlink(tmp_path)
+                raise
             
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:
