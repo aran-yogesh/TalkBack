@@ -13,6 +13,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
+- [📖 Additional Documentation](#-additional-documentation)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -89,10 +90,17 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 1. **macOS 13.0+** (developed on macOS 26.0.1 beta)
 2. **Xcode Command Line Tools** installed
-3. **API Keys**:
+3. **Python 3** (for MCP integration scripts)
+4. **Python packages** (only needed for MCP code monitoring):
+   - `watchdog` — used by `cursor_code_monitor.py`
+   - `mcp` — used by `cursor_mcp_server.py`
+   ```bash
+   pip3 install watchdog mcp
+   ```
+5. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
-   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
+   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey)) *(optional — for planned vision features)*
 
 ### Installation
 
@@ -184,13 +192,21 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 |---|---|
 | `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
-| `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
-| `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
+| `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers (requires `watchdog`) |
+| `cursor_mcp_server.py` | MCP server for Cursor IDE integration via stdio transport (requires `mcp`) |
 | `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
-| `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
+| `start_talkback_mcp.sh` | Compiles and launches TalkBack, installs Python deps, starts monitoring |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
-| `mcp_config.json` | Cursor IDE MCP server configuration |
+| `mcp_config.json` | Cursor IDE MCP server configuration (update paths before use) |
+| `cline_mcp_settings.json` | Cline/Roo-Cline MCP settings for Cursor (update paths before use) |
+| `QUICK_START.md` | Condensed 3-step guide for MCP code monitoring |
+| `MCP_SETUP.md` | Detailed MCP setup and Cursor IDE integration guide |
+| `MCP_SETUP_COMPLETE.md` | Post-setup verification and troubleshooting steps |
+| `MCP_INTEGRATION.md` | Architecture overview and roast-level documentation |
+| `API_KEY_SETUP.md` | Detailed API key configuration guide |
+
+> **Note**: `mcp_config.json` and `cline_mcp_settings.json` contain hardcoded developer paths. Update the `command` and `args` paths to match your local clone before use.
 
 ## 📋 API Endpoints Used
 
@@ -262,6 +278,14 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+
+## 📖 Additional Documentation
+
+- **[QUICK_START.md](QUICK_START.md)** — Get MCP code monitoring running in 3 steps
+- **[MCP_SETUP.md](MCP_SETUP.md)** — Full MCP setup with Cursor IDE integration options
+- **[MCP_SETUP_COMPLETE.md](MCP_SETUP_COMPLETE.md)** — Post-setup verification and troubleshooting
+- **[MCP_INTEGRATION.md](MCP_INTEGRATION.md)** — Architecture diagram, roast levels, and file change log
+- **[API_KEY_SETUP.md](API_KEY_SETUP.md)** — Detailed guide for configuring API keys
 
 ## 🔮 Future Features
 
