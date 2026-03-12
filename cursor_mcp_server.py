@@ -5,10 +5,12 @@ Sends roasts to TalkBack avatar based on errors/success
 """
 
 import asyncio
+import fcntl
 import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -175,23 +177,45 @@ async def handle_call_tool(
     
     raise ValueError(f"Unknown tool: {name}")
 
+_message_sequence = 0
+
+def _atomic_write_message(message_file: str, payload: dict) -> None:
+    """Atomically write a JSON message using temp-file + rename."""
+    msg_dir = os.path.dirname(message_file) or "/tmp"
+    fd, tmp_path = tempfile.mkstemp(dir=msg_dir, suffix=".json.tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            json.dump(payload, f)
+            f.flush()
+            os.fsync(f.fileno())
+        os.rename(tmp_path, message_file)
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via atomic file write."""
+    global _message_sequence
+    _message_sequence += 1
+
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
-        "timestamp": time.time()
+        "timestamp": time.time(),
+        "seq": _message_sequence,
     }
-    
-    # Write to a file that TalkBack monitors
+
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    try:
+        _atomic_write_message(message_file, talkback_message)
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except Exception as e:
+        print(f"❌ Failed to write TalkBack message: {e}", file=sys.stderr)
+        raise
 
 async def main():
     """Main entry point"""
