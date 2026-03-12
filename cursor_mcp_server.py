@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -186,12 +187,27 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
         "timestamp": time.time()
     }
     
-    # Write to a file that TalkBack monitors
+    # Atomic write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    try:
+        tmp_fd = tempfile.NamedTemporaryFile(
+            mode="w", dir="/tmp", suffix=".json", delete=False
+        )
+        try:
+            json.dump(talkback_message, tmp_fd)
+            tmp_fd.flush()
+            os.fsync(tmp_fd.fileno())
+            tmp_fd.close()
+            os.replace(tmp_fd.name, message_file)
+        except BaseException:
+            tmp_fd.close()
+            if os.path.exists(tmp_fd.name):
+                os.unlink(tmp_fd.name)
+            raise
+        
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except Exception as e:
+        print(f"❌ Error sending TalkBack message: {e}", file=sys.stderr)
 
 async def main():
     """Main entry point"""
