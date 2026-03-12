@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -71,10 +72,22 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "success": success
         }
         
-        # Write to file that TalkBack monitors
+        # Atomic write to file that TalkBack monitors
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
+            tmp_fd = tempfile.NamedTemporaryFile(
+                mode="w", dir="/tmp", suffix=".json", delete=False
+            )
+            try:
+                json.dump(message, tmp_fd, indent=2)
+                tmp_fd.flush()
+                os.fsync(tmp_fd.fileno())
+                tmp_fd.close()
+                os.replace(tmp_fd.name, self.talkback_message_file)
+            except BaseException:
+                tmp_fd.close()
+                if os.path.exists(tmp_fd.name):
+                    os.unlink(tmp_fd.name)
+                raise
             
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:
