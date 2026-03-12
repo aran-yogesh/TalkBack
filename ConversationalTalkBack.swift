@@ -830,10 +830,13 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         guard assignmentAlertsEnabled else { return }
         
         if isThinking {
-            print("⏳ Skipping assignment summary, still processing previous request.")
+            print("⏳ Assignment summary deferred: still processing previous request.")
+            DispatchQueue.main.asyncAfter(deadline: .now() + openAICooldown) { [weak self] in
+                self?.askOpenAIForAssignmentSummary(mail: mail)
+            }
             return
         }
-        
+
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
             print("⏰ Assignment summary delayed to respect cooldown.")
@@ -1002,26 +1005,31 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
         guard teacherModeEnabled else { return }
-        guard !isThinking else {
-            print("⌛ Teacher feedback skipped: already processing another response.")
+
+        let durationText = duration.map { String(format: "%.2f seconds", $0) } ?? "unknown duration"
+        let successText = success ? "success" : "failure"
+        let composedPrompt = "Command: \(command)\nResult: \(successText) (exit code \(exitCode))\nDuration: \(durationText)\n\nCommand output (truncated):\n\(outputSnippet)"
+
+        if isThinking {
+            print("⌛ Teacher feedback queued: still processing another response.")
+            scheduleOpenAIRequest(prompt: composedPrompt, delay: openAICooldown)
             return
         }
-        
+
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Teacher feedback skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Teacher feedback queued: cooldown \(wait)s remaining.")
+            scheduleOpenAIRequest(prompt: composedPrompt, delay: wait)
             return
         }
-        
+
         isThinking = true
         needsDisplay = true
         lastOpenAICall = Date()
         message = "Reviewing results... 🧠"
         needsDisplay = true
-        
-        let durationText = duration.map { String(format: "%.2f seconds", $0) } ?? "unknown duration"
-        let successText = success ? "success" : "failure"
-        
+
         let systemPrompt = success
         ? """
         You are TalkBack, a witty but supportive coding teacher. The command finished successfully. Celebrate briefly, highlight what the result means, and suggest one productive next step. Be concise (max 3 sentences) and keep a playful tone.
@@ -1029,15 +1037,8 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         : """
         You are TalkBack, a witty but supportive coding teacher. The command failed. Diagnose likely causes from the output, teach the user what went wrong, and give 1-2 actionable next steps. Be encouraging but can sprinkle light sass. Keep it under 4 sentences.
         """
-        
-        let userPrompt = """
-        Command: \(command)
-        Result: \(successText) (exit code \(exitCode))
-        Duration: \(durationText)
-        
-        Command output (truncated):
-        \(outputSnippet)
-        """
+
+        let userPrompt = composedPrompt
         
         let messages: [[String: String]] = [
             ["role": "system", "content": systemPrompt],
@@ -1601,19 +1602,44 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        let fileURL = URL(fileURLWithPath: mcpMessageFile)
+        let fileManager = FileManager.default
+
+        guard fileManager.fileExists(atPath: mcpMessageFile) else { return }
+
+        let data: Data
+        do {
+            data = try Data(contentsOf: fileURL)
+        } catch {
+            print("⚠️ MCP file read error (will retry next poll): \(error.localizedDescription)")
             return
         }
-        
-        // Only process new messages
+
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("⚠️ MCP file is not a JSON object, skipping")
+                return
+            }
+            json = parsed
+        } catch {
+            print("⚠️ MCP JSON parse error (partial write?): \(error.localizedDescription)")
+            return
+        }
+
+        guard let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message missing timestamp field, skipping")
+            return
+        }
+
         if timestamp <= lastMCPMessageTime {
             return
         }
-        
+
         lastMCPMessageTime = timestamp
-        
+
+        try? fileManager.removeItem(at: fileURL)
+
         if let event = json["event"] as? String {
             switch event {
             case "command_started":
@@ -1631,16 +1657,16 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
             return
         }
-        
+
         guard let prompt = json["prompt"] as? String,
               let type = json["type"] as? String else {
+            print("⚠️ MCP message has no event/prompt+type fields, dropping: \(json.keys.sorted())")
             return
         }
-        
+
         print("📬 New MCP message: \(type)")
         print("   Prompt: \(prompt)")
-        
-        // Update message based on type
+
         DispatchQueue.main.async {
             switch type {
             case "roast":
@@ -1654,8 +1680,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
             self.needsDisplay = true
         }
-        
-        // Generate AI response with appropriate attitude
+
         self.generateRoastResponse(prompt: prompt, type: type)
     }
     
@@ -1698,11 +1723,17 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
-        guard !isThinking else { return }
-        
+        if isThinking {
+            print("⏳ Roast queued: still processing previous reply.")
+            scheduleOpenAIRequest(prompt: prompt, delay: openAICooldown)
+            return
+        }
+
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Roast skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Roast queued: cooldown \(wait)s remaining.")
+            scheduleOpenAIRequest(prompt: prompt, delay: wait)
             return
         }
         
@@ -1760,27 +1791,33 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
                 
                 if let httpResponse = response as? HTTPURLResponse {
                     print("OpenAI Roast HTTP Status: \(httpResponse.statusCode)")
+                    if httpResponse.statusCode == 429 {
+                        if let strongSelf = self {
+                            strongSelf.scheduleOpenAIRequest(prompt: prompt, delay: strongSelf.rateLimitBackoff)
+                            strongSelf.message = "Cooling off... 😴"
+                            strongSelf.needsDisplay = true
+                        }
+                        return
+                    }
                 }
-                
+
                 guard let data = data else {
                     self?.message = "No Data! 😤"
                     self?.needsDisplay = true
                     return
                 }
-                
+
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
                         print("OpenAI Roast Response: \(json)")
-                        
+
                         if let choices = json["choices"] as? [[String: Any]],
                            let firstChoice = choices.first,
                            let message = firstChoice["message"] as? [String: Any],
                            let text = message["content"] as? String {
-                            
+
                             let cleanText = text.trimmingCharacters(in: .whitespacesAndNewlines)
                             self?.message = cleanText
-                            
-                            // Don't add roasts to chat history (they're triggered events, not conversations)
                             
                             // Speak with Ivanna's voice
                             self?.speakWithElevenLabs(cleanText)
