@@ -17,6 +17,8 @@ from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 
+from talkback_utils import MESSAGE_FILE, build_message, write_message_atomic
+
 # TalkBack MCP Server
 app = Server("talkback-monitor")
 
@@ -113,12 +115,14 @@ async def handle_call_tool(
     """Handle tool calls"""
     
     if name == "report_code_execution":
-        # Update execution results
-        execution_results["last_run_time"] = time.time()
-        execution_results["last_output"] = arguments.get("output", "")
-        execution_results["error_count"] = arguments.get("error_count", 0)
-        execution_results["linter_errors"] = arguments.get("linter_errors", [])
-        execution_results["success"] = arguments.get("success", False)
+        global execution_results
+        execution_results = {
+            "last_run_time": time.time(),
+            "last_output": arguments.get("output", ""),
+            "error_count": arguments.get("error_count", 0),
+            "linter_errors": arguments.get("linter_errors", []),
+            "success": arguments.get("success", False),
+        }
         
         # Generate roast message based on error count
         error_count = execution_results["error_count"]
@@ -176,22 +180,18 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
-    talkback_message = {
-        "prompt": prompt,
-        "type": response_type,
-        "timestamp": time.time()
-    }
-    
-    # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    """Send prompt to TalkBack via the shared message file."""
+    error_count = execution_results.get("error_count", 0)
+    success = execution_results.get("success", False)
+    talkback_message = build_message(
+        prompt, response_type, error_count=error_count, success=success
+    )
+
+    try:
+        write_message_atomic(talkback_message)
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except Exception as e:
+        print(f"❌ Error sending to TalkBack: {e}", file=sys.stderr)
 
 async def main():
     """Main entry point"""
