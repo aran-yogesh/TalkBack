@@ -9,6 +9,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
 - [📂 Project Structure](#-project-structure)
+- [🔗 Message Delivery Pipeline](#-message-delivery-pipeline)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
@@ -184,13 +185,36 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 |---|---|
 | `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
+| `talkback_ipc.py` | Shared IPC helpers — atomic writes and message queue directory |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify message delivery IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+
+## 🔗 Message Delivery Pipeline
+
+Python writers (`cursor_mcp_server.py`, `cursor_code_monitor.py`) communicate with the Swift consumer (`ConversationalTalkBack.swift`) through a file-based IPC channel.
+
+### How it works
+
+1. **Writers** call `atomic_write_message()` from `talkback_ipc.py`, which writes each message as a uniquely-named JSON file inside `/tmp/talkback_messages/` using atomic rename (write to `.tmp`, then `os.rename` to `.json`).
+2. A **legacy single-file** at `/tmp/talkback_message.json` is also written for backward compatibility.
+3. The **Swift consumer** polls the queue directory every 0.5 seconds, processes files in sorted order, and deletes each file after consumption.
+4. If the queue directory is empty or missing, the consumer falls back to the legacy single-file path (timestamp-based deduplication).
+
+### Reliability guarantees
+
+| Concern | Mitigation |
+|---|---|
+| Partial / corrupt reads | Atomic write-then-rename; readers never see half-written files |
+| Message overwrites between polls | Each message gets a unique file in the queue directory |
+| Silent drops when `isThinking` | Roast messages are queued in `pendingRoasts` and drained after the current response completes |
+| Silent drops on API cooldown | Messages are queued and retried after the cooldown expires |
+| Stale message replay on restart | Queue files are deleted after consumption; legacy file uses timestamp dedup |
+| Parse errors swallowed silently | All JSON/file errors are now logged with the source file path |
 
 ## 📋 API Endpoints Used
 

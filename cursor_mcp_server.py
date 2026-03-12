@@ -12,6 +12,8 @@ import sys
 import time
 from typing import Any, Dict, List
 
+from talkback_ipc import atomic_write_message, atomic_write_legacy
+
 from mcp import types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
@@ -176,22 +178,19 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via the message queue directory."""
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
-    
-    # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+
+    result = atomic_write_message(talkback_message)
+    if result:
+        atomic_write_legacy(talkback_message)
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    else:
+        print(f"❌ Failed to deliver TalkBack message: {response_type}", file=sys.stderr)
 
 async def main():
     """Main entry point"""
