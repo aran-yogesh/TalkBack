@@ -4,8 +4,10 @@ Test script to verify MCP server connection
 """
 
 import json
+import os
 import subprocess
 import sys
+import tempfile
 import time
 
 
@@ -19,10 +21,20 @@ def test_mcp_server():
         "timestamp": time.time()
     }
     
-    # Write to the file that TalkBack monitors
+    # Atomic write to the file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(test_message, f)
+    try:
+        fd, tmp_path = tempfile.mkstemp(dir="/tmp", suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(test_message, f)
+            os.replace(tmp_path, message_file)
+        except BaseException:
+            os.unlink(tmp_path)
+            raise
+    except Exception as e:
+        print(f"❌ Failed to write message file: {e}")
+        return False
     
     print("✅ Test message sent to TalkBack!")
     print(f"📁 Message file: {message_file}")

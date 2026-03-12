@@ -219,6 +219,12 @@ The MCP monitor looks for these error patterns in terminal output:
 - **Debouncing**: Only processes new messages (checks timestamp)
 - **Non-blocking**: Runs on a separate timer, doesn't interfere with other features
 
+### Message Delivery Reliability
+- **Atomic writes**: Python writers use write-to-temp-then-rename (`os.replace`) so the Swift consumer never reads a partially-written file
+- **File cleanup**: Swift deletes the message file after a successful read to prevent stale re-processing
+- **Retry on busy**: Roast and teaching-moment requests are deferred and retried when the OpenAI pipeline is busy or rate-limited, instead of being silently dropped
+- **Error logging**: Parse failures and missing fields are logged with `⚠️` prefixes for easy debugging
+
 ### OpenAI Prompts
 Each roast level has a custom system prompt:
 
