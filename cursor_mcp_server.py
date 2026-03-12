@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Dict, List
 
@@ -113,12 +114,12 @@ async def handle_call_tool(
     """Handle tool calls"""
     
     if name == "report_code_execution":
-        # Update execution results
+        args = arguments or {}
         execution_results["last_run_time"] = time.time()
-        execution_results["last_output"] = arguments.get("output", "")
-        execution_results["error_count"] = arguments.get("error_count", 0)
-        execution_results["linter_errors"] = arguments.get("linter_errors", [])
-        execution_results["success"] = arguments.get("success", False)
+        execution_results["last_output"] = args.get("output", "")
+        execution_results["error_count"] = args.get("error_count", 0)
+        execution_results["linter_errors"] = args.get("linter_errors", [])
+        execution_results["success"] = args.get("success", False)
         
         # Generate roast message based on error count
         error_count = execution_results["error_count"]
@@ -175,23 +176,38 @@ async def handle_call_tool(
     
     raise ValueError(f"Unknown tool: {name}")
 
+def _atomic_write_message(message: dict, path: str) -> None:
+    """Atomically write a JSON message to path using rename."""
+    dir_name = os.path.dirname(path)
+    fd, tmp_path = tempfile.mkstemp(suffix=".tmp", dir=dir_name)
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(message, f)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
 async def trigger_talkback_speech(prompt: str, response_type: str):
-    """Send prompt to TalkBack via HTTP or socket"""
-    # For now, we'll write to a file that TalkBack monitors
-    # In production, this would be a proper socket/HTTP connection
-    
+    """Send prompt to TalkBack via the shared message file."""
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
     
-    # Write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.json"
-    with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
-    
-    print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    try:
+        _atomic_write_message(talkback_message, message_file)
+        print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
+    except Exception as e:
+        print(f"❌ Failed to write TalkBack message: {e}", file=sys.stderr)
 
 async def main():
     """Main entry point"""

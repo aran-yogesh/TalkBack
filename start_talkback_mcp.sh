@@ -1,6 +1,16 @@
 #!/bin/bash
+set -euo pipefail
 
 # TalkBack MCP Starter Script
+
+cleanup() {
+    if [ -n "${TALKBACK_PID:-}" ] && kill -0 "$TALKBACK_PID" 2>/dev/null; then
+        echo ""
+        echo "🛑 Stopping TalkBack (PID: $TALKBACK_PID)..."
+        kill "$TALKBACK_PID" 2>/dev/null || true
+    fi
+}
+trap cleanup EXIT INT TERM
 
 echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
@@ -21,16 +31,14 @@ fi
 
 # Check Python dependencies
 echo "🔍 Checking Python dependencies..."
-python3 -c "import mcp" 2>/dev/null
-if [ $? -ne 0 ]; then
+if ! python3 -c "import mcp" 2>/dev/null; then
     echo "⚠️  'mcp' not installed. Installing..."
-    pip3 install mcp
+    pip3 install mcp || { echo "❌ Failed to install mcp"; exit 1; }
 fi
 
-python3 -c "import watchdog" 2>/dev/null
-if [ $? -ne 0 ]; then
+if ! python3 -c "import watchdog" 2>/dev/null; then
     echo "⚠️  'watchdog' not installed. Installing..."
-    pip3 install watchdog
+    pip3 install watchdog || { echo "❌ Failed to install watchdog"; exit 1; }
 fi
 
 echo ""
@@ -42,6 +50,12 @@ echo ""
 # Start TalkBack in background
 ./MCPTalkBack &
 TALKBACK_PID=$!
+
+sleep 0.5
+if ! kill -0 "$TALKBACK_PID" 2>/dev/null; then
+    echo "❌ TalkBack failed to start!"
+    exit 1
+fi
 
 echo "✅ TalkBack running (PID: $TALKBACK_PID)"
 echo ""
