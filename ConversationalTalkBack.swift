@@ -87,6 +87,11 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
+    var pendingRoastPrompt: String?
+    var pendingRoastType: String?
+    var roastRetryTimer: Timer?
+    var pendingTeachingArgs: (command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?)?
+    var teachingRetryTimer: Timer?
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
@@ -1000,16 +1005,31 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         return String(cleaned.suffix(1200))
     }
     
+    private func scheduleTeachingRetry(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?, delay: TimeInterval) {
+        pendingTeachingArgs = (command, outputSnippet, success, exitCode, duration)
+        teachingRetryTimer?.invalidate()
+        let clampedDelay = max(1.0, delay)
+        teachingRetryTimer = Timer.scheduledTimer(withTimeInterval: clampedDelay, repeats: false) { [weak self] _ in
+            guard let self = self, let args = self.pendingTeachingArgs else { return }
+            self.pendingTeachingArgs = nil
+            self.teachingRetryTimer = nil
+            self.askOpenAIForTeachingMoment(command: args.command, outputSnippet: args.outputSnippet, success: args.success, exitCode: args.exitCode, duration: args.duration)
+        }
+    }
+
     func askOpenAIForTeachingMoment(command: String, outputSnippet: String, success: Bool, exitCode: Int, duration: Double?) {
         guard teacherModeEnabled else { return }
-        guard !isThinking else {
-            print("⌛ Teacher feedback skipped: already processing another response.")
+        if isThinking {
+            print("⌛ Teacher feedback queued: still processing another response.")
+            scheduleTeachingRetry(command: command, outputSnippet: outputSnippet, success: success, exitCode: exitCode, duration: duration, delay: openAICooldown)
             return
         }
         
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Teacher feedback skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Teacher feedback queued: cooldown \(wait)s remaining.")
+            scheduleTeachingRetry(command: command, outputSnippet: outputSnippet, success: success, exitCode: exitCode, duration: duration, delay: wait)
             return
         }
         
@@ -1601,18 +1621,43 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        let fileURL = URL(fileURLWithPath: mcpMessageFile)
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: mcpMessageFile) else { return }
+
+        let data: Data
+        do {
+            data = try Data(contentsOf: fileURL)
+        } catch {
             return
         }
-        
-        // Only process new messages
+
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("⚠️ MCP message file is not a JSON object, removing.")
+                try? fileManager.removeItem(at: fileURL)
+                return
+            }
+            json = parsed
+        } catch {
+            print("⚠️ MCP message file contains invalid JSON: \(error). Removing.")
+            try? fileManager.removeItem(at: fileURL)
+            return
+        }
+
+        guard let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message missing timestamp field, removing.")
+            try? fileManager.removeItem(at: fileURL)
+            return
+        }
+
         if timestamp <= lastMCPMessageTime {
             return
         }
         
         lastMCPMessageTime = timestamp
+        try? fileManager.removeItem(at: fileURL)
         
         if let event = json["event"] as? String {
             switch event {
@@ -1697,12 +1742,34 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         self.askOpenAIForRoast(prompt: prompt, systemPrompt: systemPrompt)
     }
     
+    private func scheduleRoastRetry(prompt: String, systemPrompt: String, delay: TimeInterval) {
+        pendingRoastPrompt = prompt
+        pendingRoastType = systemPrompt
+        roastRetryTimer?.invalidate()
+        let clampedDelay = max(1.0, delay)
+        roastRetryTimer = Timer.scheduledTimer(withTimeInterval: clampedDelay, repeats: false) { [weak self] _ in
+            guard let self = self,
+                  let p = self.pendingRoastPrompt,
+                  let sp = self.pendingRoastType else { return }
+            self.pendingRoastPrompt = nil
+            self.pendingRoastType = nil
+            self.roastRetryTimer = nil
+            self.askOpenAIForRoast(prompt: p, systemPrompt: sp)
+        }
+    }
+
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
-        guard !isThinking else { return }
+        if isThinking {
+            print("⏳ Roast queued: still processing another response.")
+            scheduleRoastRetry(prompt: prompt, systemPrompt: systemPrompt, delay: openAICooldown)
+            return
+        }
         
         let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
         if timeSinceLastCall < openAICooldown {
-            print("⏰ Roast skipped to respect OpenAI cooldown.")
+            let wait = openAICooldown - timeSinceLastCall
+            print("⏰ Roast queued: cooldown \(wait)s remaining.")
+            scheduleRoastRetry(prompt: prompt, systemPrompt: systemPrompt, delay: wait)
             return
         }
         

@@ -263,6 +263,14 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
 
+### Message Delivery Reliability
+
+The MCP message pipeline (`Python → /tmp/talkback_message.json → Swift`) uses these safeguards:
+- **Atomic writes**: Python writers use `tempfile.mkstemp` + `os.replace` so Swift never reads a half-written file.
+- **File cleanup**: Swift deletes the message file after reading to prevent stale messages across restarts.
+- **Retry queues**: Roast and teaching-moment messages are queued with a timer when the OpenAI cooldown or `isThinking` guard fires, instead of being silently dropped.
+- **Error logging**: Corrupt or malformed JSON is logged with a warning before the file is removed.
+
 ## 🔮 Future Features
 
 - [ ] Gemini vision-based behavior monitoring (webcam gaze/emotion detection)
