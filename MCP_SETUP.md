@@ -121,7 +121,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ### TalkBack not roasting?
 - Check that `MCPTalkBack` is running (`ps aux | grep MCP`)
-- Check that `/tmp/talkback_message.json` exists and is being written
+- Check that `/tmp/talkback_queue/` has message files: `ls /tmp/talkback_queue/`
 - Check terminal output for errors
 
 ### No voice output?

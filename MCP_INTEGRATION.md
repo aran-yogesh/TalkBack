@@ -20,28 +20,32 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            test_mcp_roast.py (Monitor Script)                │
+│       cursor_code_monitor.py / cursor_mcp_server.py         │
 │  - Captures terminal output                                  │
 │  - Counts errors (Traceback, SyntaxError, etc.)              │
 │  - Determines roast type (roast/minor_sass/sassy_success)    │
+│  - Writes atomically (temp file + rename)                    │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│          /tmp/talkback_message.json (IPC File)               │
-│  {                                                           │
-│    "prompt": "ROAST ME! 5 errors...",                        │
-│    "type": "roast",                                          │
-│    "timestamp": 1234567890.123,                              │
-│    "error_count": 5                                          │
-│  }                                                           │
+│       /tmp/talkback_queue/ (Directory-based queue)           │
+│  One JSON file per message, sorted by filename.              │
+│  Each file is written atomically and deleted after           │
+│  consumption, so no messages are lost even when              │
+│  multiple writers produce faster than the consumer polls.    │
+│  Legacy /tmp/talkback_message.json is also written for       │
+│  backward compatibility.                                     │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │           ConversationalTalkBack.swift                       │
 │  - startMCPMonitoring() polls every 0.5s                     │
-│  - checkForMCPMessages() reads JSON file                     │
+│  - drainMCPQueue() reads & deletes queue files in order      │
+│  - checkForMCPMessages() reads legacy JSON file              │
+│  - Queues messages internally when busy (cooldown/thinking)  │
+│  - processPendingMCPMessage() retries queued messages        │
 │  - generateRoastResponse() picks roast level                 │
 │  - askOpenAIForRoast() gets savage AI response               │
 │  - speakWithElevenLabs() delivers roast via Ivanna voice     │
@@ -215,8 +219,11 @@ The MCP monitor looks for these error patterns in terminal output:
 - `AttributeError`, `ImportError`, `ModuleNotFoundError`
 
 ### Polling Mechanism
-- **Frequency**: TalkBack checks `/tmp/talkback_message.json` every **0.5 seconds**
-- **Debouncing**: Only processes new messages (checks timestamp)
+- **Frequency**: TalkBack polls `/tmp/talkback_queue` and the legacy `/tmp/talkback_message.json` every **0.5 seconds**
+- **Queue-based**: Each message is a separate file in `/tmp/talkback_queue`, deleted after consumption — no messages are overwritten
+- **Atomic writes**: Python writers use temp-file + `os.rename()` so the consumer never sees partial JSON
+- **Internal retry queue**: Messages that arrive while TalkBack is busy (thinking or in cooldown) are queued in memory and retried on the next poll cycle
+- **Debouncing**: Only processes messages with a newer timestamp than the last seen
 - **Non-blocking**: Runs on a separate timer, doesn't interfere with other features
 
 ### OpenAI Prompts
@@ -265,7 +272,7 @@ Keep it under 30 words. Be dramatic.
 
 ### TalkBack not roasting?
 1. Check if TalkBack is running: `ps aux | grep ConversationalTalkBack`
-2. Verify the JSON file is being created: `cat /tmp/talkback_message.json`
+2. Verify queue files are being created: `ls /tmp/talkback_queue/`
 3. Check TalkBack terminal output for "📬 New MCP message" logs
 
 ### Roasts are too harsh/mild?

@@ -24,10 +24,11 @@ python -c "import mcp; print('✅ MCP package is installed!')" || {
 echo "🧪 Testing MCP server..."
 python test_mcp_connection.py
 
-# Check if message file was created
-if [ -f "/tmp/talkback_message.json" ]; then
+# Check if message queue was created
+if [ -d "/tmp/talkback_queue" ] && [ -f "/tmp/talkback_message.json" ]; then
     echo "✅ MCP server test successful!"
-    echo "📁 Message file created at: /tmp/talkback_message.json"
+    echo "📁 Message queue: /tmp/talkback_queue"
+    echo "📁 Legacy file: /tmp/talkback_message.json"
 else
     echo "❌ MCP server test failed!"
     exit 1

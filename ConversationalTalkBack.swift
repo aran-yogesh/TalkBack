@@ -87,6 +87,9 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
     let mcpMessageFile = "/tmp/talkback_message.json"
+    let mcpQueueDir = "/tmp/talkback_queue"
+    var pendingMCPMessages: [(prompt: String, type: String)] = []
+    var mcpRetryTimer: Timer?
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
@@ -1593,27 +1596,78 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     
     func startMCPMonitoring() {
         print("🔍 Starting MCP monitoring for Cursor IDE...")
-        
-        // Monitor the MCP message file every 0.5 seconds
+
         mcpMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            self?.drainMCPQueue()
             self?.checkForMCPMessages()
+            self?.processPendingMCPMessage()
         }
     }
-    
+
+    private func drainMCPQueue() {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: mcpQueueDir) else { return }
+
+        let files: [String]
+        do {
+            files = try fm.contentsOfDirectory(atPath: mcpQueueDir)
+                .filter { $0.hasSuffix(".json") }
+                .sorted()
+        } catch {
+            print("⚠️ Failed to list queue directory: \(error)")
+            return
+        }
+
+        for filename in files {
+            let path = (mcpQueueDir as NSString).appendingPathComponent(filename)
+            do {
+                let data = try Data(contentsOf: URL(fileURLWithPath: path))
+                try fm.removeItem(atPath: path)
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let timestamp = json["timestamp"] as? TimeInterval else {
+                    print("⚠️ Malformed message in queue file: \(filename)")
+                    continue
+                }
+                if timestamp <= lastMCPMessageTime { continue }
+                lastMCPMessageTime = timestamp
+                dispatchMCPPayload(json)
+            } catch {
+                print("⚠️ Error reading queue file \(filename): \(error)")
+            }
+        }
+    }
+
     func checkForMCPMessages() {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: mcpMessageFile)),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else {
+        let data: Data
+        do {
+            data = try Data(contentsOf: URL(fileURLWithPath: mcpMessageFile))
+        } catch {
             return
         }
-        
-        // Only process new messages
-        if timestamp <= lastMCPMessageTime {
+
+        let json: [String: Any]
+        do {
+            guard let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("⚠️ MCP message file is not a JSON object")
+                return
+            }
+            json = parsed
+        } catch {
+            print("⚠️ Failed to parse MCP message file: \(error)")
             return
         }
-        
+
+        guard let timestamp = json["timestamp"] as? TimeInterval else {
+            print("⚠️ MCP message missing timestamp")
+            return
+        }
+
+        if timestamp <= lastMCPMessageTime { return }
         lastMCPMessageTime = timestamp
-        
+        dispatchMCPPayload(json)
+    }
+
+    private func dispatchMCPPayload(_ json: [String: Any]) {
         if let event = json["event"] as? String {
             switch event {
             case "command_started":
@@ -1631,16 +1685,16 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
             return
         }
-        
+
         guard let prompt = json["prompt"] as? String,
               let type = json["type"] as? String else {
+            print("⚠️ MCP message missing prompt or type fields")
             return
         }
-        
+
         print("📬 New MCP message: \(type)")
         print("   Prompt: \(prompt)")
-        
-        // Update message based on type
+
         DispatchQueue.main.async {
             switch type {
             case "roast":
@@ -1654,9 +1708,19 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
             }
             self.needsDisplay = true
         }
-        
-        // Generate AI response with appropriate attitude
-        self.generateRoastResponse(prompt: prompt, type: type)
+
+        pendingMCPMessages.append((prompt: prompt, type: type))
+    }
+
+    private func processPendingMCPMessage() {
+        guard !pendingMCPMessages.isEmpty else { return }
+        guard !isThinking else { return }
+
+        let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
+        guard timeSinceLastCall >= openAICooldown else { return }
+
+        let next = pendingMCPMessages.removeFirst()
+        self.generateRoastResponse(prompt: next.prompt, type: next.type)
     }
     
     func generateRoastResponse(prompt: String, type: String) {
@@ -1698,19 +1762,21 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     }
     
     func askOpenAIForRoast(prompt: String, systemPrompt: String) {
-        guard !isThinking else { return }
-        
-        let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
-        if timeSinceLastCall < openAICooldown {
-            print("⏰ Roast skipped to respect OpenAI cooldown.")
+        guard !isThinking else {
+            print("⏰ Roast deferred: already processing another response.")
             return
         }
-        
+
+        let timeSinceLastCall = Date().timeIntervalSince(lastOpenAICall)
+        if timeSinceLastCall < openAICooldown {
+            print("⏰ Roast deferred: OpenAI cooldown active.")
+            return
+        }
+
         isThinking = true
         needsDisplay = true
         lastOpenAICall = Date()
-        
-        // Build roast message
+
         let messages: [[String: String]] = [
             ["role": "system", "content": systemPrompt],
             ["role": "user", "content": prompt]
