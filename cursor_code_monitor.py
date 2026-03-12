@@ -7,6 +7,7 @@ This script monitors terminal output and linter errors, then sends to TalkBack
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -15,10 +16,12 @@ from pathlib import Path
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+from talkback_utils import MESSAGE_FILE, build_message, write_message_atomic
+
 
 class CodeExecutionMonitor(FileSystemEventHandler):
-    def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
-        self.talkback_message_file = talkback_message_file
+    def __init__(self, talkback_message_file=None):
+        self.talkback_message_file = talkback_message_file or MESSAGE_FILE
         self.last_error_count = 0
         self.monitoring = True
         
@@ -49,9 +52,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         return error_count
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
-        """Send code execution results to TalkBack"""
-        
-        # Determine response type
+        """Send code execution results to TalkBack."""
         if error_count >= 2:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
@@ -61,21 +62,13 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
-        # Create message for TalkBack
-        message = {
-            "prompt": prompt,
-            "type": response_type,
-            "timestamp": time.time(),
-            "error_count": error_count,
-            "success": success
-        }
-        
-        # Write to file that TalkBack monitors
+
+        message = build_message(
+            prompt, response_type, error_count=error_count, success=success
+        )
+
         try:
-            with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
-            
+            write_message_atomic(message, self.talkback_message_file)
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:
             print(f"❌ Error sending to TalkBack: {e}")
@@ -85,10 +78,8 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         print(f"🔍 Monitoring command: {command}")
         
         try:
-            # Run command and capture output
             result = subprocess.run(
-                command,
-                shell=True,
+                shlex.split(command),
                 capture_output=True,
                 text=True,
                 timeout=30
