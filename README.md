@@ -263,6 +263,20 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
 
+### Message Delivery Reliability
+
+The IPC between Python writers and the Swift consumer uses `/tmp/talkback_message.json`.
+Reliability safeguards:
+
+- **Atomic writes** — Python scripts write to a temporary file and `os.replace()` it into
+  place so the Swift consumer never reads a half-written JSON blob.
+- **File cleanup** — The Swift consumer deletes the message file after successful
+  consumption, preventing stale re-processing on restart.
+- **Logged parse errors** — Read and JSON parse failures are logged with context instead
+  of being silently swallowed, making debugging straightforward.
+- **Queued delivery** — Roast, teaching, and assignment messages that arrive while the
+  OpenAI pipeline is busy or in cooldown are queued for retry instead of being dropped.
+
 ## 🔮 Future Features
 
 - [ ] Gemini vision-based behavior monitoring (webcam gaze/emotion detection)
