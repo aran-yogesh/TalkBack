@@ -159,7 +159,7 @@ class TestCountErrors(unittest.TestCase):
 
     def test_single_error_keyword(self):
         count = self.monitor.count_errors_in_output("error: undefined variable")
-        self.assertGreater(count, 0)
+        self.assertEqual(count, 1)
 
     def test_traceback(self):
         output = "Traceback (most recent call last):\n  File 'x.py', line 1"
@@ -208,9 +208,12 @@ class TestCountErrors(unittest.TestCase):
         self.assertGreater(count, 2)
 
     def test_case_insensitive_error(self):
-        # "ERROR:" should match
         count = self.monitor.count_errors_in_output("ERROR: critical failure")
-        self.assertGreater(count, 0)
+        self.assertEqual(count, 1)
+
+    def test_mixed_case_error_counted_once(self):
+        count = self.monitor.count_errors_in_output("Error: something went wrong")
+        self.assertEqual(count, 1)
 
     def test_empty_string(self):
         self.assertEqual(self.monitor.count_errors_in_output(""), 0)
