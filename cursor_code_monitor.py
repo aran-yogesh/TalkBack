@@ -11,13 +11,68 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 
+def yaml_scalar(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return "null"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False)
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def to_yaml(data: Any, indent: int = 0) -> str:
+    space = " " * indent
+
+    if isinstance(data, dict):
+        if not data:
+            return f"{space}{{}}\n"
+
+        lines: list[str] = []
+        for key, value in data.items():
+            key_text = str(key)
+            if isinstance(value, dict):
+                if value:
+                    lines.append(f"{space}{key_text}:")
+                    lines.extend(to_yaml(value, indent + 2).rstrip("\n").split("\n"))
+                else:
+                    lines.append(f"{space}{key_text}: {{}}")
+            elif isinstance(value, list):
+                if value:
+                    lines.append(f"{space}{key_text}:")
+                    lines.extend(to_yaml(value, indent + 2).rstrip("\n").split("\n"))
+                else:
+                    lines.append(f"{space}{key_text}: []")
+            else:
+                lines.append(f"{space}{key_text}: {yaml_scalar(value)}")
+        return "\n".join(lines) + "\n"
+
+    if isinstance(data, list):
+        if not data:
+            return f"{space}[]\n"
+
+        lines: list[str] = []
+        for item in data:
+            if isinstance(item, (dict, list)):
+                lines.append(f"{space}-")
+                lines.extend(to_yaml(item, indent + 2).rstrip("\n").split("\n"))
+            else:
+                lines.append(f"{space}- {yaml_scalar(item)}")
+        return "\n".join(lines) + "\n"
+
+    return f"{space}{yaml_scalar(data)}\n"
+
+
 class CodeExecutionMonitor(FileSystemEventHandler):
-    def __init__(self, talkback_message_file="/tmp/talkback_message.json"):
+    def __init__(self, talkback_message_file="/tmp/talkback_message.yaml"):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
@@ -74,7 +129,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         # Write to file that TalkBack monitors
         try:
             with open(self.talkback_message_file, "w") as f:
-                json.dump(message, f, indent=2)
+                f.write(to_yaml(message))
             
             print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:

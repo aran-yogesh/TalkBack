@@ -29,6 +29,60 @@ execution_results = {
     "success": False
 }
 
+
+def yaml_scalar(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return "null"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False)
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def to_yaml(data: Any, indent: int = 0) -> str:
+    space = " " * indent
+
+    if isinstance(data, dict):
+        if not data:
+            return f"{space}{{}}\n"
+
+        lines: List[str] = []
+        for key, value in data.items():
+            key_text = str(key)
+            if isinstance(value, dict):
+                if value:
+                    lines.append(f"{space}{key_text}:")
+                    lines.extend(to_yaml(value, indent + 2).rstrip("\n").split("\n"))
+                else:
+                    lines.append(f"{space}{key_text}: {{}}")
+            elif isinstance(value, list):
+                if value:
+                    lines.append(f"{space}{key_text}:")
+                    lines.extend(to_yaml(value, indent + 2).rstrip("\n").split("\n"))
+                else:
+                    lines.append(f"{space}{key_text}: []")
+            else:
+                lines.append(f"{space}{key_text}: {yaml_scalar(value)}")
+        return "\n".join(lines) + "\n"
+
+    if isinstance(data, list):
+        if not data:
+            return f"{space}[]\n"
+
+        lines: List[str] = []
+        for item in data:
+            if isinstance(item, (dict, list)):
+                lines.append(f"{space}-")
+                lines.extend(to_yaml(item, indent + 2).rstrip("\n").split("\n"))
+            else:
+                lines.append(f"{space}- {yaml_scalar(item)}")
+        return "\n".join(lines) + "\n"
+
+    return f"{space}{yaml_scalar(data)}\n"
+
 @app.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
     """List available resources from TalkBack monitor"""
@@ -37,13 +91,13 @@ async def handle_list_resources() -> list[types.Resource]:
             uri="talkback://execution-results",
             name="Latest Code Execution Results",
             description="Most recent code execution output and error count",
-            mimeType="application/json"
+            mimeType="application/x-yaml"
         ),
         types.Resource(
             uri="talkback://linter-errors",
             name="Current Linter Errors",
             description="Active linter/compiler errors in the workspace",
-            mimeType="application/json"
+            mimeType="application/x-yaml"
         )
     ]
 
@@ -51,12 +105,12 @@ async def handle_list_resources() -> list[types.Resource]:
 async def handle_read_resource(uri: str) -> str:
     """Read resource data"""
     if uri == "talkback://execution-results":
-        return json.dumps(execution_results, indent=2)
+        return to_yaml(execution_results)
     elif uri == "talkback://linter-errors":
-        return json.dumps({
+        return to_yaml({
             "linter_errors": execution_results["linter_errors"],
             "error_count": execution_results["error_count"]
-        }, indent=2)
+        })
     else:
         raise ValueError(f"Unknown resource: {uri}")
 
@@ -142,12 +196,12 @@ async def handle_call_tool(
         return [
             types.TextContent(
                 type="text",
-                text=json.dumps({
+                text=to_yaml({
                     "status": "success",
                     "error_count": error_count,
                     "response_type": response_type,
                     "message": f"TalkBack triggered with {response_type}"
-                })
+                }).rstrip()
             )
         ]
     
@@ -187,9 +241,9 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
     }
     
     # Write to a file that TalkBack monitors
-    message_file = "/tmp/talkback_message.json"
+    message_file = "/tmp/talkback_message.yaml"
     with open(message_file, "w") as f:
-        json.dump(talkback_message, f)
+        f.write(to_yaml(talkback_message))
     
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 

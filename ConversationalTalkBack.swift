@@ -86,7 +86,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
     // MCP monitoring for Cursor IDE roasting 🔥
     var mcpMonitorTimer: Timer?
     var lastMCPMessageTime: TimeInterval = 0
-    let mcpMessageFile = "/tmp/talkback_message.json"
+    let mcpMessageFile = "/tmp/talkback_message.yaml"
     
     // APIs
     let openAIAPIKey = Config.openAIAPIKey
