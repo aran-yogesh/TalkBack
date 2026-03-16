@@ -6,11 +6,11 @@ echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
 
 # Check if compiled
-if [ ! -f "MCPTalkBack" ]; then
-    echo "📦 Compiling MCPTalkBack..."
-    swiftc -o MCPTalkBack MCPTalkBack.swift \
+if [ ! -f "ConversationalTalkBack" ]; then
+    echo "📦 Compiling ConversationalTalkBack..."
+    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
       -framework Cocoa -framework Foundation -framework AVFoundation \
-      -target arm64-apple-macosx13.0
+      -framework ApplicationServices -target arm64-apple-macosx13.0
     
     if [ $? -ne 0 ]; then
         echo "❌ Compilation failed!"
@@ -40,7 +40,7 @@ echo "🚀 Starting TalkBack Avatar..."
 echo ""
 
 # Start TalkBack in background
-./MCPTalkBack &
+./ConversationalTalkBack &
 TALKBACK_PID=$!
 
 echo "✅ TalkBack running (PID: $TALKBACK_PID)"
