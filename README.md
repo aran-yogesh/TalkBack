@@ -27,50 +27,50 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
-- **Click and Hold** the avatar to speak your mind
-- **ElevenLabs Speech-to-Text** for accurate voice recognition
-- Supports multiple languages (English, Bengali, Hindi, and more!)
-- Natural conversation flow with real-time transcription
+- 👆 **Click and Hold** the avatar to speak your mind
+- 🎙️ **ElevenLabs Speech-to-Text** for accurate voice recognition
+- 🌍 Supports multiple languages (English, Bengali, Hindi, and more!)
+- 💬 Natural conversation flow with real-time transcription
 
 ### 🗣️ **Sassy AI Responses**
-- **OpenAI GPT-4o** powered responses
-- **ElevenLabs Text-to-Speech** with Ivanna's voice
-- Attitude-filled, personality-driven replies
-- Short, snappy responses that pack a punch
+- 🤖 **OpenAI GPT-4o** powered responses (configurable model)
+- 🔊 **ElevenLabs Text-to-Speech** with Ivanna's voice
+- 😏 Attitude-filled, personality-driven replies
+- ⚡ Short, snappy responses that pack a punch
 
 ### 🧠 **Conversational Memory**
-- Remembers your chat history
-- Maintains context across conversations
-- Smart follow-ups based on previous interactions
+- 💾 Remembers your chat history
+- 🔗 Maintains context across conversations
+- 🎯 Smart follow-ups based on previous interactions
 
 ### 🎨 **Custom Floating Avatar**
-- Transparent floating window (always on top)
-- Custom purse/wallet icon design
-- Animated eyes that follow your cursor
-- Dynamic expressions based on mood
-- Draggable anywhere on your screen
+- 🪟 Transparent floating window (always on top)
+- 👛 Custom purse/wallet icon design
+- 👀 Animated eyes that follow your cursor
+- 🎭 Dynamic expressions based on mood
+- ✋ Draggable anywhere on your screen
 
 ### 🗑️ **"The Great Escape" Feature**
-- Drag avatar near the menu bar to reveal trash can
-- Drop in trash to quit (the only way to close it!)
-- Adds a fun, mischievous interaction
+- ⬆️ Drag avatar near the menu bar to reveal trash can
+- 🎯 Drop in trash to quit (the only way to close it!)
+- 😈 Adds a fun, mischievous interaction
 
 ### 👁️ **Vision-Based Behavior Monitoring** *(Planned)*
-- Gemini API key slot is included in the config for future vision features
-- Planned capabilities:
+- 🔑 Gemini API key slot is included in the config for future vision features
+- 🚀 Planned capabilities:
   - 👀 Detecting when you look away from the screen
   - 😊😤😐 Emotion recognition (happy, frustrated, confused)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
 ### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
-- **Watches your terminal for code execution results**
-- **Auto-roasts you when you mess up!**
+- 👀 **Watches your terminal for code execution results**
+- 💀 **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
   - 😏 **1 error**: Light sass and sarcasm
   - 💅 **Success**: Sassy compliment with attitude
-- Integrates with Cursor IDE workflow
-- Real-time feedback via Ivanna's voice
+- 🖥️ Integrates with Cursor IDE workflow
+- 🎤 Real-time feedback via Ivanna's voice
 
 ## 🛠️ Tech Stack
 
@@ -120,6 +120,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    ```
    
    > **Note**: `config.swift` is gitignored so your keys stay local. Never commit real API keys.
+   > 
+   > For detailed API key setup instructions, see [API_KEY_SETUP.md](API_KEY_SETUP.md).
 
 3. **Compile the app**:
    ```bash
@@ -151,7 +153,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -175,8 +177,13 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
    # This will trigger a savage roast
    python3 cursor_code_monitor.py run 'python3 broken_code.py'
    
+   # Test the MCP connection
+   python3 test_mcp_connection.py
+   
    # TalkBack will speak the roast with Ivanna's voice!
    ```
+
+> **For detailed MCP setup instructions**, see [MCP_SETUP.md](MCP_SETUP.md) and [MCP_INTEGRATION.md](MCP_INTEGRATION.md).
 
 ## 📂 Project Structure
 
@@ -186,11 +193,12 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
-| `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
+| `start_talkback_mcp.sh` | Helper script for launching TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline MCP settings for Cursor IDE |
 
 ## 📋 API Endpoints Used
 
@@ -228,40 +236,42 @@ TalkBack is designed to be:
 ## 🐛 Troubleshooting
 
 ### No Voice Output?
-- Check system volume and audio output device
-- Verify ElevenLabs API key and voice ID
-- Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
+- 🔈 Check system volume and audio output device
+- 🔑 Verify ElevenLabs API key and voice ID
+- 🔍 Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
 
 ### Empty Transcriptions?
-- Ensure you're holding the mouse button while speaking
-- Check microphone permissions (System Settings → Privacy & Security → Microphone)
-- Verify ElevenLabs API key is valid
+- 🖱️ Ensure you're holding the mouse button while speaking
+- 🔒 Check microphone permissions (System Settings → Privacy & Security → Microphone)
+- 🔑 Verify ElevenLabs API key is valid
 
 ### Rate Limit Errors?
-- OpenAI usage limits: Check your account for current limits
-- Add payment method or wait 20 seconds between requests
+- 📊 OpenAI usage limits: Check your account for current limits
+- 💳 Add payment method or wait 20 seconds between requests
 
 ### Missing `config.swift`?
-- Copy the template: `cp config.swift.template config.swift`
-- Add your API keys to `config.swift`
+- 📋 Copy the template: `cp config.swift.template config.swift`
+- 🔑 Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
-- Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
-- Check that `watchdog` is installed: `pip3 install watchdog`
+- ✅ Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
+- ▶️ Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
+- 📦 Check that `watchdog` is installed: `pip3 install watchdog`
+- 🧪 Test the connection: `python3 test_mcp_connection.py`
+- 📁 Verify the message file exists: `ls -la /tmp/talkback_message.yaml`
 
 ### Crashes on Launch?
-- Compile with explicit target: `-target arm64-apple-macosx13.0`
-- Check Swift version: `swift --version`
-- Beta macOS can be unstable with Speech framework
+- 🎯 Compile with explicit target: `-target arm64-apple-macosx13.0`
+- 🔍 Check Swift version: `swift --version`
+- ⚠️ Beta macOS can be unstable with Speech framework
 
 ## 📝 Development Notes
 
 This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which required special handling:
-- Explicit compilation target (`-target arm64-apple-macosx13.0`)
-- Avoided unstable `SFSpeechRecognizer` framework
-- Used ElevenLabs STT instead of macOS built-in speech recognition
-- Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+- 🎯 Explicit compilation target (`-target arm64-apple-macosx13.0`)
+- 🚫 Avoided unstable `SFSpeechRecognizer` framework
+- 🎙️ Used ElevenLabs STT instead of macOS built-in speech recognition
+- 🔊 Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
 
 ## 🔮 Future Features
 
@@ -276,10 +286,10 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
+- 🐛 Report bugs
+- 💡 Suggest new features
+- 🔀 Submit pull requests
+- 📝 Improve documentation
 
 ## 📄 License
 
