@@ -1,0 +1,60 @@
+---
+description: Project overview and conventions for TalkBack — a macOS floating AI companion with voice interaction and MCP code monitoring.
+globs:
+  - "**/*"
+---
+
+# TalkBack
+
+Sassy macOS floating avatar that acts as a productivity coach with voice interaction, conversational memory, and real-time code monitoring via MCP.
+
+## Architecture
+
+- **ConversationalTalkBack.swift** — Main app: floating window, avatar rendering, voice chat (ElevenLabs STT/TTS), OpenAI GPT-4o responses, MCP message polling.
+- **config.swift.template** — API key template. Users copy to `config.swift` (gitignored) and fill in keys for OpenAI, ElevenLabs, and Gemini.
+- **cursor_code_monitor.py** — Standalone CLI that wraps shell commands, counts errors in output, and writes roast triggers to `/tmp/talkback_message.json`.
+- **cursor_mcp_server.py** — MCP server (stdio transport) for Cursor IDE integration.
+- **tests/** — Python tests for the MCP server, code monitor, and YAML utilities.
+
+## Tech Stack
+
+- Swift 6.2 / AppKit (native macOS, compiled with `swiftc`)
+- Python 3 (MCP server, code monitor, tests)
+- OpenAI GPT-4o, ElevenLabs STT & TTS, Gemini (planned vision features)
+
+## Build & Run
+
+```bash
+# Compile
+swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+  -framework Cocoa -framework Foundation -framework AVFoundation \
+  -target arm64-apple-macosx13.0
+
+# Run
+./ConversationalTalkBack
+
+# MCP integration test
+python3 test_mcp_connection.py
+```
+
+## Key Conventions
+
+- Never commit API keys or `config.swift`. Use `config.swift.template` for reference.
+- Keep changes focused and minimal.
+- Update `README.md` (including its Table of Contents) whenever features, setup steps, or user-visible behavior changes.
+- All command snippets in docs must be copy-paste ready from the repo root.
+- Python scripts use `watchdog` for file monitoring and the `mcp` SDK for MCP transport.
+- Swift code targets macOS 13.0+ (`-target arm64-apple-macosx13.0`).
+
+## Testing
+
+```bash
+# Run Python tests
+python3 -m pytest tests/ -v
+
+# Test MCP connection
+python3 test_mcp_connection.py
+
+# Test code monitor roast
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
+```
