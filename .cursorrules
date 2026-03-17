@@ -23,8 +23,8 @@
 
 🤖 **App**: TalkBack - macOS floating AI companion with voice and vision features
 📄 **Primary source**: `ConversationalTalkBack.swift`
-🔨 **Build**: `swiftc -o ConversationalTalkBack ConversationalTalkBack.swift -framework Cocoa -framework Foundation -framework AVFoundation -target arm64-apple-macosx13.0`
-▶️ **Run**: `./ConversationalTalkBack`
+⚙️ **Build**: `swiftc -o ConversationalTalkBack ConversationalTalkBack.swift -framework Cocoa -framework Foundation -framework AVFoundation -target arm64-apple-macosx13.0`
+🚀 **Run**: `./ConversationalTalkBack`
 🔐 **API config**: Copy `config.swift.template` to `config.swift` (gitignored)
 👀 **MCP monitor**: `python3 cursor_code_monitor.py run "COMMAND"`
 🛠️ **Tech stack**: Swift 6.2, AppKit, OpenAI GPT-4o, ElevenLabs STT/TTS, Gemini (planned)
