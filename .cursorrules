@@ -1,0 +1,37 @@
+# TalkBack Project Rules
+
+## README.md Maintenance
+
+### Structure Requirements
+- Always include a Table of Contents section immediately after the project description
+- Update the table of contents whenever headings are added, removed, or renamed
+- Maintain section order: Features → Tech Stack → Quick Start → How to Use → Project Structure → API Endpoints → Personality → Troubleshooting → Development Notes → Future Features → Contributing → License → Acknowledgments → Questions
+
+### When to Update README
+- Update whenever setup steps, commands, features, or user-visible behavior changes
+- When adding new scripts or integrations, add at least one concrete usage example
+- When adding new files, add an entry to the Project Structure table
+- If a code change does not require README updates, explicitly state why
+
+### Content Guidelines
+- Keep Quick Start, prerequisites, and troubleshooting steps aligned with current code
+- All command snippets must be copy-paste ready and valid from repo root unless noted
+- Use concise, actionable language and avoid vague instructions
+- Never include real API keys or secrets - use placeholders like `YOUR_OPENAI_API_KEY_HERE`
+
+## Project Context
+
+**App**: TalkBack - macOS floating AI companion with voice and vision features
+**Primary source**: `ConversationalTalkBack.swift`
+**Build**: `swiftc -o ConversationalTalkBack ConversationalTalkBack.swift -framework Cocoa -framework Foundation -framework AVFoundation -target arm64-apple-macosx13.0`
+**Run**: `./ConversationalTalkBack`
+**API config**: Copy `config.swift.template` to `config.swift` (gitignored)
+**MCP monitor**: `python3 cursor_code_monitor.py run "COMMAND"`
+**Tech stack**: Swift 6.2, AppKit, OpenAI GPT-4o, ElevenLabs STT/TTS, Gemini (planned)
+
+## Validation Checklist
+- Verify all command snippets match actual scripts and build steps
+- Confirm anchor links in table of contents resolve correctly
+- Check that Project Structure table lists every user-facing file in repo root
+- Confirm Swift and Python scripts still run after edits
+- Check for obvious lint/type/runtime errors in edited files
