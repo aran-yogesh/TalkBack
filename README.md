@@ -18,6 +18,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
+- [👤 Author](#-author)
 
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
@@ -291,6 +292,10 @@ MIT License - feel free to use, modify, and distribute.
 - **Google** for Gemini API (planned vision features)
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
+
+## 👤 Author
+
+**Yogesh Mahendran** — [@aran-yogesh](https://github.com/aran-yogesh)
 
 ## 💬 Questions or Feedback?
 
