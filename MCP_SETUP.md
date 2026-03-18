@@ -21,20 +21,21 @@ Your Code → Cursor IDE → MCP Monitor → TalkBack Avatar → Ivanna's Voice 
 ### 1. Install Python Dependencies
 
 ```bash
-cd /Users/aran/Desktop/talkback
 pip3 install mcp watchdog
 ```
 
 ### 2. Add Your API Keys
 
-Edit `MCPTalkBack.swift` and replace:
-- Line 40: `YOUR_OPENAI_API_KEY_HERE` with your OpenAI key
-- Line 43: `YOUR_ELEVENLABS_API_KEY_HERE` with your ElevenLabs key
+Copy the config template and add your keys:
+```bash
+cp config.swift.template config.swift
+```
+Edit `config.swift` with your OpenAI and ElevenLabs API keys.
 
 ### 3. Compile TalkBack with MCP Support
 
 ```bash
-swiftc -o MCPTalkBack MCPTalkBack.swift \
+swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
   -framework Cocoa -framework Foundation -framework AVFoundation \
   -target arm64-apple-macosx13.0
 ```
@@ -42,7 +43,7 @@ swiftc -o MCPTalkBack MCPTalkBack.swift \
 ### 4. Run TalkBack Avatar
 
 ```bash
-./MCPTalkBack &
+./ConversationalTalkBack &
 ```
 
 The avatar will appear on your screen, watching your code! 👀

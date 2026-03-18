@@ -8,7 +8,6 @@ API keys are now stored in a `Config` struct at the **top of each Swift file** (
 
 ### Files with Config:
 - `ConversationalTalkBack.swift` - Main avatar app
-- `GeminiVisionTest.swift` - Standalone vision test tool
 
 ## 🔧 How to Update Your API Keys
 
@@ -95,11 +94,7 @@ The repo currently has:
    - Added `Config` struct at the top
    - Replaced hardcoded keys with `Config.keyName`
 
-2. **GeminiVisionTest.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
-
-3. **.gitignore**
+2. **.gitignore**
    - Added `.env`, `config.swift`
 
 4. **README.md**
