@@ -31,7 +31,7 @@ python3 test_mcp_connection.py
 ### **Test 1: Basic Connection**
 ```bash
 # Run this to send a test message to TalkBack
-python test_mcp_connection.py
+python3 test_mcp_connection.py
 ```
 
 ### **Test 2: Code Execution Monitoring**

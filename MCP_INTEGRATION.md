@@ -134,9 +134,9 @@ Add to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
 # TalkBack roasting aliases
-alias pyroast='python3 cursor_code_monitor.py run "python3'
-alias swiftroast='python3 cursor_code_monitor.py run "swift'
-alias noderoast='python3 cursor_code_monitor.py run "node'
+pyroast()  { python3 cursor_code_monitor.py run "python3 $*"; }
+swiftroast() { python3 cursor_code_monitor.py run "swift $*"; }
+noderoast()  { python3 cursor_code_monitor.py run "node $*"; }
 ```
 
 Then reload your shell:
@@ -146,9 +146,9 @@ source ~/.zshrc
 
 Now you can just:
 ```bash
-pyroast my_script.py"
-swiftroast my_code.swift"
-noderoast app.js"
+pyroast my_script.py
+swiftroast my_code.swift
+noderoast app.js
 ```
 
 ### Method 3: Cursor IDE Terminal Integration

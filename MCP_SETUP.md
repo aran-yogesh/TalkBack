@@ -81,9 +81,10 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 1. Add MCP server to Cursor settings:
    
-   Copy the contents of `mcp_config.json` to your Cursor MCP settings:
+   Copy the contents of `mcp_config.json` to your Cursor MCP settings.
+   The path depends on which Cursor extension you use, for example:
    
-   **Mac**: `~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
+   **Roo-Cline**: `~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
 
 2. Restart Cursor
 

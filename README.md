@@ -20,7 +20,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
-![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
+![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -253,7 +253,7 @@ TalkBack is designed to be:
 - Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
 
 ### Empty Transcriptions?
-- Ensure you're holding the mouse button while speaking
+- Make sure you're speaking clearly — the mic is always on
 - Check microphone permissions (System Settings → Privacy & Security → Microphone)
 - Verify ElevenLabs API key is valid
 

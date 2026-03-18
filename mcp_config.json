@@ -3,11 +3,8 @@
     "talkback-monitor": {
       "command": "python3",
       "args": [
-        "/Users/aran/Desktop/talkback/cursor_mcp_server.py"
+        "cursor_mcp_server.py"
       ],
-      "env": {
-        "PYTHONPATH": "/Users/aran/Desktop/talkback"
-      },
       "description": "TalkBack code monitor - roasts you when your code fails!",
       "features": [
         "Terminal output monitoring",
