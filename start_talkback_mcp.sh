@@ -8,7 +8,7 @@ echo ""
 # Check if compiled
 if [ ! -f "ConversationalTalkBack" ]; then
     echo "📦 Compiling ConversationalTalkBack..."
-    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+    swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
       -framework Cocoa -framework Foundation -framework AVFoundation \
       -target arm64-apple-macosx13.0
     

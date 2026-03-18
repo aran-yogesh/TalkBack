@@ -54,19 +54,19 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND"
 
 ### Test with Success (0 errors)
 ```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py success"
+python3 cursor_code_monitor.py run 'echo "Hello World"'
 ```
 **Expected**: "Okay you made it this time, darling! 💅"
 
 ### Test with 1 Error
 ```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py one_error"
+python3 cursor_code_monitor.py run 'python3 -c "print(undefined_var)"'
 ```
 **Expected**: "ONE error? Cute. 😏"
 
 ### Test with Multiple Errors (ROAST MODE)
 ```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py roast"
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 **Expected**: "OH HONEY, what is this hot mess?! 🔥💀"
 

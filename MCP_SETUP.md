@@ -35,7 +35,7 @@ Edit `config.swift` with your OpenAI and ElevenLabs API keys.
 ### 3. Compile TalkBack with MCP Support
 
 ```bash
-swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
   -framework Cocoa -framework Foundation -framework AVFoundation \
   -target arm64-apple-macosx13.0
 ```
@@ -102,7 +102,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ## How to Use
 
-1. **Start TalkBack**: Run `./MCPTalkBack`
+1. **Start TalkBack**: Run `./ConversationalTalkBack`
 2. **Code in Cursor**: Write your code as usual
 3. **Run with Monitor**: Use `cursor_code_monitor.py run "your_command"`
 4. **Get Roasted**: TalkBack watches the output and roasts you accordingly! 🔥
@@ -113,7 +113,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 ✅ Error counting and analysis  
 ✅ Smart roasting based on error count  
 ✅ ElevenLabs voice (Ivanna) for maximum sass  
-✅ OpenAI GPT-4o-mini for witty roasts  
+✅ OpenAI GPT-4o for witty roasts  
 ✅ Works with any programming language  
 ✅ Draggable avatar (drag to trash to quit)  
 ✅ Always on top - can't escape the judgment! 😈  
@@ -121,8 +121,8 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 ## Troubleshooting
 
 ### TalkBack not roasting?
-- Check that `MCPTalkBack` is running (`ps aux | grep MCP`)
-- Check that `/tmp/talkback_message.json` exists and is being written
+- Check that `ConversationalTalkBack` is running (`ps aux | grep ConversationalTalkBack`)
+- Check that `/tmp/talkback_message.yaml` exists and is being written
 - Check terminal output for errors
 
 ### No voice output?
@@ -139,7 +139,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ### Change Roast Severity
 
-Edit `MCPTalkBack.swift`, find the `generateRoastResponse` function and modify the prompts:
+Edit `ConversationalTalkBack.swift`, find the `generateRoastResponse` function and modify the prompts:
 
 ```swift
 case "roast":

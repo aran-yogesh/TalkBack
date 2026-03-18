@@ -68,36 +68,15 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 
 ---
 
-## 📂 Files Added/Modified
+## 📂 Key Files
 
-### New Files:
-- **`cursor_code_monitor.py`**: Code monitor script (requires `watchdog`)
-  - Runs commands and monitors output
-  - Counts errors using regex patterns
-  - Sends roast triggers to TalkBack
-
-- **`broken_code.py`**: Test script with intentional errors (for testing roasts)
-
-- **`MCP_INTEGRATION.md`**: This documentation file
-
-### Modified Files:
-- **`ConversationalTalkBack.swift`**: 
-  - Added MCP monitoring variables (`mcpMonitorTimer`, `lastMCPMessageTime`, `mcpMessageFile`)
-  - Added `startMCPMonitoring()` function
-  - Added `checkForMCPMessages()` function
-  - Added `generateRoastResponse(prompt:type:)` function
-  - Added `askOpenAIForRoast(prompt:systemPrompt:)` function
-  - Updated startup message to mention MCP monitoring
-
-- **`README.md`**:
-  - Added MCP Code Monitor feature section
-  - Added usage instructions for MCP testing
-  - Added examples for all 3 roast levels
-
-### Existing Files (untouched):
-- **`cursor_mcp_server.py`**: Full MCP server (requires `mcp` package)
-- **`cursor_code_monitor.py`**: Alternative monitor (requires `watchdog` package)
-- **`ConversationalTalkBack.swift`**: Main app with MCP monitoring built in
+| File | Purpose |
+|------|---------|
+| `ConversationalTalkBack.swift` | Main app — includes MCP polling, roast generation, and TTS |
+| `cursor_code_monitor.py` | Standalone code monitor (requires `watchdog`) — wraps commands and writes roast triggers |
+| `cursor_mcp_server.py` | MCP server for Cursor IDE integration (requires `mcp` package, stdio transport) |
+| `broken_code.py` | Intentionally broken script for testing roast triggers |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 
 ---
 
@@ -210,8 +189,9 @@ In Cursor, you can create custom tasks in `.vscode/tasks.json`:
 ### Error Detection Patterns
 The MCP monitor looks for these error patterns in terminal output:
 - `error:`, `Error:`, `ERROR:`
-- `Traceback` (Python)
-- `SyntaxError`, `TypeError`, `ValueError`, `NameError`, etc.
+- `compilation failed`, `build failed`, `test failed`
+- `exception`, `Exception`, `Traceback`
+- `SyntaxError`, `TypeError`, `ValueError`
 - `AttributeError`, `ImportError`, `ModuleNotFoundError`
 
 ### Polling Mechanism
@@ -271,7 +251,7 @@ Keep it under 30 words. Be dramatic.
 ### Roasts are too harsh/mild?
 - Edit the `generateRoastResponse` function in `ConversationalTalkBack.swift`
 - Adjust the system prompts to your liking
-- Recompile: `swiftc -O -target arm64-apple-macosx13.0 ConversationalTalkBack.swift -o ConversationalTalkBack`
+- Recompile: `swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift -framework Cocoa -framework Foundation -framework AVFoundation -target arm64-apple-macosx13.0`
 
 ### Want different error thresholds?
 - Edit `cursor_code_monitor.py`
