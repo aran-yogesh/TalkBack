@@ -21,7 +21,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
-![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
+![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -65,7 +65,25 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 👩‍🏫 **Teacher Mode**
+- Coding-teacher personality enabled by default
+- Toggle on/off from the menu bar status item
+- When enabled, responses are tailored to help you learn and improve
+
+### 📬 **Assignment Monitoring**
+- Scans your Apple Mail inbox every 3 minutes for assignment-related emails
+- Detects keywords like "assignment", "homework", "due", "exam", etc.
+- Recognizes `.edu`, Canvas, and Blackboard sender domains
+- Summarizes detected assignments via GPT-4o and reads them aloud
+- Toggle on/off from the menu bar (disabled by default)
+
+### 🔍 **TalkBack Lens** (Accessibility Summarizer)
+- Floating overlay that summarizes or condenses on-screen text using **GPT-4.1**
+- Activate via the menu bar "Lens Mode" toggle or by holding the **⌥ Option** key
+- Two actions: **Summarize** and **Make Concise**
+- Uses macOS Accessibility APIs to read UI elements under the cursor
+
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -79,7 +97,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Language**: Swift 6.2
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
-  - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
+  - [OpenAI GPT-4o / GPT-4.1](https://platform.openai.com/) - Conversational AI & Lens summarization
   - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
@@ -146,6 +164,13 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 5. **Drag**: Move the avatar anywhere on your screen
 6. **Quit**: Drag avatar near the menu bar → drop in trash can
 
+### Menu Bar Controls
+
+A **viewfinder** (🔍) icon appears in the menu bar with these toggles:
+
+- **Lens Mode** — enable/disable the on-screen text summarizer (hold ⌥ Option for temporary activation)
+- **Coding Teacher Mode** — toggle the teaching-assistant personality (on by default)
+
 ### 🔥 MCP Code Monitoring (Cursor IDE Integration)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
@@ -207,15 +232,19 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
-### OpenAI GPT-4o
+### OpenAI Chat Completions
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
-- **Model**: `gpt-4o`
-- **Temperature**: 0.9 (for sassy responses)
-- **Max Tokens**: 80 (short, snappy replies)
+
+| Context | Model | Temperature | Max Tokens |
+|---|---|---|---|
+| Sassy chat responses | `gpt-4o` | 0.9 | 80 |
+| MCP code roasts | `gpt-4o` | 0.6 | 120 |
+| Assignment email summaries | `gpt-4o` | 0.7 | 120 |
+| TalkBack Lens summarizer | `gpt-4.1` | 0.3 | 120 |
 
 ### Gemini (Vision) — *Planned*
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - A Gemini API key slot is included in `config.swift.template` for future vision-based behavior monitoring
+- No Gemini code is implemented yet
 
 ## 🎭 Personality
 

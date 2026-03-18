@@ -11,12 +11,12 @@ This file gives quick context and working rules for AI coding agents in this rep
 ## Common Workflows
 
 - Build app:
-  - `swiftc -o ConversationalTalkBack ConversationalTalkBack.swift -framework Cocoa -framework Foundation -framework AVFoundation -target arm64-apple-macosx13.0`
+  - `swiftc -o ConversationalTalkBack ConversationalTalkBack.swift config.swift -framework Cocoa -framework Foundation -framework AVFoundation -target arm64-apple-macosx13.0`
 - Run app:
   - `./ConversationalTalkBack`
 - MCP integration checks:
   - `python3 test_mcp_connection.py`
-  - `python3 test_mcp_roast.py 'python3 broken_code.py'`
+  - `python3 cursor_code_monitor.py run 'python3 broken_code.py'`
 
 ## Editing Guidelines
 
