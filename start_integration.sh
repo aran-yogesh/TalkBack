@@ -25,9 +25,9 @@ echo "🧪 Testing MCP server..."
 python test_mcp_connection.py
 
 # Check if message file was created
-if [ -f "/tmp/talkback_message.json" ]; then
+if [ -f "/tmp/talkback_message.yaml" ]; then
     echo "✅ MCP server test successful!"
-    echo "📁 Message file created at: /tmp/talkback_message.json"
+    echo "📁 Message file created at: /tmp/talkback_message.yaml"
 else
     echo "❌ MCP server test failed!"
     exit 1
@@ -37,7 +37,7 @@ echo ""
 echo "🎯 Next Steps:"
 echo "1. Quit Cursor completely"
 echo "2. Restart Cursor (it will auto-connect to MCP server)"
-echo "3. Run: swift ConversationalTalkBack.swift"
+echo "3. Compile and run: ./ConversationalTalkBack (see README for build command)"
 echo "4. In Cursor's terminal, run some commands to test!"
 echo ""
 echo "🔥 Your coding assistant is ready to roast you!"

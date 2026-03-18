@@ -4,35 +4,24 @@ This document explains how TalkBack handles API keys.
 
 ## 📍 Where Are API Keys Stored?
 
-API keys are now stored in a `Config` struct at the **top of each Swift file** (around line 8):
-
-### Files with Config:
-- `ConversationalTalkBack.swift` - Main avatar app
-- `GeminiVisionTest.swift` - Standalone vision test tool
+API keys live in a separate `config.swift` file (gitignored) that is compiled alongside `ConversationalTalkBack.swift`. The repo ships a `config.swift.template` you copy and fill in.
 
 ## 🔧 How to Update Your API Keys
 
-### 1. Edit the Config Struct
+### 1. Create Your Config File
 
-Open `ConversationalTalkBack.swift` and find the `Config` struct (around line 8):
+```bash
+cp config.swift.template config.swift
+```
+
+Edit `config.swift` with your actual keys:
 
 ```swift
 struct Config {
-    static let openAIAPIKey: String = {
-        return "YOUR_OPENAI_API_KEY_HERE"  // ← Replace this
-    }()
-    
-    static let elevenLabsAPIKey: String = {
-        return "YOUR_ELEVENLABS_API_KEY_HERE"  // ← Replace this
-    }()
-    
-    static let elevenLabsVoiceID: String = {
-        return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice (keep this)
-    }()
-    
-    static let geminiAPIKey: String = {
-        return "YOUR_GEMINI_API_KEY_HERE"  // ← Replace this
-    }()
+    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+    static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+    static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"
+    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
 }
 ```
 
@@ -49,72 +38,20 @@ struct Config {
 After updating your API keys, recompile:
 
 ```bash
-swiftc -O -target arm64-apple-macosx13.0 ConversationalTalkBack.swift -o ConversationalTalkBack
+swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
+  -framework Cocoa -framework Foundation -framework AVFoundation \
+  -target arm64-apple-macosx13.0
 ```
 
 ## 🚨 Security Warning
 
 ⚠️ **NEVER commit your actual API keys to GitHub!**
 
-The current API keys in the codebase are **placeholders** (or belong to the original developer for testing).
+`config.swift` is already in `.gitignore` so your keys stay local. The repo only ships `config.swift.template` with placeholder values.
 
-### Before Committing to Git:
+## 🎯 Current Setup
 
-1. Replace all real API keys with `YOUR_*_API_KEY_HERE` placeholders
-2. Or use a separate `config.swift` file (already added to `.gitignore`)
-
-## 📝 Alternative: Using config.swift (Recommended for Development)
-
-For local development, you can create a separate `config.swift` file:
-
-1. **Copy the template**:
-   ```bash
-   cp config.swift.template config.swift
-   ```
-
-2. **Edit `config.swift`** with your real keys
-
-3. **This file is gitignored** - it won't be committed to GitHub
-
-4. **Compile with both files**:
-   ```bash
-   swiftc -O -target arm64-apple-macosx13.0 config.swift ConversationalTalkBack.swift -o ConversationalTalkBack
-   ```
-
-## 🎯 Current Setup (as of latest commit)
-
-The repo currently has:
-- ✅ **Embedded Config struct** in each Swift file
-- ✅ **config.swift** and **config.swift.template** files
-- ✅ **Updated .gitignore** to exclude `config.swift`
-- ✅ **README.md** with setup instructions
-
-## 📚 Files Modified
-
-1. **ConversationalTalkBack.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
-
-2. **GeminiVisionTest.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
-
-3. **.gitignore**
-   - Added `.env`, `config.swift`
-
-4. **README.md**
-   - Updated installation instructions
-   - Added Gemini API key requirement
-   - Documented new vision monitoring features
-
-5. **config.swift** (gitignored)
-   - Standalone config file with actual keys (local only)
-
-6. **config.swift.template**
-   - Template for others to copy and fill in
-
----
-
-**Last Updated**: October 19, 2025  
-**Status**: ✅ All API keys properly configured
+- ✅ **`config.swift.template`** — checked-in template with placeholder keys
+- ✅ **`config.swift`** — your local copy with real keys (gitignored)
+- ✅ **`.gitignore`** — excludes `config.swift` and `.env`
 

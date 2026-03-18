@@ -5,7 +5,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ## Table of Contents
 
 - [🎯 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
+- [🛠️ Tech Stack](#%EF%B8%8F-tech-stack)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
 - [📂 Project Structure](#-project-structure)
@@ -27,7 +27,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
-- **Click and Hold** the avatar to speak your mind
+- **Continuous listening** — TalkBack hears you automatically (always-on mic)
 - **ElevenLabs Speech-to-Text** for accurate voice recognition
 - Supports multiple languages (English, Bengali, Hindi, and more!)
 - Natural conversation flow with real-time transcription
@@ -55,6 +55,23 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Drop in trash to quit (the only way to close it!)
 - Adds a fun, mischievous interaction
 
+### 🔍 **TalkBack Lens** (Accessibility Text Summarizer)
+- Hold **⌥ Option** or toggle from the menu bar to activate
+- Hover over any on-screen text to get an instant summary or rewrite
+- Powered by **OpenAI GPT-4.1** for concise, accurate results
+- Caches results per element to avoid redundant API calls
+
+### 🎓 **Coding Teacher Mode**
+- Automatically analyzes your terminal command output
+- Provides short teaching moments on errors and successes
+- Togglable from the menu bar
+
+### 📬 **Assignment Email Alerts**
+- Monitors Apple Mail for assignment-related emails via AppleScript
+- Detects keywords like "assignment", "homework", "due", "exam", etc.
+- Summarizes new assignment emails with GPT-4o and speaks the alert
+- Togglable from the menu bar; checks every 3 minutes when enabled
+
 ### 👁️ **Vision-Based Behavior Monitoring** *(Planned)*
 - Gemini API key slot is included in the config for future vision features
 - Planned capabilities:
@@ -63,7 +80,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -77,11 +94,11 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - **Language**: Swift 6.2
 - **Framework**: AppKit (native macOS)
 - **AI & Voice Services**:
-  - [OpenAI GPT-4o](https://platform.openai.com/) - Conversational AI
+  - [OpenAI GPT-4o / GPT-4.1](https://platform.openai.com/) - Conversational AI & Lens
   - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
-- **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+- **Audio**: AVFoundation (AVAudioEngine, AVAudioPlayer)
 
 ## 🚀 Quick Start
 
@@ -89,10 +106,14 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 1. **macOS 13.0+** (developed on macOS 26.0.1 beta)
 2. **Xcode Command Line Tools** installed
-3. **API Keys**:
+3. **Python 3** with `watchdog` package (for MCP code monitoring):
+   ```bash
+   pip3 install watchdog
+   ```
+4. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
-   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
+   - Gemini API key *(optional, for planned vision features)* ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -123,7 +144,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
@@ -138,11 +159,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ### Basic Usage
 
 1. **Start the App**: Run `./ConversationalTalkBack`
-2. **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
-3. **Talk to TalkBack**:
-   - **Click and HOLD** the avatar
-   - **Speak** your message
-   - **Release** to send
+2. **Grant Microphone Permission**: Allow microphone access when prompted
+3. **Talk to TalkBack**: The mic is always on — just speak naturally
 4. **Listen**: TalkBack responds with Ivanna's voice and attitude
 5. **Drag**: Move the avatar anywhere on your screen
 6. **Quit**: Drag avatar near the menu bar → drop in trash can
@@ -151,7 +169,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -186,11 +204,13 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline MCP client settings |
+| `tests/` | Unit tests for YAML utils, code monitor, and MCP server |
 
 ## 📋 API Endpoints Used
 
@@ -206,14 +226,14 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 - **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
 - **Output**: MP3 audio
 
-### OpenAI GPT-4o
+### OpenAI Chat Completions
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
-- **Model**: `gpt-4o`
-- **Temperature**: 0.9 (for sassy responses)
-- **Max Tokens**: 80 (short, snappy replies)
+- **Chat & Roast**: `gpt-4o` — temperature 0.9, max tokens 80
+- **Teacher Mode**: `gpt-4o` — temperature 0.6, max tokens 120
+- **Assignment Alerts**: `gpt-4o` — temperature 0.7, max tokens 120
+- **Lens**: `gpt-4.1` — temperature 0.3, max tokens 120
 
 ### Gemini (Vision) — *Planned*
-- **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
 - A Gemini API key slot is included in `config.swift.template` for future vision-based behavior monitoring
 
 ## 🎭 Personality
@@ -246,7 +266,7 @@ TalkBack is designed to be:
 - Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
 
@@ -261,7 +281,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Explicit compilation target (`-target arm64-apple-macosx13.0`)
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
-- Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+- Used `AVAudioPlayer` for MP3 playback
 
 ## 🔮 Future Features
 
