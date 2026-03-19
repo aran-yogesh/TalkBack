@@ -13,6 +13,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
+- [🧪 Running Tests](#-running-tests)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -63,7 +64,19 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 👩‍🏫 **Teaching Assistant Mode**
+- Toggle via the menu bar to enable/disable
+- Automatically reviews command output after execution
+- Provides concise, witty teaching feedback on failures
+- Celebrates successes with playful encouragement
+
+### 📬 **Assignment Email Alerts**
+- Toggle via the menu bar to enable/disable
+- Monitors your email for assignment-related messages
+- Scans for keywords like "assignment", "homework", "due", "exam", etc.
+- Alerts you with a sassy nudge when new assignments are detected
+
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -151,7 +164,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -182,15 +195,24 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 | File | Purpose |
 |---|---|
-| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
+| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, teacher mode, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline/Cursor MCP settings for auto-start |
+| `package.json` | Node.js dependency manifest |
+| `tests/` | Unit tests for code monitor, MCP server, and YAML utilities |
+| `AGENTS.md` | AI agent guidelines for contributing to this repo |
+| `MCP_INTEGRATION.md` | Detailed MCP architecture and integration guide |
+| `MCP_SETUP.md` | Step-by-step MCP setup instructions |
+| `MCP_SETUP_COMPLETE.md` | Post-setup verification guide |
+| `QUICK_START.md` | Condensed quick-start for MCP roasting |
+| `API_KEY_SETUP.md` | API key configuration reference |
 
 ## 📋 API Endpoints Used
 
@@ -246,7 +268,7 @@ TalkBack is designed to be:
 - Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
 
@@ -263,11 +285,23 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
 
+## 🧪 Running Tests
+
+Run the Python unit tests from the repo root:
+
+```bash
+python3 -m pytest tests/ -v
+```
+
+The test suite covers:
+- `tests/test_code_monitor.py` — error counting, response type logic, YAML file I/O
+- `tests/test_mcp_server.py` — MCP tool calls, resource handling, IPC writing
+- `tests/test_yaml_utils.py` — shared YAML serialization edge cases
+
 ## 🔮 Future Features
 
 - [ ] Gemini vision-based behavior monitoring (webcam gaze/emotion detection)
 - [ ] Screen monitoring (detect what user is doing)
-- [ ] Context-aware productivity tips
 - [ ] Custom voice selection
 - [ ] Multiple personality modes
 - [ ] Scheduled check-ins
