@@ -16,7 +16,7 @@ TalkBack now watches your code in Cursor IDE and roasts you when you mess up! �
 ### 1️⃣ Start TalkBack Avatar
 
 ```bash
-cd /Users/aran/Desktop/talkback
+cd /path/to/TalkBack
 ./start_talkback_mcp.sh
 ```
 
@@ -24,13 +24,10 @@ cd /Users/aran/Desktop/talkback
 
 ```bash
 # Test sassy success (0 errors)
-python3 test_roast.py 1
-
-# Test minor sass (1 error)
-python3 test_roast.py 2
+python3 cursor_code_monitor.py run 'echo "Hello World"'
 
 # Test FULL ROAST (2+ errors)
-python3 test_roast.py 3
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 
 ### 3️⃣ Run Your Code with Monitoring
@@ -55,19 +52,13 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND"
 
 ### Test with Success (0 errors)
 ```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py success"
+python3 cursor_code_monitor.py run 'echo "Hello World"'
 ```
 **Expected**: "Okay you made it this time, darling! 💅"
 
-### Test with 1 Error
-```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py one_error"
-```
-**Expected**: "ONE error? Cute. 😏"
-
 ### Test with Multiple Errors (ROAST MODE)
 ```bash
-python3 cursor_code_monitor.py run "python test_with_errors.py roast"
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 **Expected**: "OH HONEY, what is this hot mess?! 🔥💀"
 
@@ -77,12 +68,10 @@ python3 cursor_code_monitor.py run "python test_with_errors.py roast"
 
 | File | Purpose |
 |------|---------|
-| `MCPTalkBack.swift` | Main TalkBack avatar with MCP monitoring |
-| `MCPTalkBack` | Compiled binary (run this!) |
+| `ConversationalTalkBack.swift` | Main TalkBack avatar with MCP monitoring |
 | `cursor_code_monitor.py` | Monitors code execution, counts errors |
 | `cursor_mcp_server.py` | MCP server for Cursor integration |
-| `test_roast.py` | Manual roast trigger (testing) |
-| `test_with_errors.py` | Demo script with intentional errors |
+| `broken_code.py` | Intentionally broken script for testing roasts |
 | `start_talkback_mcp.sh` | Easy start script |
 | `MCP_SETUP.md` | Detailed setup guide |
 
@@ -106,20 +95,20 @@ python3 cursor_code_monitor.py run "python test_with_errors.py roast"
 ### TalkBack not speaking?
 ```bash
 # Check if running
-ps aux | grep MCPTalkBack
+ps aux | grep ConversationalTalkBack
 
 # Restart
-pkill MCPTalkBack
+pkill ConversationalTalkBack
 ./start_talkback_mcp.sh
 ```
 
 ### Roasts not triggering?
 ```bash
 # Check message file exists
-cat /tmp/talkback_message.json
+cat /tmp/talkback_message.yaml
 
 # Try manual test
-python3 test_roast.py 3
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 
 ### Python dependencies missing?
