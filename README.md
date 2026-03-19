@@ -11,6 +11,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📂 Project Structure](#-project-structure)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
+- [🧪 Running Tests](#-running-tests)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
@@ -20,7 +21,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
-![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
+![macOS](https://img.shields.io/badge/macOS-13.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -123,7 +124,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift config.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
@@ -151,7 +152,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -186,11 +187,19 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline MCP server configuration |
+| `tests/` | Unit tests for YAML utils, code monitor, and MCP server |
+| `AGENTS.md` | AI agent guidelines for contributing to this repo |
+| `QUICK_START.md` | Condensed quick-start guide |
+| `API_KEY_SETUP.md` | Detailed API key setup instructions |
+| `MCP_SETUP.md` | MCP integration setup guide |
+| `MCP_INTEGRATION.md` | In-depth MCP architecture and usage docs |
+| `MCP_SETUP_COMPLETE.md` | Post-setup verification checklist |
 
 ## 📋 API Endpoints Used
 
@@ -225,6 +234,20 @@ TalkBack is designed to be:
 - 🧠 **Smart**: Remembers your conversations
 - 🎤 **Talkative**: Loves to chat (maybe too much)
 
+## 🧪 Running Tests
+
+Run the Python unit tests with:
+```bash
+python3 -m pytest tests/ -v
+```
+
+Individual test files:
+```bash
+python3 -m pytest tests/test_yaml_utils.py -v
+python3 -m pytest tests/test_code_monitor.py -v
+python3 -m pytest tests/test_mcp_server.py -v
+```
+
 ## 🐛 Troubleshooting
 
 ### No Voice Output?
@@ -246,7 +269,7 @@ TalkBack is designed to be:
 - Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
 
