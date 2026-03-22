@@ -17,10 +17,7 @@ def _list_names(root: Path, pattern: str) -> list[str]:
 
 def _tests_list(root: Path) -> list[str]:
     d = root / "tests"
-    if not d.is_dir():
-        return []
-    return sorted(p.name for p in d.glob("test_*.py") if p.is_file())
-
+    if not d.is_di
 
 def _mcp_check_commands(root: Path) -> list[str]:
     """Concrete python3 … lines for files that exist (repo root)."""
