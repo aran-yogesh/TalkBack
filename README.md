@@ -81,7 +81,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
-- **Audio**: AVFoundation (NSSound, AVAudioEngine, AVAudioPlayer)
+- **Audio**: AVFoundation (AVAudioEngine, AVAudioPlayer)
 
 ## 🚀 Quick Start
 
@@ -266,7 +266,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Explicit compilation target (`-target arm64-apple-macosx13.0`)
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
-- Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+- Used `AVAudioPlayer` for MP3 playback from ElevenLabs TTS
 
 ## 🔮 Future Features
 

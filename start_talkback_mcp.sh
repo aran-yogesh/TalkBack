@@ -56,5 +56,3 @@ echo "Press Ctrl+C to stop monitoring..."
 
 # Keep script running
 wait $TALKBACK_PID
-
-
