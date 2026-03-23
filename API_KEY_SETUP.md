@@ -6,13 +6,6 @@ This document explains how TalkBack handles API keys.
 
 API keys are stored in a separate `config.swift` file that is loaded at compile time. This file is gitignored to keep your keys safe.
 
-### Files with Config:
-- `config.swift` - Your local API key configuration (gitignored)
-- `config.swift.template` - Template to copy and fill in
-- `ConversationalTalkBack.swift` - Main avatar app (references `Config` struct)
-
-> **Note**: Vision features (Gemini-based) are planned for a future release.
-
 ## 🔧 How to Update Your API Keys
 
 ### 1. Edit the Config Struct
