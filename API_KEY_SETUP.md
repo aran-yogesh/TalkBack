@@ -4,35 +4,40 @@ This document explains how TalkBack handles API keys.
 
 ## 📍 Where Are API Keys Stored?
 
-API keys are now stored in a `Config` struct at the **top of each Swift file** (around line 8):
+API keys are stored in a separate `config.swift` file that is loaded at compile time. This file is gitignored to keep your keys safe.
 
 ### Files with Config:
-- `ConversationalTalkBack.swift` - Main avatar app
-- `GeminiVisionTest.swift` - Standalone vision test tool
+- `config.swift` - Your local API key configuration (gitignored)
+- `config.swift.template` - Template to copy and fill in
+- `ConversationalTalkBack.swift` - Main avatar app (references `Config` struct)
+
+> **Note**: Vision features (Gemini-based) are planned for a future release.
 
 ## 🔧 How to Update Your API Keys
 
 ### 1. Edit the Config Struct
 
-Open `ConversationalTalkBack.swift` and find the `Config` struct (around line 8):
+Copy the template and edit your `config.swift`:
+
+```bash
+cp config.swift.template config.swift
+```
+
+Then edit `config.swift` with your real keys:
 
 ```swift
 struct Config {
-    static let openAIAPIKey: String = {
-        return "YOUR_OPENAI_API_KEY_HERE"  // ← Replace this
-    }()
+    // OpenAI API Key (for GPT-4o chat responses)
+    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"  // ← Replace this
     
-    static let elevenLabsAPIKey: String = {
-        return "YOUR_ELEVENLABS_API_KEY_HERE"  // ← Replace this
-    }()
+    // ElevenLabs API Key (for voice synthesis and speech-to-text)
+    static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"  // ← Replace this
     
-    static let elevenLabsVoiceID: String = {
-        return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice (keep this)
-    }()
+    // ElevenLabs Voice ID (Ivanna's voice)
+    static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"  // Keep this
     
-    static let geminiAPIKey: String = {
-        return "YOUR_GEMINI_API_KEY_HERE"  // ← Replace this
-    }()
+    // Gemini API Key (for vision/behavior monitoring)
+    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"  // ← Replace this
 }
 ```
 
@@ -84,7 +89,7 @@ For local development, you can create a separate `config.swift` file:
 ## 🎯 Current Setup (as of latest commit)
 
 The repo currently has:
-- ✅ **Embedded Config struct** in each Swift file
+- ✅ **Config struct** in separate `config.swift` file (loaded at compile time)
 - ✅ **config.swift** and **config.swift.template** files
 - ✅ **Updated .gitignore** to exclude `config.swift`
 - ✅ **README.md** with setup instructions
@@ -95,9 +100,8 @@ The repo currently has:
    - Added `Config` struct at the top
    - Replaced hardcoded keys with `Config.keyName`
 
-2. **GeminiVisionTest.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
+2. **Vision features** (planned)
+   - Gemini-based vision monitoring is planned for a future release
 
 3. **.gitignore**
    - Added `.env`, `config.swift`
