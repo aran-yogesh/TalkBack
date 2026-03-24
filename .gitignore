@@ -36,6 +36,16 @@ secrets.swift
 .env
 config.swift
 
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+
+# Node
+node_modules/
+
 # Audio recordings
 *.m4a
 *.wav
