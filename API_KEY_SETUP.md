@@ -4,39 +4,28 @@ This document explains how TalkBack handles API keys.
 
 ## 📍 Where Are API Keys Stored?
 
-API keys are now stored in a `Config` struct at the **top of each Swift file** (around line 8):
+API keys are stored in a separate `config.swift` file that is **gitignored** for security. The main app (`ConversationalTalkBack.swift`) loads keys from the `Config` struct defined in `config.swift`.
 
-### Files with Config:
-- `ConversationalTalkBack.swift` - Main avatar app
-- `GeminiVisionTest.swift` - Standalone vision test tool
+## 🔧 How to Set Up Your API Keys
 
-## 🔧 How to Update Your API Keys
+### 1. Copy the Template
 
-### 1. Edit the Config Struct
+```bash
+cp config.swift.template config.swift
+```
 
-Open `ConversationalTalkBack.swift` and find the `Config` struct (around line 8):
+### 2. Edit `config.swift` with Your Keys
 
 ```swift
 struct Config {
-    static let openAIAPIKey: String = {
-        return "YOUR_OPENAI_API_KEY_HERE"  // ← Replace this
-    }()
-    
-    static let elevenLabsAPIKey: String = {
-        return "YOUR_ELEVENLABS_API_KEY_HERE"  // ← Replace this
-    }()
-    
-    static let elevenLabsVoiceID: String = {
-        return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice (keep this)
-    }()
-    
-    static let geminiAPIKey: String = {
-        return "YOUR_GEMINI_API_KEY_HERE"  // ← Replace this
-    }()
+    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+    static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
+    static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"  // Ivanna's voice
+    static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
 }
 ```
 
-### 2. Get Your API Keys
+### 3. Get Your API Keys
 
 | Service | Where to Get It | Link |
 |---------|----------------|------|
@@ -44,77 +33,20 @@ struct Config {
 | **ElevenLabs** | Profile settings | [https://elevenlabs.io/](https://elevenlabs.io/) |
 | **Gemini** | Google AI Studio | [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) |
 
-### 3. Recompile After Changes
+### 4. Recompile After Changes
 
 After updating your API keys, recompile:
 
 ```bash
-swiftc -O -target arm64-apple-macosx13.0 ConversationalTalkBack.swift -o ConversationalTalkBack
+swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+  -framework Cocoa -framework Foundation -framework AVFoundation \
+  -target arm64-apple-macosx13.0
 ```
 
 ## 🚨 Security Warning
 
 ⚠️ **NEVER commit your actual API keys to GitHub!**
 
-The current API keys in the codebase are **placeholders** (or belong to the original developer for testing).
-
-### Before Committing to Git:
-
-1. Replace all real API keys with `YOUR_*_API_KEY_HERE` placeholders
-2. Or use a separate `config.swift` file (already added to `.gitignore`)
-
-## 📝 Alternative: Using config.swift (Recommended for Development)
-
-For local development, you can create a separate `config.swift` file:
-
-1. **Copy the template**:
-   ```bash
-   cp config.swift.template config.swift
-   ```
-
-2. **Edit `config.swift`** with your real keys
-
-3. **This file is gitignored** - it won't be committed to GitHub
-
-4. **Compile with both files**:
-   ```bash
-   swiftc -O -target arm64-apple-macosx13.0 config.swift ConversationalTalkBack.swift -o ConversationalTalkBack
-   ```
-
-## 🎯 Current Setup (as of latest commit)
-
-The repo currently has:
-- ✅ **Embedded Config struct** in each Swift file
-- ✅ **config.swift** and **config.swift.template** files
-- ✅ **Updated .gitignore** to exclude `config.swift`
-- ✅ **README.md** with setup instructions
-
-## 📚 Files Modified
-
-1. **ConversationalTalkBack.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
-
-2. **GeminiVisionTest.swift**
-   - Added `Config` struct at the top
-   - Replaced hardcoded keys with `Config.keyName`
-
-3. **.gitignore**
-   - Added `.env`, `config.swift`
-
-4. **README.md**
-   - Updated installation instructions
-   - Added Gemini API key requirement
-   - Documented new vision monitoring features
-
-5. **config.swift** (gitignored)
-   - Standalone config file with actual keys (local only)
-
-6. **config.swift.template**
-   - Template for others to copy and fill in
-
----
-
-**Last Updated**: October 19, 2025  
-**Status**: ✅ All API keys properly configured
-
+- `config.swift` is already in `.gitignore` — it won't be committed
+- Only `config.swift.template` (with placeholder values) is tracked in git
+- Never paste real keys into `ConversationalTalkBack.swift` directly

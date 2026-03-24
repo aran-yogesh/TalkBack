@@ -20,31 +20,29 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            test_mcp_roast.py (Monitor Script)                │
-│  - Captures terminal output                                  │
-│  - Counts errors (Traceback, SyntaxError, etc.)              │
-│  - Determines roast type (roast/minor_sass/sassy_success)    │
+│          cursor_code_monitor.py (Monitor Script)            │
+│  - Captures terminal output                                 │
+│  - Counts errors (Traceback, SyntaxError, etc.)             │
+│  - Determines roast type (roast/minor_sass/sassy_success)   │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│          /tmp/talkback_message.json (IPC File)               │
-│  {                                                           │
-│    "prompt": "ROAST ME! 5 errors...",                        │
-│    "type": "roast",                                          │
-│    "timestamp": 1234567890.123,                              │
-│    "error_count": 5                                          │
-│  }                                                           │
+│          /tmp/talkback_message.yaml (IPC File)              │
+│  prompt: "ROAST ME! 5 errors..."                            │
+│  type: roast                                                │
+│  timestamp: 1234567890.123                                  │
+│  error_count: 5                                             │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │           ConversationalTalkBack.swift                       │
-│  - startMCPMonitoring() polls every 0.5s                     │
-│  - checkForMCPMessages() reads JSON file                     │
-│  - generateRoastResponse() picks roast level                 │
-│  - askOpenAIForRoast() gets savage AI response               │
-│  - speakWithElevenLabs() delivers roast via Ivanna voice     │
+│  - startMCPMonitoring() polls every 0.5s                    │
+│  - checkForMCPMessages() reads YAML file                    │
+│  - generateRoastResponse() picks roast level                │
+│  - askOpenAIForRoast() gets savage AI response              │
+│  - speakWithElevenLabs() delivers roast via Ivanna voice    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -72,10 +70,12 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 ## 📂 Files Added/Modified
 
 ### New Files:
-- **`test_mcp_roast.py`**: Simple MCP test script (no dependencies needed)
+- **`cursor_code_monitor.py`**: Code monitor script
   - Runs commands and monitors output
   - Counts errors using regex patterns
   - Sends roast triggers to TalkBack
+
+- **`cursor_mcp_server.py`**: MCP server for Cursor IDE integration (stdio transport)
 
 - **`broken_code.py`**: Test script with intentional errors (for testing roasts)
 
@@ -95,11 +95,6 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
   - Added usage instructions for MCP testing
   - Added examples for all 3 roast levels
 
-### Existing Files (untouched):
-- **`cursor_mcp_server.py`**: Full MCP server (requires `mcp` package)
-- **`cursor_code_monitor.py`**: Alternative monitor (requires `watchdog` package)
-- **`MCPTalkBack.swift`**: Standalone MCP version (reference implementation)
-
 ---
 
 ## 🚀 Quick Start
@@ -117,21 +112,21 @@ You'll see in the startup output:
 
 ### 2. Test with Success (0 errors)
 ```bash
-python3 test_mcp_roast.py 'echo Success!'
+python3 cursor_code_monitor.py run 'echo Success!'
 ```
 
 TalkBack will respond with a sassy compliment! 💅
 
 ### 3. Test with 1 Error
 ```bash
-python3 test_mcp_roast.py 'python3 -c "print(undefined_var)"'
+python3 cursor_code_monitor.py run 'python3 -c "print(undefined_var)"'
 ```
 
 TalkBack will give you light sass! 😏
 
 ### 4. Test with Multiple Errors (FULL ROAST)
 ```bash
-python3 test_mcp_roast.py 'python3 broken_code.py'
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
 ```
 
 TalkBack will ROAST YOU HARD! 🔥💀
@@ -143,34 +138,27 @@ TalkBack will ROAST YOU HARD! 🔥💀
 ### Method 1: Wrap Your Commands
 Instead of running:
 ```bash
-python my_script.py
+python3 my_script.py
 ```
 
 Run:
 ```bash
-python3 test_mcp_roast.py 'python my_script.py'
+python3 cursor_code_monitor.py run 'python3 my_script.py'
 ```
 
 ### Method 2: Create Aliases (Recommended)
 Add to your `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-# TalkBack roasting aliases
-alias pyroast='python3 /Users/aran/Desktop/talkback/test_mcp_roast.py "python3'
-alias swiftroast='python3 /Users/aran/Desktop/talkback/test_mcp_roast.py "swift'
-alias noderoast='python3 /Users/aran/Desktop/talkback/test_mcp_roast.py "node'
+# TalkBack roasting aliases (update the path to your repo location)
+alias pyroast='python3 cursor_code_monitor.py run "python3 $@"'
+alias swiftroast='python3 cursor_code_monitor.py run "swift $@"'
+alias noderoast='python3 cursor_code_monitor.py run "node $@"'
 ```
 
 Then reload your shell:
 ```bash
 source ~/.zshrc
-```
-
-Now you can just:
-```bash
-pyroast my_script.py"
-swiftroast my_code.swift"
-noderoast app.js"
 ```
 
 ### Method 3: Cursor IDE Terminal Integration
@@ -185,7 +173,8 @@ In Cursor, you can create custom tasks in `.vscode/tasks.json`:
       "type": "shell",
       "command": "python3",
       "args": [
-        "test_mcp_roast.py",
+        "cursor_code_monitor.py",
+        "run",
         "${file}"
       ],
       "group": {
@@ -202,141 +191,3 @@ In Cursor, you can create custom tasks in `.vscode/tasks.json`:
   ]
 }
 ```
-
----
-
-## 🔧 Technical Details
-
-### Error Detection Patterns
-The MCP monitor looks for these error patterns in terminal output:
-- `error:`, `Error:`, `ERROR:`
-- `Traceback` (Python)
-- `SyntaxError`, `TypeError`, `ValueError`, `NameError`, etc.
-- `AttributeError`, `ImportError`, `ModuleNotFoundError`
-
-### Polling Mechanism
-- **Frequency**: TalkBack checks `/tmp/talkback_message.json` every **0.5 seconds**
-- **Debouncing**: Only processes new messages (checks timestamp)
-- **Non-blocking**: Runs on a separate timer, doesn't interfere with other features
-
-### OpenAI Prompts
-Each roast level has a custom system prompt:
-
-**Roast (2+ errors)**:
-```
-You are TalkBack, a SAVAGE code reviewer with NO MERCY! 
-The user's code just FAILED with 2+ errors.
-Your job: ROAST THEM HARD but be funny about it. 
-Use dramatic language, emojis, and sass.
-Make them laugh while feeling the burn.
-Keep it under 40 words but make it HURT (in a fun way).
-```
-
-**Minor Sass (1 error)**:
-```
-You are TalkBack, a sassy code reviewer. 
-The user got 1 error. 
-Give them a little attitude but not too harsh.
-Be witty and sarcastic. Keep it under 30 words.
-```
-
-**Sassy Success (0 errors)**:
-```
-You are TalkBack, a sassy AI. 
-The user's code ran successfully!
-Say "okay you made it this time" but with MAJOR attitude and sass.
-Backhanded compliment energy.
-Keep it under 30 words. Be dramatic.
-```
-
----
-
-## 💡 Tips & Best Practices
-
-1. **Always Have TalkBack Running**: Start it at the beginning of your coding session
-2. **Use for Quick Tests**: Perfect for rapid iteration and debugging
-3. **Don't Take It Personally**: The roasts are meant to be funny and motivating!
-4. **Celebrate Successes**: Even the sassy success responses are encouraging
-5. **Share with Friends**: Record TalkBack roasting you and share the laughs
-
----
-
-## 🐛 Troubleshooting
-
-### TalkBack not roasting?
-1. Check if TalkBack is running: `ps aux | grep ConversationalTalkBack`
-2. Verify the JSON file is being created: `cat /tmp/talkback_message.json`
-3. Check TalkBack terminal output for "📬 New MCP message" logs
-
-### Roasts are too harsh/mild?
-- Edit the `generateRoastResponse` function in `ConversationalTalkBack.swift`
-- Adjust the system prompts to your liking
-- Recompile: `swiftc -O -target arm64-apple-macosx13.0 ConversationalTalkBack.swift -o ConversationalTalkBack`
-
-### Want different error thresholds?
-- Edit `test_mcp_roast.py`
-- Change line 54-63 to adjust when each roast type triggers
-
----
-
-## 🎉 Examples in Action
-
-```bash
-# Test 1: Python with syntax error
-$ python3 test_mcp_roast.py 'python3 -c "print(hello"'
-📊 Command finished: 1 errors, success=False
-✅ Sent to TalkBack: minor_sass (errors: 1)
-🎤 TalkBack should roast you in 3... 2... 1... 🔥
-
-TalkBack (Ivanna): "Aww, ONE error? How precious! You're thisclose, sweetie. 😏"
-
-# Test 2: Successful execution
-$ python3 test_mcp_roast.py 'echo "Hello World"'
-📊 Command finished: 0 errors, success=True
-✅ Sent to TalkBack: sassy_success (errors: 0)
-🎤 TalkBack should roast you in 3... 2... 1... 🔥
-
-TalkBack (Ivanna): "Oh WOW, it actually worked?! Mark the calendar, folks! Don't let it go to your head. 💅✨"
-
-# Test 3: Multiple errors (FULL ROAST)
-$ python3 test_mcp_roast.py 'python3 broken_code.py'
-📊 Command finished: 5 errors, success=False
-✅ Sent to TalkBack: roast (errors: 5)
-🎤 TalkBack should roast you in 3... 2... 1... 🔥
-
-TalkBack (Ivanna): "Oh HONEY NO. FIVE errors?! Did you just smash your keyboard and call it code? This is a HOT MESS EXPRESS! 🔥💀🚂"
-```
-
----
-
-## 🚧 Future Enhancements
-
-Potential improvements for the MCP integration:
-
-1. **Real-time linter integration**: Watch Cursor linter in real-time
-2. **Git commit hooks**: Roast on failed pre-commit checks
-3. **CI/CD integration**: Roast when builds fail
-4. **Custom roast templates**: User-defined roast styles
-5. **Roast history**: Keep track of all roasts for fun stats
-6. **Multiplayer mode**: Compete with friends for least roasts
-
----
-
-## 📝 License
-
-Same as TalkBack main project - MIT License
-
----
-
-## 🙏 Credits
-
-- **MCP Concept**: Inspired by Model Context Protocol for AI integrations
-- **Roasting AI**: Powered by OpenAI GPT-4o-mini
-- **Voice**: ElevenLabs Ivanna voice
-- **Attitude**: 100% TalkBack original sass 💅
-
----
-
-**Have fun coding, and may your errors be few and your roasts be savage! 🔥😎**
-
-
