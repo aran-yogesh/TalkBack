@@ -9,10 +9,12 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
 - [📂 Project Structure](#-project-structure)
+- [🧪 Running Tests](#-running-tests)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
+- [📚 Additional Documentation](#-additional-documentation)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -89,7 +91,11 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 1. **macOS 13.0+** (developed on macOS 26.0.1 beta)
 2. **Xcode Command Line Tools** installed
-3. **API Keys**:
+3. **Python 3** with `mcp` and `watchdog` packages (for MCP integration):
+   ```bash
+   pip3 install mcp watchdog
+   ```
+4. **API Keys**:
    - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys))
    - ElevenLabs API key ([Get one here](https://elevenlabs.io/))
    - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
@@ -180,7 +186,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 ## 📂 Project Structure
 
-| File | Purpose |
+| File / Directory | Purpose |
 |---|---|
 | `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
@@ -191,6 +197,37 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline/Cursor MCP settings for auto-starting the server |
+| `package.json` | Node.js dependency manifest |
+| `tests/` | Unit tests for code monitor, MCP server, and YAML utilities |
+| `AGENTS.md` | AI agent guidelines and project conventions |
+| `API_KEY_SETUP.md` | Detailed API key configuration guide |
+| `MCP_SETUP.md` | MCP integration setup walkthrough |
+| `MCP_SETUP_COMPLETE.md` | Complete MCP setup verification steps |
+| `MCP_INTEGRATION.md` | MCP architecture and integration details |
+| `QUICK_START.md` | Quick-start guide for MCP code monitoring |
+
+## 🧪 Running Tests
+
+Run individual test files from the repo root:
+
+```bash
+python3 -m pytest tests/test_code_monitor.py
+python3 -m pytest tests/test_mcp_server.py
+python3 -m pytest tests/test_yaml_utils.py
+```
+
+Verify the MCP IPC connection:
+
+```bash
+python3 test_mcp_connection.py
+```
+
+Test roast triggers with the intentionally broken script:
+
+```bash
+python3 cursor_code_monitor.py run 'python3 broken_code.py'
+```
 
 ## 📋 API Endpoints Used
 
@@ -262,6 +299,16 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+
+## 📚 Additional Documentation
+
+| Document | Description |
+|---|---|
+| [API_KEY_SETUP.md](API_KEY_SETUP.md) | Step-by-step API key configuration |
+| [MCP_SETUP.md](MCP_SETUP.md) | MCP integration setup walkthrough |
+| [MCP_SETUP_COMPLETE.md](MCP_SETUP_COMPLETE.md) | Complete MCP setup verification |
+| [MCP_INTEGRATION.md](MCP_INTEGRATION.md) | Architecture and integration details |
+| [QUICK_START.md](QUICK_START.md) | Quick-start guide for MCP code monitoring |
 
 ## 🔮 Future Features
 
