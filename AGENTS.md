@@ -16,7 +16,7 @@ This file gives quick context and working rules for AI coding agents in this rep
   - `./ConversationalTalkBack`
 - MCP integration checks:
   - `python3 test_mcp_connection.py`
-  - `python3 test_mcp_roast.py 'python3 broken_code.py'`
+  - `python3 cursor_code_monitor.py run 'python3 broken_code.py'`
 
 ## Editing Guidelines
 

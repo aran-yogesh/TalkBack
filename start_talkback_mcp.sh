@@ -6,9 +6,9 @@ echo "🤖 Starting TalkBack with Cursor IDE Integration..."
 echo ""
 
 # Check if compiled
-if [ ! -f "MCPTalkBack" ]; then
-    echo "📦 Compiling MCPTalkBack..."
-    swiftc -o MCPTalkBack MCPTalkBack.swift \
+if [ ! -f "ConversationalTalkBack" ]; then
+    echo "📦 Compiling ConversationalTalkBack..."
+    swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
       -framework Cocoa -framework Foundation -framework AVFoundation \
       -target arm64-apple-macosx13.0
     
@@ -40,14 +40,14 @@ echo "🚀 Starting TalkBack Avatar..."
 echo ""
 
 # Start TalkBack in background
-./MCPTalkBack &
+./ConversationalTalkBack &
 TALKBACK_PID=$!
 
 echo "✅ TalkBack running (PID: $TALKBACK_PID)"
 echo ""
 echo "📋 Quick Guide:"
 echo "   1. Run code with: python3 cursor_code_monitor.py run \"YOUR_COMMAND\""
-echo "   2. Test roasts with: python3 test_roast.py [1|2|3]"
+echo "   2. Test connection with: python3 test_mcp_connection.py"
 echo "   3. Stop TalkBack: kill $TALKBACK_PID"
 echo ""
 echo "🎤 TalkBack is watching your code... Ready to roast! 🔥"
@@ -55,5 +55,5 @@ echo ""
 echo "Press Ctrl+C to stop monitoring..."
 
 # Keep script running
-wait $TALKBACK_PID
+wait "$TALKBACK_PID"
 
