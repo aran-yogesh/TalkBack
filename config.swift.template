@@ -4,7 +4,7 @@ import Foundation
 // Copy this file to config.swift and add your actual API keys
 
 struct Config {
-    // OpenAI API Key (for GPT-4o-mini chat responses)
+    // OpenAI API Key (for GPT-4o chat responses)
     // Get it from: https://platform.openai.com/account/api-keys
     static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
     
