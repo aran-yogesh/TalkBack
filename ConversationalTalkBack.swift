@@ -223,7 +223,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         """
         
         let process = Process()
-        process.launchPath = "/usr/bin/osascript"
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         process.arguments = ["-e", script]
         
         let pipe = Pipe()
@@ -1282,7 +1282,7 @@ class ConversationalAvatarView: NSView, NSSoundDelegate, AVAudioPlayerDelegate {
         print("🎤 Starting continuous listening...")
         
         // Request microphone permission
-        AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
+        AVCaptureDevice.requestAccess(for: .microphone) { [weak self] granted in
                 DispatchQueue.main.async {
                     if granted {
                     self?.setupAudioEngine()
@@ -2472,7 +2472,7 @@ class ConversationalAppDelegate: NSObject, NSApplicationDelegate {
         
         // Show window
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         
         // Start Lens controller (menu bar toggle + option key)
         lensController = LensController(
