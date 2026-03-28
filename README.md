@@ -6,6 +6,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 - [🎯 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
+- [📁 Repository Layout](#-repository-layout)
 - [🚀 Quick Start](#-quick-start)
 - [🎮 How to Use](#-how-to-use)
 - [📂 Project Structure](#-project-structure)
@@ -82,6 +83,17 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
 - **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+
+## 📁 Repository Layout
+
+- `ConversationalTalkBack.swift` — main macOS app runtime source.
+- `config.swift.template` — template for local key/config setup.
+- `QUICK_START.md` — shortest path to run with MCP support.
+- `MCP_SETUP.md` / `MCP_INTEGRATION.md` — MCP installation and integration details.
+- `API_KEY_SETUP.md` / `MCP_SETUP_COMPLETE.md` — setup troubleshooting and completion checks.
+- `test_mcp_connection.py` — verifies MCP connectivity.
+- `test_mcp_roast.py` — sends command results for roast/sass testing.
+- `start_talkback_mcp.sh` / `start_integration.sh` — helper launch scripts.
 
 ## 🚀 Quick Start
 
