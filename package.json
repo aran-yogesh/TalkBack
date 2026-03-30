@@ -1,6 +1,7 @@
 {
   "name": "talkback",
   "version": "0.0.0",
+  "author": "Yogesh Mahendran",
   "private": true,
   "type": "module",
   "dependencies": {
