@@ -16,6 +16,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
+- [✍️ Author](#️-author)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
@@ -284,6 +285,10 @@ Contributions are welcome! Feel free to:
 ## 📄 License
 
 MIT License - feel free to use, modify, and distribute.
+
+## ✍️ Author
+
+**Yogesh Mahendran** — [@aran-yogesh](https://github.com/aran-yogesh)
 
 ## 🙏 Acknowledgments
 
