@@ -2,6 +2,8 @@
 
 A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
 
+**Author:** [Yogesh Mahendran](https://github.com/aran-yogesh)
+
 ## Table of Contents
 
 - [🎯 Features](#-features)
