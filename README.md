@@ -4,6 +4,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## Table of Contents
 
+- [✍️ Author](#️-author)
 - [🎯 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
 - [🚀 Quick Start](#-quick-start)
@@ -23,6 +24,12 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+## ✍️ Author
+
+🧑‍💻 **Yogesh Mahendran** — Creator and main author of TalkBack 🚀
+
+- 🐙 GitHub: [@aran-yogesh](https://github.com/aran-yogesh)
 
 ## 🎯 Features
 
