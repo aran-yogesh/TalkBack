@@ -27,9 +27,9 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## ✍️ Author
 
-**Yogesh Mahendran** — Creator and main author of TalkBack.
+🧑‍💻 **Yogesh Mahendran** — Creator and main author of TalkBack 🚀
 
-- GitHub: [@aran-yogesh](https://github.com/aran-yogesh)
+- 🐙 GitHub: [@aran-yogesh](https://github.com/aran-yogesh)
 
 ## 🎯 Features
 
