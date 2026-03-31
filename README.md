@@ -24,6 +24,22 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [How to Use](#how-to-use)
+- [API Endpoints Used](#api-endpoints-used)
+- [Personality](#personality)
+- [Troubleshooting](#troubleshooting)
+- [Development Notes](#development-notes)
+- [Future Features](#future-features)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Questions or Feedback?](#questions-or-feedback)
+
 ## 🎯 Features
 
 ### 🎤 **Real Voice Interaction**
