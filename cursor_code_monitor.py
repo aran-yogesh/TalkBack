@@ -10,11 +10,21 @@ import re
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 from typing import Any
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+
+warnings.warn(
+    "cursor_code_monitor.py uses file-based IPC (/tmp/talkback_message.json) which is "
+    "deprecated. A future version will use a proper WebSocket or HTTP-based transport. "
+    "The 'watchdog' file-system monitoring approach in this module will also be replaced "
+    "with native IDE event hooks.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def yaml_scalar(value: Any) -> str:

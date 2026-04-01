@@ -10,12 +10,22 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
+
+warnings.warn(
+    "cursor_mcp_server.py uses file-based IPC (/tmp/talkback_message.json) which is "
+    "deprecated. A future version will use a proper WebSocket or HTTP-based transport. "
+    "Additionally, 'mcp.server.models.InitializationOptions' may be removed in a future "
+    "version of the MCP SDK.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # TalkBack MCP Server
 app = Server("talkback-monitor")
