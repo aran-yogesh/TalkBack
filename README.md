@@ -276,11 +276,7 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
+PRs welcome!
 
 ## 📄 License
 
