@@ -1,6 +1,6 @@
 # TalkBack - Annoying But Useful AI Companion 🤖
 
-A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
+A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that continuously listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
 
 ## Table of Contents
 
@@ -11,6 +11,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📂 Project Structure](#-project-structure)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
+- [🧪 Running Tests](#-running-tests)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
@@ -27,11 +28,11 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## 🎯 Features
 
-### 🎤 **Real Voice Interaction**
-- **Click and Hold** the avatar to speak your mind
+### 🎤 **Continuous Listening**
+- **Always-on microphone** — TalkBack listens continuously using `AVAudioEngine`
 - **ElevenLabs Speech-to-Text** for accurate voice recognition
 - Supports multiple languages (English, Bengali, Hindi, and more!)
-- Natural conversation flow with real-time transcription
+- Automatic voice-activity detection — just speak and TalkBack responds
 
 ### 🗣️ **Sassy AI Responses**
 - **OpenAI GPT-4o** powered responses
@@ -56,6 +57,25 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - Drop in trash to quit (the only way to close it!)
 - Adds a fun, mischievous interaction
 
+### 👩‍🏫 **Coding Teacher Mode**
+- Toggle via the menu bar status item or programmatically
+- When enabled, TalkBack auto-analyzes terminal output from MCP-monitored commands
+- **Success**: Celebrates briefly, explains the result, and suggests a next step
+- **Failure**: Diagnoses likely causes, teaches what went wrong, and gives actionable fixes
+- Enabled by default on launch
+
+### 📬 **Assignment Email Alerts**
+- Toggle via the menu bar status item
+- Periodically scans for emails matching academic keywords (`assignment`, `homework`, `due`, `exam`, etc.) and domains (`edu`, `canvas`, `blackboard`)
+- Summarizes detected assignment emails using GPT-4o and reads them aloud
+- Checks every 3 minutes while enabled
+
+### 🔍 **TalkBack Lens**
+- A floating overlay for quick text summarization
+- Activate temporarily by holding the **⌥ Option** key, or toggle persistent mode from the menu bar
+- Actions: **Summarize** and **Make Concise** — powered by OpenAI
+- Appears as a dark translucent bubble near your cursor
+
 ### 👁️ **Vision-Based Behavior Monitoring** *(Planned)*
 - Gemini API key slot is included in the config for future vision features
 - Planned capabilities:
@@ -64,7 +84,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 🧐 Focus level tracking
   - 📱 Phone usage detection
 
-### 🔥 **MCP Code Monitor** (Cursor IDE Integration) (NEW!)
+### 🔥 **MCP Code Monitor** (Cursor IDE Integration)
 - **Watches your terminal for code execution results**
 - **Auto-roasts you when you mess up!**
   - 🔥 **2+ errors**: Full savage roast mode
@@ -72,6 +92,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - 💅 **Success**: Sassy compliment with attitude
 - Integrates with Cursor IDE workflow
 - Real-time feedback via Ivanna's voice
+- IPC via `/tmp/talkback_message.yaml`
 
 ## 🛠️ Tech Stack
 
@@ -82,7 +103,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
   - [Gemini](https://aistudio.google.com/) - Vision & behavior analysis *(planned)*
   - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) - Voice recognition
   - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) - Voice synthesis (Ivanna voice)
-- **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession)
+- **Audio & Video**: AVFoundation (NSSound, AVAudioEngine, AVCaptureSession)
 
 ## 🚀 Quick Start
 
@@ -139,20 +160,25 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 ### Basic Usage
 
 1. **Start the App**: Run `./ConversationalTalkBack`
-2. **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
-3. **Talk to TalkBack**:
-   - **Click and HOLD** the avatar
-   - **Speak** your message
-   - **Release** to send
+2. **Grant Microphone Permission**: Allow microphone access when prompted (required for continuous listening)
+3. **Talk to TalkBack**: Just speak — continuous listening is always active
 4. **Listen**: TalkBack responds with Ivanna's voice and attitude
 5. **Drag**: Move the avatar anywhere on your screen
 6. **Quit**: Drag avatar near the menu bar → drop in trash can
+
+### Menu Bar Controls
+
+A **viewfinder** (🔍) icon appears in the menu bar with these toggles:
+
+- **Lens Mode** — Enable/disable the TalkBack Lens overlay
+- **Coding Teacher Mode** — Enable/disable automatic terminal output analysis
+- **Hold ⌥ Option** — Temporarily activate Lens without toggling it on permanently
 
 ### 🔥 MCP Code Monitoring (Cursor IDE Integration)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -181,17 +207,25 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 ## 📂 Project Structure
 
-| File | Purpose |
+| File / Directory | Purpose |
 |---|---|
-| `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
+| `ConversationalTalkBack.swift` | Main app — floating avatar, continuous listening, MCP polling, Lens, Teacher Mode |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
-| `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
+| `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers to YAML |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline editor MCP server configuration |
+| `tests/` | Unit tests for code monitor, MCP server, and YAML utilities |
+| `AGENTS.md` | AI agent guidelines and common workflows |
+| `QUICK_START.md` | Condensed getting-started guide |
+| `API_KEY_SETUP.md` | Detailed API key setup instructions |
+| `MCP_SETUP.md` | MCP integration setup guide |
+| `MCP_INTEGRATION.md` | MCP architecture and integration details |
+| `MCP_SETUP_COMPLETE.md` | Post-setup verification checklist |
 
 ## 📋 API Endpoints Used
 
@@ -226,6 +260,22 @@ TalkBack is designed to be:
 - 🧠 **Smart**: Remembers your conversations
 - 🎤 **Talkative**: Loves to chat (maybe too much)
 
+## 🧪 Running Tests
+
+The `tests/` directory contains unit tests for the Python components:
+
+```bash
+# Run all tests
+python3 -m pytest tests/ -v
+
+# Run individual test files
+python3 -m pytest tests/test_code_monitor.py -v
+python3 -m pytest tests/test_mcp_server.py -v
+python3 -m pytest tests/test_yaml_utils.py -v
+```
+
+Tests cover YAML serialization utilities, error counting logic, MCP server tool/resource handling, and IPC file writing.
+
 ## 🐛 Troubleshooting
 
 ### No Voice Output?
@@ -234,7 +284,7 @@ TalkBack is designed to be:
 - Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
 
 ### Empty Transcriptions?
-- Ensure you're holding the mouse button while speaking
+- Speak clearly — continuous listening uses voice-activity detection
 - Check microphone permissions (System Settings → Privacy & Security → Microphone)
 - Verify ElevenLabs API key is valid
 
@@ -247,7 +297,7 @@ TalkBack is designed to be:
 - Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
 
@@ -263,6 +313,8 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+- Continuous listening via `AVAudioEngine` replaced the earlier click-and-hold recording model
+- IPC between Python scripts and the Swift app uses a lightweight YAML format (no third-party YAML library — custom `to_yaml`/`yaml_scalar` helpers are embedded in each script)
 
 ## 🔮 Future Features
 
