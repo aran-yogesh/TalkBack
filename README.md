@@ -12,7 +12,9 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📋 API Endpoints Used](#-api-endpoints-used)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
+- [🧪 Running Tests](#-running-tests)
 - [📝 Development Notes](#-development-notes)
+- [📚 Additional Documentation](#-additional-documentation)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -124,9 +126,9 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 3. **Compile the app**:
    ```bash
-   swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
+   swiftc -o ConversationalTalkBack config.swift ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
-     -target arm64-apple-macosx13.0
+     -framework ApplicationServices -target arm64-apple-macosx13.0
    ```
 
 4. **Run TalkBack**:
@@ -152,7 +154,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -187,11 +189,18 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline/Roo-Cline MCP settings for Cursor |
+| `tests/` | Unit tests for the MCP server, code monitor, and YAML utilities |
+| `QUICK_START.md` | Condensed quick-start guide for MCP roasting |
+| `MCP_INTEGRATION.md` | Detailed MCP architecture and integration guide |
+| `MCP_SETUP.md` | Step-by-step MCP setup instructions |
+| `MCP_SETUP_COMPLETE.md` | Post-setup verification checklist |
+| `API_KEY_SETUP.md` | API key configuration reference |
 
 ## 📋 API Endpoints Used
 
@@ -247,7 +256,7 @@ TalkBack is designed to be:
 - Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
 
@@ -256,6 +265,22 @@ TalkBack is designed to be:
 - Check Swift version: `swift --version`
 - Beta macOS can be unstable with Speech framework
 
+## 🧪 Running Tests
+
+Unit tests live in the `tests/` directory and cover the MCP server, code monitor, and YAML utilities:
+
+```bash
+python3 -m pytest tests/ -v
+```
+
+To run a single test file:
+
+```bash
+python3 -m pytest tests/test_code_monitor.py -v
+python3 -m pytest tests/test_mcp_server.py -v
+python3 -m pytest tests/test_yaml_utils.py -v
+```
+
 ## 📝 Development Notes
 
 This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which required special handling:
@@ -263,6 +288,16 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+
+## 📚 Additional Documentation
+
+| Document | Description |
+|---|---|
+| [QUICK_START.md](QUICK_START.md) | Condensed 3-step guide to get MCP roasting working |
+| [MCP_INTEGRATION.md](MCP_INTEGRATION.md) | Full architecture diagram, roast levels, and workflow integration |
+| [MCP_SETUP.md](MCP_SETUP.md) | Step-by-step MCP setup for Cursor IDE |
+| [MCP_SETUP_COMPLETE.md](MCP_SETUP_COMPLETE.md) | Post-setup verification and troubleshooting |
+| [API_KEY_SETUP.md](API_KEY_SETUP.md) | API key configuration details and security notes |
 
 ## 🔮 Future Features
 
