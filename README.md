@@ -295,7 +295,7 @@ MIT License - feel free to use, modify, and distribute.
 
 ## ✍️ Authors
 
-- **Yogesh Mahendran** — Creator & Lead Developer
+- **[Yogesh Mahendran](https://github.com/aran-yogesh)** — Creator & Lead Developer
 
 ## 💬 Questions or Feedback?
 
