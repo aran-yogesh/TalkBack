@@ -13,6 +13,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
+- [📚 Documentation](#-documentation)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
@@ -152,7 +153,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.yaml`)
 
 2. **Run your code through the monitor**:
    ```bash
@@ -187,11 +188,13 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
 | `cursor_code_monitor.py` | Standalone code monitor — wraps commands and writes roast triggers |
 | `cursor_mcp_server.py` | MCP server for Cursor IDE integration (stdio transport) |
-| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.json` IPC works |
+| `test_mcp_connection.py` | Quick test to verify `/tmp/talkback_message.yaml` IPC works |
 | `broken_code.py` | Intentionally broken script for testing roast triggers |
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
+| `cline_mcp_settings.json` | Cline MCP client settings |
+| `tests/` | Unit tests for code monitor, MCP server, and YAML utilities |
 
 ## 📋 API Endpoints Used
 
@@ -247,7 +250,7 @@ TalkBack is designed to be:
 - Add your API keys to `config.swift`
 
 ### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.yaml` every 0.5s)
 - Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
 - Check that `watchdog` is installed: `pip3 install watchdog`
 
@@ -263,6 +266,17 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 - Avoided unstable `SFSpeechRecognizer` framework
 - Used ElevenLabs STT instead of macOS built-in speech recognition
 - Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+
+## 📚 Documentation
+
+| Document | Description |
+|---|---|
+| [QUICK_START.md](QUICK_START.md) | Fast-track setup for TalkBack + Cursor MCP roasting |
+| [API_KEY_SETUP.md](API_KEY_SETUP.md) | Detailed guide for configuring API keys |
+| [MCP_SETUP.md](MCP_SETUP.md) | Step-by-step MCP server setup |
+| [MCP_INTEGRATION.md](MCP_INTEGRATION.md) | Architecture and deep-dive on MCP integration |
+| [MCP_SETUP_COMPLETE.md](MCP_SETUP_COMPLETE.md) | Post-setup verification checklist |
+| [AGENTS.md](AGENTS.md) | Guidelines for AI coding agents working in this repo |
 
 ## 🔮 Future Features
 
