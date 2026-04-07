@@ -193,21 +193,21 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 | `start_talkback_mcp.sh` | Compiles and launches TalkBack with MCP support |
 | `start_integration.sh` | Sets up venv and verifies MCP connection |
 | `mcp_config.json` | Cursor IDE MCP server configuration |
-| `cline_mcp_settings.json` | Cline/Roo-Cline MCP settings for Cursor |
-| `tests/test_mcp_server.py` | Unit tests for the MCP server |
-| `tests/test_code_monitor.py` | Unit tests for the code monitor |
-| `tests/test_yaml_utils.py` | Unit tests for YAML serialization utilities |
+| `cline_mcp_settings.json` | ⚙️ Cline/Roo-Cline MCP settings for Cursor |
+| `tests/test_mcp_server.py` | 🧪 Unit tests for the MCP server |
+| `tests/test_code_monitor.py` | 🧪 Unit tests for the code monitor |
+| `tests/test_yaml_utils.py` | 🧪 Unit tests for YAML serialization utilities |
 
 ## 📚 Additional Documentation
 
 | Document | Description |
 |---|---|
-| [`QUICK_START.md`](QUICK_START.md) | Fast 3-step guide to get roasting |
-| [`MCP_INTEGRATION.md`](MCP_INTEGRATION.md) | Detailed MCP architecture and roast-level docs |
-| [`MCP_SETUP.md`](MCP_SETUP.md) | Full MCP + Cursor IDE setup walkthrough |
-| [`MCP_SETUP_COMPLETE.md`](MCP_SETUP_COMPLETE.md) | Post-setup verification and troubleshooting |
-| [`API_KEY_SETUP.md`](API_KEY_SETUP.md) | API key configuration guide |
-| [`AGENTS.md`](AGENTS.md) | Guidelines for AI coding agents working in this repo |
+| [`QUICK_START.md`](QUICK_START.md) | ⚡ Fast 3-step guide to get roasting |
+| [`MCP_INTEGRATION.md`](MCP_INTEGRATION.md) | 🔥 Detailed MCP architecture and roast-level docs |
+| [`MCP_SETUP.md`](MCP_SETUP.md) | 🛠️ Full MCP + Cursor IDE setup walkthrough |
+| [`MCP_SETUP_COMPLETE.md`](MCP_SETUP_COMPLETE.md) | ✅ Post-setup verification and troubleshooting |
+| [`API_KEY_SETUP.md`](API_KEY_SETUP.md) | 🔐 API key configuration guide |
+| [`AGENTS.md`](AGENTS.md) | 🤖 Guidelines for AI coding agents working in this repo |
 
 ## 📋 API Endpoints Used
 
