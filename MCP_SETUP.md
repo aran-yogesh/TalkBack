@@ -21,20 +21,27 @@ Your Code → Cursor IDE → MCP Monitor → TalkBack Avatar → Ivanna's Voice 
 ### 1. Install Python Dependencies
 
 ```bash
-cd /Users/aran/Desktop/talkback
+cd /path/to/talkback
 pip3 install mcp watchdog
 ```
 
 ### 2. Add Your API Keys
 
-Edit `MCPTalkBack.swift` and replace:
-- Line 40: `YOUR_OPENAI_API_KEY_HERE` with your OpenAI key
-- Line 43: `YOUR_ELEVENLABS_API_KEY_HERE` with your ElevenLabs key
+Copy `config.swift.template` to `config.swift` and replace the placeholder values with your actual keys:
+
+```bash
+cp config.swift.template config.swift
+```
+
+Then edit `config.swift` and fill in:
+- `YOUR_OPENAI_API_KEY_HERE` with your OpenAI key
+- `YOUR_ELEVENLABS_API_KEY_HERE` with your ElevenLabs key
+- `YOUR_GEMINI_API_KEY_HERE` with your Gemini key
 
 ### 3. Compile TalkBack with MCP Support
 
 ```bash
-swiftc -o MCPTalkBack MCPTalkBack.swift \
+swiftc -o ConversationalTalkBack ConversationalTalkBack.swift config.swift \
   -framework Cocoa -framework Foundation -framework AVFoundation \
   -target arm64-apple-macosx13.0
 ```
@@ -42,7 +49,7 @@ swiftc -o MCPTalkBack MCPTalkBack.swift \
 ### 4. Run TalkBack Avatar
 
 ```bash
-./MCPTalkBack &
+./ConversationalTalkBack &
 ```
 
 The avatar will appear on your screen, watching your code! 👀
@@ -101,7 +108,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ## How to Use
 
-1. **Start TalkBack**: Run `./MCPTalkBack`
+1. **Start TalkBack**: Run `./ConversationalTalkBack`
 2. **Code in Cursor**: Write your code as usual
 3. **Run with Monitor**: Use `cursor_code_monitor.py run "your_command"`
 4. **Get Roasted**: TalkBack watches the output and roasts you accordingly! 🔥
@@ -120,8 +127,8 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 ## Troubleshooting
 
 ### TalkBack not roasting?
-- Check that `MCPTalkBack` is running (`ps aux | grep MCP`)
-- Check that `/tmp/talkback_message.json` exists and is being written
+- Check that `ConversationalTalkBack` is running (`ps aux | grep ConversationalTalkBack`)
+- Check that `/tmp/talkback_message.yaml` exists and is being written
 - Check terminal output for errors
 
 ### No voice output?
@@ -138,7 +145,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ### Change Roast Severity
 
-Edit `MCPTalkBack.swift`, find the `generateRoastResponse` function and modify the prompts:
+Edit `ConversationalTalkBack.swift`, find the `generateRoastResponse` function and modify the prompts:
 
 ```swift
 case "roast":

@@ -4,7 +4,7 @@
 Your MCP server is ready! Test it:
 
 ```bash
-cd /Users/aran/Desktop/talkback
+cd <project-root>
 source .venv/bin/activate
 python test_mcp_connection.py
 ```
@@ -16,14 +16,14 @@ python test_mcp_connection.py
 2. **Copy the MCP settings file to Cursor's config:**
    ```bash
    mkdir -p ~/.cursor
-   cp /Users/aran/Desktop/talkback/cline_mcp_settings.json ~/.cursor/cline_mcp_settings.json
+   cp ./cline_mcp_settings.json ~/.cursor/cline_mcp_settings.json
    ```
 3. **Restart Cursor** - it will automatically start the MCP server
 
 ### **Option B: Manual Server (For Debugging)**
 1. **Keep server running in terminal:**
    ```bash
-   cd /Users/aran/Desktop/talkback
+   cd <project-root>
    source .venv/bin/activate
    python cursor_mcp_server.py
    ```
@@ -56,14 +56,14 @@ python test_mcp_connection.py
 ### **Test 3: Monitor the Message File**
 ```bash
 # Watch the message file in real-time
-tail -f /tmp/talkback_message.json
+tail -f /tmp/talkback_message.yaml
 ```
 
 ## 🎯 **How It Works**
 
 1. **Cursor runs commands** in terminal
 2. **MCP server detects** execution results
-3. **Server writes** to `/tmp/talkback_message.json`
+3. **Server writes** to `/tmp/talkback_message.yaml`
 4. **TalkBack reads** the file and responds with voice
 5. **You get roasted** for errors or praised for success! 🔥
 
@@ -73,7 +73,7 @@ tail -f /tmp/talkback_message.json
 ```bash
 # Check Python path
 which python
-# Should show: /Users/aran/Desktop/talkback/.venv/bin/python
+# Should show the Python binary inside your project's .venv
 
 # Reinstall MCP if needed
 pip install mcp
@@ -85,7 +85,7 @@ pip install mcp
 3. Make sure virtual environment is activated
 
 ### **If TalkBack doesn't respond:**
-1. Check `/tmp/talkback_message.json` exists
+1. Check `/tmp/talkback_message.yaml` exists
 2. Verify TalkBack is running
 3. Check console output for errors
 
@@ -93,7 +93,7 @@ pip install mcp
 
 - ✅ MCP server starts without errors
 - ✅ Cursor connects to MCP server
-- ✅ `/tmp/talkback_message.json` gets created
+- ✅ `/tmp/talkback_message.yaml` gets created
 - ✅ TalkBack speaks when you run code
 - ✅ You get roasted for errors! 🔥
 
