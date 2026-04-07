@@ -56,14 +56,14 @@ python test_mcp_connection.py
 ### **Test 3: Monitor the Message File**
 ```bash
 # Watch the message file in real-time
-tail -f /tmp/talkback_message.json
+tail -f /tmp/talkback_message.yaml
 ```
 
 ## 🎯 **How It Works**
 
 1. **Cursor runs commands** in terminal
 2. **MCP server detects** execution results
-3. **Server writes** to `/tmp/talkback_message.json`
+3. **Server writes** to `/tmp/talkback_message.yaml`
 4. **TalkBack reads** the file and responds with voice
 5. **You get roasted** for errors or praised for success! 🔥
 
@@ -85,7 +85,7 @@ pip install mcp
 3. Make sure virtual environment is activated
 
 ### **If TalkBack doesn't respond:**
-1. Check `/tmp/talkback_message.json` exists
+1. Check `/tmp/talkback_message.yaml` exists
 2. Verify TalkBack is running
 3. Check console output for errors
 
@@ -93,7 +93,7 @@ pip install mcp
 
 - ✅ MCP server starts without errors
 - ✅ Cursor connects to MCP server
-- ✅ `/tmp/talkback_message.json` gets created
+- ✅ `/tmp/talkback_message.yaml` gets created
 - ✅ TalkBack speaks when you run code
 - ✅ You get roasted for errors! 🔥
 

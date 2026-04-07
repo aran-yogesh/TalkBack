@@ -116,7 +116,7 @@ pkill MCPTalkBack
 ### Roasts not triggering?
 ```bash
 # Check message file exists
-cat /tmp/talkback_message.json
+cat /tmp/talkback_message.yaml
 
 # Try manual test
 python3 test_roast.py 3
