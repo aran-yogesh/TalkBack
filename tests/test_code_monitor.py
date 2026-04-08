@@ -215,8 +215,25 @@ class TestValidateMessageFields(unittest.TestCase):
 
 class TestConstants(unittest.TestCase):
 
-    def test_max_prompt_size_is_5kb(self):
-        self.assertEqual(MAX_PROMPT_SIZE_BYTES, 5 * 1024)
+    def test_max_prompt_size_default_is_5kb(self):
+        if "MAX_PROMPT_SIZE_BYTES" not in os.environ:
+            self.assertEqual(MAX_PROMPT_SIZE_BYTES, 5 * 1024)
+
+    def test_max_prompt_size_from_env(self):
+        import importlib
+        import cursor_code_monitor
+
+        original = os.environ.get("MAX_PROMPT_SIZE_BYTES")
+        try:
+            os.environ["MAX_PROMPT_SIZE_BYTES"] = "8192"
+            importlib.reload(cursor_code_monitor)
+            self.assertEqual(cursor_code_monitor.MAX_PROMPT_SIZE_BYTES, 8192)
+        finally:
+            if original is None:
+                os.environ.pop("MAX_PROMPT_SIZE_BYTES", None)
+            else:
+                os.environ["MAX_PROMPT_SIZE_BYTES"] = original
+            importlib.reload(cursor_code_monitor)
 
     def test_roast_threshold_is_2(self):
         self.assertEqual(ROAST_ERROR_THRESHOLD, 2)

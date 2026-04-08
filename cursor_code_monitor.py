@@ -16,8 +16,9 @@ from typing import Any
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-# Maximum size for prompt and output fields in TalkBack messages (5KB)
-MAX_PROMPT_SIZE_BYTES = 5 * 1024
+# Maximum size for prompt and output fields in TalkBack messages (default 5KB).
+# Override at deploy time with the MAX_PROMPT_SIZE_BYTES environment variable.
+MAX_PROMPT_SIZE_BYTES = int(os.environ.get("MAX_PROMPT_SIZE_BYTES", 5 * 1024))
 ROAST_ERROR_THRESHOLD = 2
 
 

@@ -7,6 +7,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
+- [⚙️ Environment Variables](#️-environment-variables)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
@@ -250,6 +251,18 @@ TalkBack is designed to be:
 - Compile with explicit target: `-target arm64-apple-macosx13.0`
 - Check Swift version: `swift --version`
 - Beta macOS can be unstable with Speech framework
+
+## ⚙️ Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `MAX_PROMPT_SIZE_BYTES` | `5120` (5 KB) | Maximum byte size for prompt fields in TalkBack messages. Prompts exceeding this limit are truncated. |
+
+Example:
+
+```bash
+export MAX_PROMPT_SIZE_BYTES=10240  # 10 KB
+```
 
 ## 📝 Development Notes
 
