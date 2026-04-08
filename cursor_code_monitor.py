@@ -16,6 +16,38 @@ from typing import Any
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+# Maximum size for prompt and output fields in TalkBack messages (5KB)
+MAX_PROMPT_SIZE_BYTES = 5 * 1024
+ROAST_ERROR_THRESHOLD = 2
+
+
+def validate_message_fields(message: dict[str, Any]) -> dict[str, Any]:
+    """Validate and enforce size limits on TalkBack message fields.
+
+    - prompt: truncated to MAX_PROMPT_SIZE_BYTES if oversized
+    - type: must be a valid response type, rejected otherwise
+    - error_count: must be non-negative, rejected otherwise
+    """
+    valid_types = {"roast", "minor_sass", "sassy_success"}
+
+    if "type" in message and message["type"] not in valid_types:
+        raise ValueError(
+            f"invalid response type '{message['type']}', "
+            f"must be one of {valid_types}"
+        )
+
+    if "error_count" in message and message["error_count"] < 0:
+        raise ValueError("error_count must be non-negative")
+
+    # Truncate prompt if it exceeds the size limit
+    if "prompt" in message and message["prompt"] is not None:
+        encoded = message["prompt"].encode("utf-8")
+        if len(encoded) > MAX_PROMPT_SIZE_BYTES:
+            truncated = encoded[:MAX_PROMPT_SIZE_BYTES].decode("utf-8", errors="ignore")
+            message["prompt"] = truncated
+
+    return message
+
 
 def yaml_scalar(value: Any) -> str:
     if isinstance(value, bool):
@@ -105,9 +137,9 @@ class CodeExecutionMonitor(FileSystemEventHandler):
     
     def send_to_talkback(self, output: str, error_count: int, success: bool):
         """Send code execution results to TalkBack"""
-        
+
         # Determine response type
-        if error_count >= 2:
+        if error_count >= ROAST_ERROR_THRESHOLD:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
         elif error_count == 1:
@@ -116,7 +148,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
+
         # Create message for TalkBack
         message = {
             "prompt": prompt,
@@ -125,6 +157,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "error_count": error_count,
             "success": success
         }
+        message = validate_message_fields(message)
         
         # Write to file that TalkBack monitors
         try:

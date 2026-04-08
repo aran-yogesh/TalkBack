@@ -14,7 +14,14 @@ from unittest.mock import MagicMock, mock_open, patch
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cursor_code_monitor import CodeExecutionMonitor, to_yaml, yaml_scalar
+from cursor_code_monitor import (
+    MAX_PROMPT_SIZE_BYTES,
+    ROAST_ERROR_THRESHOLD,
+    CodeExecutionMonitor,
+    to_yaml,
+    validate_message_fields,
+    yaml_scalar,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -143,6 +150,76 @@ class TestToYaml(unittest.TestCase):
         result = to_yaml(data)
         for key in ["a:", "b:", "c:"]:
             self.assertIn(key, result)
+
+
+# ---------------------------------------------------------------------------
+# validate_message_fields tests
+# ---------------------------------------------------------------------------
+
+class TestValidateMessageFields(unittest.TestCase):
+
+    def test_valid_message_passes_through(self):
+        msg = {"prompt": "hello", "type": "roast", "error_count": 3}
+        result = validate_message_fields(msg)
+        self.assertEqual(result["prompt"], "hello")
+
+    def test_invalid_type_raises(self):
+        msg = {"type": "invalid_type"}
+        with self.assertRaises(ValueError):
+            validate_message_fields(msg)
+
+    def test_negative_error_count_raises(self):
+        msg = {"error_count": -1}
+        with self.assertRaises(ValueError):
+            validate_message_fields(msg)
+
+    def test_oversized_prompt_is_truncated(self):
+        big_prompt = "x" * (MAX_PROMPT_SIZE_BYTES + 1000)
+        msg = {"prompt": big_prompt, "type": "roast", "error_count": 1}
+        result = validate_message_fields(msg)
+        self.assertLessEqual(
+            len(result["prompt"].encode("utf-8")), MAX_PROMPT_SIZE_BYTES
+        )
+
+    def test_prompt_at_limit_is_not_truncated(self):
+        exact_prompt = "x" * MAX_PROMPT_SIZE_BYTES
+        msg = {"prompt": exact_prompt}
+        result = validate_message_fields(msg)
+        self.assertEqual(result["prompt"], exact_prompt)
+
+    def test_truncation_preserves_valid_utf8(self):
+        # Build a prompt with multibyte chars that would split at the boundary
+        emoji_prompt = "\U0001f600" * (MAX_PROMPT_SIZE_BYTES // 4 + 100)
+        msg = {"prompt": emoji_prompt}
+        result = validate_message_fields(msg)
+        # Should be valid utf-8 and within limit
+        encoded = result["prompt"].encode("utf-8")
+        self.assertLessEqual(len(encoded), MAX_PROMPT_SIZE_BYTES)
+
+    def test_none_prompt_passes(self):
+        msg = {"prompt": None, "type": "roast"}
+        result = validate_message_fields(msg)
+        self.assertIsNone(result["prompt"])
+
+    def test_all_valid_types_accepted(self):
+        for t in ("roast", "minor_sass", "sassy_success"):
+            msg = {"type": t}
+            result = validate_message_fields(msg)
+            self.assertEqual(result["type"], t)
+
+    def test_zero_error_count_accepted(self):
+        msg = {"error_count": 0}
+        result = validate_message_fields(msg)
+        self.assertEqual(result["error_count"], 0)
+
+
+class TestConstants(unittest.TestCase):
+
+    def test_max_prompt_size_is_5kb(self):
+        self.assertEqual(MAX_PROMPT_SIZE_BYTES, 5 * 1024)
+
+    def test_roast_threshold_is_2(self):
+        self.assertEqual(ROAST_ERROR_THRESHOLD, 2)
 
 
 # ---------------------------------------------------------------------------
