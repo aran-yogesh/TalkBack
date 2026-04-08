@@ -6,6 +6,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 
 - [🎭 Personality](#-personality)
+- [⚙️ Environment Variables](#️-environment-variables)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
@@ -173,6 +174,18 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
    
    # TalkBack will speak the roast with Ivanna's voice!
    ```
+
+### ⚙️ Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `MAX_PROMPT_SIZE_BYTES` | `5120` (5 KB) | Maximum byte size for prompt fields in TalkBack messages. Prompts exceeding this limit are truncated. |
+
+Example — raise the prompt limit to 16 KB:
+```bash
+export MAX_PROMPT_SIZE_BYTES=16384
+python3 cursor_code_monitor.py run 'python3 your_script.py'
+```
 
 ## 📂 Project Structure
 
