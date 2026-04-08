@@ -17,6 +17,12 @@ from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 
+from cursor_code_monitor import (
+    MAX_PROMPT_SIZE_BYTES,
+    ROAST_ERROR_THRESHOLD,
+    validate_message_fields,
+)
+
 # TalkBack MCP Server
 app = Server("talkback-monitor")
 
@@ -177,7 +183,7 @@ async def handle_call_tool(
         # Generate roast message based on error count
         error_count = execution_results["error_count"]
         
-        if error_count >= 2:
+        if error_count >= ROAST_ERROR_THRESHOLD:
             # ROAST MODE 🔥
             roast_prompt = f"ROAST ME HARD! My code just failed with {error_count} errors. Here's the output: {execution_results['last_output'][:500]}"
             response_type = "roast"
@@ -189,7 +195,7 @@ async def handle_call_tool(
             # Success with attitude
             roast_prompt = f"My code ran successfully! Tell me 'okay you made it this time' but with attitude and sass."
             response_type = "sassy_success"
-        
+
         # Call TalkBack to speak
         await trigger_talkback_speech(roast_prompt, response_type)
         
@@ -233,18 +239,19 @@ async def trigger_talkback_speech(prompt: str, response_type: str):
     """Send prompt to TalkBack via HTTP or socket"""
     # For now, we'll write to a file that TalkBack monitors
     # In production, this would be a proper socket/HTTP connection
-    
+
     talkback_message = {
         "prompt": prompt,
         "type": response_type,
         "timestamp": time.time()
     }
-    
+    talkback_message = validate_message_fields(talkback_message)
+
     # Write to a file that TalkBack monitors
     message_file = "/tmp/talkback_message.yaml"
     with open(message_file, "w") as f:
         f.write(to_yaml(talkback_message))
-    
+
     print(f"🎤 TalkBack message sent: {response_type}", file=sys.stderr)
 
 async def main():
