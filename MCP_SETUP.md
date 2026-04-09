@@ -1,4 +1,4 @@
-# TalkBack + Cursor MCP Integration 🤖🔥
+# TalkBack + Cursor MCP Integration
 
 ## Overview
 
@@ -11,9 +11,9 @@ Your Code → Cursor IDE → MCP Monitor → TalkBack Avatar → Ivanna's Voice 
                               ↓
                     (counts errors in output)
                               ↓
-                    2+ errors = ROAST MODE 🔥
-                    1 error   = Minor sass 😏
-                    0 errors  = Sassy success 💅
+                    2+ errors = ROAST MODE
+                    1 error   = Minor sass
+                    0 errors  = Sassy success
 ```
 
 ## Quick Start
@@ -45,7 +45,7 @@ swiftc -o MCPTalkBack MCPTalkBack.swift \
 ./MCPTalkBack &
 ```
 
-The avatar will appear on your screen, watching your code! 👀
+The avatar will appear on your screen, watching your code!
 
 ### 5. Run Code with Monitoring
 
@@ -79,9 +79,9 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 ### Option 2: MCP Server Integration (Advanced)
 
 1. Add MCP server to Cursor settings:
-   
+
    Copy the contents of `mcp_config.json` to your Cursor MCP settings:
-   
+
    **Mac**: `~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
 
 2. Restart Cursor
@@ -90,32 +90,32 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 
 ## Roast Examples
 
-### 2+ Errors (ROAST MODE 🔥):
-> "OH HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
+### 2+ Errors (ROAST MODE):
+> "OH HONEY, what is this hot mess? Did you code this with your eyes closed?"
 
-### 1 Error (Minor Sass 😏):
-> "ONE error? Cute. At least you're almost there, sweetheart. 😏"
+### 1 Error (Minor Sass):
+> "ONE error? Cute. At least you're almost there, sweetheart."
 
-### Success (Sassy Success 💅):
-> "Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now. 💅✨"
+### Success (Sassy Success):
+> "Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now."
 
 ## How to Use
 
 1. **Start TalkBack**: Run `./MCPTalkBack`
 2. **Code in Cursor**: Write your code as usual
 3. **Run with Monitor**: Use `cursor_code_monitor.py run "your_command"`
-4. **Get Roasted**: TalkBack watches the output and roasts you accordingly! 🔥
+4. **Get Roasted**: TalkBack watches the output and roasts you accordingly!
 
 ## Features
 
-✅ Real-time code execution monitoring  
-✅ Error counting and analysis  
-✅ Smart roasting based on error count  
-✅ ElevenLabs voice (Ivanna) for maximum sass  
-✅ OpenAI GPT-4o-mini for witty roasts  
-✅ Works with any programming language  
-✅ Draggable avatar (drag to trash to quit)  
-✅ Always on top - can't escape the judgment! 😈  
+- Real-time code execution monitoring
+- Error counting and analysis
+- Smart roasting based on error count
+- ElevenLabs voice (Ivanna) for maximum sass
+- OpenAI GPT-4o-mini for witty roasts
+- Works with any programming language
+- Draggable avatar (drag to trash to quit)
+- Always on top - can't escape the judgment!
 
 ## Troubleshooting
 
@@ -127,7 +127,7 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND_HERE"
 ### No voice output?
 - Verify ElevenLabs API key is correct
 - Check system volume
-- Look for `🎤 ElevenLabs TTS HTTP Status: 200` in terminal
+- Look for `ElevenLabs TTS HTTP Status: 200` in terminal
 
 ### Errors not detected?
 - Check the output of your command manually
@@ -143,7 +143,7 @@ Edit `MCPTalkBack.swift`, find the `generateRoastResponse` function and modify t
 ```swift
 case "roast":
     systemPrompt = """
-    Your custom ROAST prompt here! Make it BRUTAL! 🔥
+    Your custom ROAST prompt here! Make it BRUTAL!
     """
 ```
 
@@ -169,7 +169,7 @@ Future features:
 
 ---
 
-**Made with 💻 and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
 
-🔥 **Now go code and get roasted!** 🔥
+**Now go code and get roasted!**
 
