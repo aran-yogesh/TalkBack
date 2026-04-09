@@ -1,3 +1,3 @@
-# Contributors
+# 🤝 Contributors
 
-- **Yogesh Mahendran** — Creator & Lead Developer
+- 🚀 **Yogesh Mahendran** — Creator & Lead Developer 🎯
