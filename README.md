@@ -277,6 +277,8 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for a list of contributors.
+
 ## 📄 License
 
 MIT License - feel free to use, modify, and distribute.
