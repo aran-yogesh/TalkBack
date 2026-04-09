@@ -1,26 +1,26 @@
-# TalkBack + Cursor MCP - Quick Start 🚀
+# TalkBack + Cursor MCP - Quick Start
 
-## 🎯 What You Just Got
+## What You Just Got
 
-TalkBack now watches your code in Cursor IDE and roasts you when you mess up! 🔥
+TalkBack now watches your code in Cursor IDE and roasts you when you mess up!
 
 ### Roasting Rules:
-- **2+ errors** → FULL ROAST MODE 🔥🔥🔥
-- **1 error** → Light sass 😏
-- **0 errors** → Sassy success 💅
+- **2+ errors** → FULL ROAST MODE
+- **1 error** → Light sass
+- **0 errors** → Sassy success
 
 ---
 
-## ⚡ Quick Start (3 Steps)
+## Quick Start (3 Steps)
 
-### 1️⃣ Start TalkBack Avatar
+### Step 1: Start TalkBack Avatar
 
 ```bash
 cd /Users/aran/Desktop/talkback
 ./start_talkback_mcp.sh
 ```
 
-### 2️⃣ Test the Roasting
+### Step 2: Test the Roasting
 
 ```bash
 # Test sassy success (0 errors)
@@ -33,7 +33,7 @@ python3 test_roast.py 2
 python3 test_roast.py 3
 ```
 
-### 3️⃣ Run Your Code with Monitoring
+### Step 3: Run Your Code with Monitoring
 
 ```bash
 # Python
@@ -51,29 +51,29 @@ python3 cursor_code_monitor.py run "YOUR_COMMAND"
 
 ---
 
-## 🧪 Demo Scripts
+## Demo Scripts
 
 ### Test with Success (0 errors)
 ```bash
 python3 cursor_code_monitor.py run "python test_with_errors.py success"
 ```
-**Expected**: "Okay you made it this time, darling! 💅"
+**Expected**: "Okay you made it this time, darling!"
 
 ### Test with 1 Error
 ```bash
 python3 cursor_code_monitor.py run "python test_with_errors.py one_error"
 ```
-**Expected**: "ONE error? Cute. 😏"
+**Expected**: "ONE error? Cute."
 
 ### Test with Multiple Errors (ROAST MODE)
 ```bash
 python3 cursor_code_monitor.py run "python test_with_errors.py roast"
 ```
-**Expected**: "OH HONEY, what is this hot mess?! 🔥💀"
+**Expected**: "OH HONEY, what is this hot mess?!"
 
 ---
 
-## 📁 Files Overview
+## Files Overview
 
 | File | Purpose |
 |------|---------|
@@ -88,20 +88,20 @@ python3 cursor_code_monitor.py run "python test_with_errors.py roast"
 
 ---
 
-## 🎤 What Ivanna Will Say
+## What Ivanna Will Say
 
 ### Success (0 errors):
-> "Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now. 💅✨"
+> "Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now."
 
 ### 1 Error:
-> "ONE error? Cute. At least you're almost there, sweetheart. 😏"
+> "ONE error? Cute. At least you're almost there, sweetheart."
 
 ### 2+ Errors (ROAST MODE):
-> "OH HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀 Try again, but this time with SKILL!"
+> "OH HONEY, what is this hot mess? Did you code this with your eyes closed? Try again, but this time with SKILL!"
 
 ---
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### TalkBack not speaking?
 ```bash
@@ -129,16 +129,16 @@ pip3 install mcp watchdog
 
 ---
 
-## 🎯 Next Steps
+## Next Steps
 
 1. **Try the demos** above to see TalkBack in action
 2. **Run your real code** with the monitor
-3. **Get roasted** and improve! 🔥
+3. **Get roasted** and improve!
 4. **Share your roasts** (they're hilarious)
 
 ---
 
-## 📖 More Info
+## More Info
 
 - **Detailed Setup**: See [MCP_SETUP.md](MCP_SETUP.md)
 - **Main README**: See [README.md](README.md)
@@ -146,7 +146,7 @@ pip3 install mcp watchdog
 
 ---
 
-**Now go code and get roasted! 🔥**
+**Now go code and get roasted!**
 
-Made with 💻 and a lot of sass by [@aran-yogesh](https://github.com/aran-yogesh)
+Made with a lot of sass by [@aran-yogesh](https://github.com/aran-yogesh)
 

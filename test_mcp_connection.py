@@ -66,23 +66,23 @@ def to_yaml(data: Any, indent: int = 0) -> str:
 
 def test_mcp_server():
     """Test the MCP server by sending a test message"""
-    
+
     # Test message to send to TalkBack
     test_message = {
-        "prompt": "Test message from MCP server! Your code monitoring is working! 🎉",
+        "prompt": "Test message from MCP server! Your code monitoring is working! ",
         "type": "test",
         "timestamp": time.time()
     }
-    
+
     # Write to the file that TalkBack monitors
     message_file = "/tmp/talkback_message.yaml"
     with open(message_file, "w") as f:
         f.write(to_yaml(test_message))
-    
-    print("✅ Test message sent to TalkBack!")
-    print(f"📁 Message file: {message_file}")
-    print(f"📝 Message content:\n{to_yaml(test_message).rstrip()}")
-    
+
+    print("Test message sent to TalkBack!")
+    print(f"Message file: {message_file}")
+    print(f"Message content:\n{to_yaml(test_message).rstrip()}")
+
     return True
 
 if __name__ == "__main__":
