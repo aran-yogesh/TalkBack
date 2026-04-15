@@ -10,6 +10,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
+- [👥 Contributors](CONTRIBUTORS.md)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [✍️ Authors](#️-authors)
@@ -276,6 +277,8 @@ Contributions are welcome! Feel free to:
 - Suggest new features
 - Submit pull requests
 - Improve documentation
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of contributors and detailed contribution guidelines.
 
 ## 📄 License
 
