@@ -271,7 +271,9 @@ This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which re
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
+Contributions are welcome! See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of contributors and detailed contribution guidelines.
+
+Feel free to:
 - Report bugs
 - Suggest new features
 - Submit pull requests
