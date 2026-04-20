@@ -2,6 +2,13 @@
 
 A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
 
+> ⚠️ **Security note**: Never commit real API keys. Use `config.swift.template` to create a local `config.swift` and keep secrets out of version control.
+
+TalkBack is made up of two parts:
+- The **macOS Swift app** (`ConversationalTalkBack.swift`) for avatar UI, voice chat, and camera behavior checks.
+- Optional **MCP integration scripts** (Python + shell) for Cursor terminal roast events.
+
+
 ## Table of Contents
 
 
