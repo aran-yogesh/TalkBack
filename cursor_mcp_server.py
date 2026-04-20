@@ -10,7 +10,16 @@ import os
 import subprocess
 import sys
 import time
+import warnings
 from typing import Any, Dict, List
+
+warnings.filterwarnings("default", category=DeprecationWarning)
+warnings.warn(
+    "cursor_mcp_server.py is deprecated and will be removed in a future release. "
+    "Use cursor_code_monitor.py or another /tmp/talkback_message.json writer instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp import types
 from mcp.server import NotificationOptions, Server
