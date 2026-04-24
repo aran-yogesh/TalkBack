@@ -291,6 +291,7 @@ MIT License - feel free to use, modify, and distribute.
 ## ✍️ Authors
 
 - **Yogesh Mahendran** — Creator & Lead Developer
+- Aran Yogesh Developed openswe.
 
 ## 💬 Questions or Feedback?
 
