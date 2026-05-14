@@ -179,7 +179,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
 
 ## Project Structure
 
-| File | Purpose |
+| 📄 File | 🎯 Purpose |
 |---|---|
 | `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
