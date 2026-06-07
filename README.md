@@ -298,4 +298,4 @@ Open an issue or reach out! TalkBack loves to chat (obviously).
 
 ---
 
-**Made with a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with code and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
