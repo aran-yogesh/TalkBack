@@ -160,6 +160,8 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
    ```bash
    # Test with a script that has errors (will trigger full roast)
    python3 cursor_code_monitor.py run 'python3 your_broken_script.py'
+
+   # Test with successful code (will get sassy compliment 💅)
    
    # Test with successful code (will get sassy compliment)
    python3 cursor_code_monitor.py run 'python3 your_working_script.py'
