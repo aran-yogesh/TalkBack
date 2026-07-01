@@ -1,9 +1,16 @@
 # TalkBack - Annoying But Useful AI Companion
 
-A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you, remembers your conversations, and responds with attitude-filled voice feedback.
+> *"Did I ask for your opinion? No. Am I giving it anyway? Absolutely."* — TalkBack, probably
 
-## Table of Contents
+A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you 👂, remembers your conversations 🧠, and responds with attitude-filled voice feedback 🗣️🔥. Think of it as that one friend who roasts you but secretly wants you to succeed 💀❤️.
 
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [How to Use](#how-to-use)
+- [Project Structure](#project-structure)
+- [API Endpoints Used](#api-endpoints-used)
 - [Personality](#personality)
 - [Troubleshooting](#troubleshooting)
 - [Development Notes](#development-notes)
@@ -13,6 +20,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [Acknowledgments](#acknowledgments)
 - [Authors](#authors)
 - [Questions or Feedback?](#questions-or-feedback)
+
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
@@ -108,53 +116,60 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    struct Config {
        static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
        static let elevenLabsAPIKey = "YOUR_ELEVENLABS_API_KEY_HERE"
-       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9"  // Ivanna's voice
+       static let elevenLabsVoiceID = "cgSgspJ2msm6clMCkdW9" // Ivanna's voice
        static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
 
    > **Note**: `config.swift` is gitignored so your keys stay local. Never commit real API keys.
 
-3. **Compile the app**:
+3. **Compile the app** 🔨:
    ```bash
    swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
      -framework Cocoa -framework Foundation -framework AVFoundation \
      -target arm64-apple-macosx13.0
    ```
 
-4. **Run TalkBack**:
+4. **Run TalkBack** 🏃‍♂️💨:
    ```bash
    ./ConversationalTalkBack
    ```
+   
+   > 🎊 Congrats, you now have a sassy AI companion that will never leave you alone!
 
 ## How to Use
 
-### Basic Usage
+### Basic Usage 🕹️
 
-1. **Start the App**: Run `./ConversationalTalkBack`
-2. **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
-3. **Talk to TalkBack**:
-   - **Click and HOLD** the avatar
-   - **Speak** your message
-   - **Release** to send
-4. **Listen**: TalkBack responds with Ivanna's voice and attitude
-5. **Drag**: Move the avatar anywhere on your screen
-6. **Quit**: Drag avatar near the menu bar → drop in trash can
+1. 🟢 **Start the App**: Run `./ConversationalTalkBack`
+2. 📸 **Grant Camera Permission**: Allow camera access when prompted (don't worry, we're not *that* creepy 😅)
+3. 🎤 **Talk to TalkBack**:
+   - **Click and HOLD** the avatar 🫳
+   - **Speak** your message 🗣️
+   - **Release** to send 🚀
+4. 👂 **Listen**: TalkBack responds with Ivanna's voice and attitude (brace yourself 😤)
+5. 🖱️ **Drag**: Move the avatar anywhere on your screen
+6. 🗑️ **Quit**: Drag avatar near the menu bar → drop in trash can (it's the only way out! 😈)
 
 ### MCP Code Monitoring (Cursor IDE Integration)
 
-TalkBack can watch your terminal and roast you when your code fails! Here's how:
+TalkBack can watch your terminal and roast you when your code fails! Here's how to get roasted 🍗:
 
-1. **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+1. 🚀 **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
 
-2. **Run your code through the monitor**:
+2. 🧪 **Run your code through the monitor**:
    ```bash
    # Test with a script that has errors (will trigger full roast)
    python3 cursor_code_monitor.py run 'python3 your_broken_script.py'
    
    # Test with successful code (will get sassy compliment )
    python3 cursor_code_monitor.py run 'python3 your_working_script.py'
+
+   # Test with successful code (will get sassy compliment 💅)
    
+   # Test with successful code (will get sassy compliment)
+   python3 cursor_code_monitor.py run 'python3 your_working_script.py'
+
    # Test with any command
    python3 cursor_code_monitor.py run 'swift your_code.swift'
    ```
@@ -164,17 +179,17 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
    - **1 error**: "ONE error? Cute. At least you're almost there, sweetheart."
    - **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed?"
 
-4. **Example test**:
+4. 🧪 **Example test**:
    ```bash
-   # This will trigger a savage roast
+   # This will trigger a savage roast 🌶️🌶️🌶️
    python3 cursor_code_monitor.py run 'python3 broken_code.py'
-   
+
    # TalkBack will speak the roast with Ivanna's voice!
    ```
 
 ## Project Structure
 
-| File | Purpose |
+| 📄 File | 🎯 Purpose |
 |---|---|
 | `ConversationalTalkBack.swift` | Main app — floating avatar, voice chat, MCP polling |
 | `config.swift.template` | API key template (copy to `config.swift` and add your keys) |
@@ -190,25 +205,25 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how:
 
 ### ElevenLabs Speech-to-Text
 - **Endpoint**: `https://api.elevenlabs.io/v1/speech-to-text`
-- **Model**: `scribe_v1`
-- **Input**: WAV audio (16kHz, mono, PCM)
-- **Output**: Transcribed text with language detection
+- **Model**: `scribe_v1` 📝
+- **Input**: WAV audio (16kHz, mono, PCM) 🎵
+- **Output**: Transcribed text with language detection 🌐
 
-### ElevenLabs Text-to-Speech
+### 🗣️ ElevenLabs Text-to-Speech
 - **Endpoint**: `https://api.elevenlabs.io/v1/text-to-speech/{voice_id}`
-- **Model**: `eleven_multilingual_v2`
-- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`)
-- **Output**: MP3 audio
+- **Model**: `eleven_multilingual_v2` 🌍
+- **Voice**: Ivanna (`cgSgspJ2msm6clMCkdW9`) 👄✨
+- **Output**: MP3 audio 🔊
 
-### OpenAI GPT-4o
+### 🧠 OpenAI GPT-4o
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
-- **Model**: `gpt-4o`
-- **Temperature**: 0.9 (for sassy responses)
-- **Max Tokens**: 80 (short, snappy replies)
+- **Model**: `gpt-4o` 🚀
+- **Temperature**: 0.9 (cranked up for maximum sass 🌶️)
+- **Max Tokens**: 80 (short, snappy replies — ain't nobody got time for essays 💅)
 
-### Gemini (Vision) — *Planned*
+### 👁️ Gemini (Vision) — *Planned* 🔮
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`
-- A Gemini API key slot is included in `config.swift.template` for future vision-based behavior monitoring
+- A Gemini API key slot is included in `config.swift.template` for future vision-based behavior monitoring 🛸👀
 
 ## Personality
 
@@ -226,69 +241,66 @@ TalkBack is designed to be:
 - Verify ElevenLabs API key and voice ID
 - Look for `ElevenLabs TTS HTTP Status: 200` in terminal
 
-### Empty Transcriptions?
-- Ensure you're holding the mouse button while speaking
-- Check microphone permissions (System Settings → Privacy & Security → Microphone)
-- Verify ElevenLabs API key is valid
+### 🤫 Empty Transcriptions?
+- Ensure you're holding the mouse button while speaking (don't be shy! 🫣)
+- Check microphone permissions (System Settings → Privacy & Security → Microphone) 🎙️
+- Verify ElevenLabs API key is valid 🔐
 
-### Rate Limit Errors?
-- OpenAI usage limits: Check your account for current limits
-- Add payment method or wait 20 seconds between requests
+### 🚦 Rate Limit Errors?
+- OpenAI usage limits: Check your account for current limits 📊
+- Add payment method or wait 20 seconds between requests (patience, grasshopper 🧘)
 
-### Missing `config.swift`?
-- Copy the template: `cp config.swift.template config.swift`
-- Add your API keys to `config.swift`
+### 📁 Missing `config.swift`?
+- Copy the template: `cp config.swift.template config.swift` 📋
+- Add your API keys to `config.swift` 🔑
 
-### MCP Roasts Not Triggering?
-- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s)
-- Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"`
-- Check that `watchdog` is installed: `pip3 install watchdog`
+### 🤐 MCP Roasts Not Triggering?
+- Ensure TalkBack is running (it polls `/tmp/talkback_message.json` every 0.5s) ⏱️
+- Run commands through the monitor: `python3 cursor_code_monitor.py run "YOUR_COMMAND"` 🖥️
+- Check that `watchdog` is installed: `pip3 install watchdog` 🐕
 
-### Crashes on Launch?
-- Compile with explicit target: `-target arm64-apple-macosx13.0`
-- Check Swift version: `swift --version`
-- Beta macOS can be unstable with Speech framework
+### 💥 Crashes on Launch?
+- Compile with explicit target: `-target arm64-apple-macosx13.0` 🎯
+- Check Swift version: `swift --version` 🦅
+- Beta macOS can be unstable with Speech framework (blame Apple, not us 🤷‍♂️)
 
 ## Development Notes
 
-This project was developed on **macOS 26.0.1 beta** with **Swift 6.2**, which required special handling:
-- Explicit compilation target (`-target arm64-apple-macosx13.0`)
-- Avoided unstable `SFSpeechRecognizer` framework
-- Used ElevenLabs STT instead of macOS built-in speech recognition
-- Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility
+This project was developed on **macOS 26.0.1 beta** with **Swift 6.2** 🦅, which required some creative problem-solving (aka suffering 😭):
+- Explicit compilation target (`-target arm64-apple-macosx13.0`) 🎯
+- Avoided unstable `SFSpeechRecognizer` framework (it ghosted us 👻)
+- Used ElevenLabs STT instead of macOS built-in speech recognition 🎙️✨
+- Prioritized `NSSound` over `AVAudioPlayer` for better MP3 compatibility 🎵
 
 ## Future Features
 
-- [ ] Gemini vision-based behavior monitoring (webcam gaze/emotion detection)
-- [ ] Screen monitoring (detect what user is doing)
-- [ ] Context-aware productivity tips
-- [ ] Custom voice selection
-- [ ] Multiple personality modes
-- [ ] Scheduled check-ins
-- [ ] Integration with calendar/reminders
+- [ ] 👁️ Gemini vision-based behavior monitoring (webcam gaze/emotion detection — Big Brother but sassy 😈)
+- [ ] 🖥️ Screen monitoring (detect what user is doing — no more secret Reddit browsing 🫣)
+- [ ] 💡 Context-aware productivity tips (actually helpful, we promise 🤞)
+- [ ] 🎵 Custom voice selection (pick your own roast master 🎤)
+- [ ] 🎭 Multiple personality modes (nice mode? ...nah, who are we kidding 😂)
+- [ ] ⏰ Scheduled check-ins (like a clingy friend who texts "wyd" every hour 📱)
+- [ ] 📅 Integration with calendar/reminders (so TalkBack can judge your schedule too 💅)
 
 ## Contributing
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
+Contributions are welcome! We don't bite (TalkBack might, though 😈). Feel free to:
+- 🐛 Report bugs (we know there are some... probably... definitely 💀)
+- 💡 Suggest new features (the sassier, the better 💅)
+- 🔀 Submit pull requests (we love free labor— er, *collaboration* 😏)
+- 📝 Improve documentation (you're reading it, so clearly it needs help 😂)
 
 ## License
 
-MIT License - feel free to use, modify, and distribute.
+## 📄 License — The Legal Stuff 📜⚖️
 
 ## Acknowledgments
 
-- **OpenAI** for GPT-4o API
-- **Google** for Gemini API (planned vision features)
-- **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
-- **Ivanna** for the sassy voice that brings TalkBack to life
+## 🙏 Acknowledgments — Shoutouts & Love Letters 💌
 
 ## Authors
 
-- **Yogesh Mahendran** — Creator & Lead Developer
+## ✍️ Authors — The Masterminds 🧑‍💻🦸
 
 ## Questions or Feedback?
 
@@ -296,4 +308,5 @@ Open an issue or reach out! TalkBack loves to chat (obviously).
 
 ---
 
-**Made with love and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
+**Made with code and a lot of sass** by [@aran-yogesh](https://github.com/aran-yogesh)
