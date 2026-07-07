@@ -1,3 +1,11 @@
+# 🗣️💥 TalkBack — Your Annoying But Useful AI Companion 🤖✨
+
+> *"Did I ask for your opinion? No. Am I giving it anyway? Absolutely."* — TalkBack, probably
+
+A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy) productivity coach. TalkBack is an interactive AI companion that listens to you 👂, remembers your conversations 🧠, and responds with attitude-filled voice feedback 🎤💅. Think Clippy, but with *way* more personality and zero chill. 🔥
+
+## 📑 Table of Contents
+
 # TalkBack - Annoying But Useful AI Companion
 
 > *"Did I ask for your opinion? No. Am I giving it anyway? Absolutely."* — TalkBack, probably
@@ -29,6 +37,85 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [✍️ Authors](#️-authors)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
+![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
+![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Vibes](https://img.shields.io/badge/vibes-immaculate-ff69b4.svg)
+![Sass Level](https://img.shields.io/badge/sass%20level-over%209000-red.svg)
+
+## 🎯 Features — *aka Why You Need This in Your Life*
+
+### 🎤🎙️ **Real Voice Interaction**
+- 👆 **Click and Hold** the avatar to speak your mind (yes, it actually listens — unlike your ex)
+- 🤖 **ElevenLabs Speech-to-Text** for accurate voice recognition
+- 🌍 Supports multiple languages (English, Bengali, Hindi, and more!) — polyglot queen 👑
+- 💬 Natural conversation flow with real-time transcription
+
+### 🗣️💅 **Sassy AI Responses**
+- 🧠 **OpenAI GPT-4o** powered responses — big brain energy
+- 🎵 **ElevenLabs Text-to-Speech** with Ivanna's iconic voice
+- 😏 Attitude-filled, personality-driven replies
+- ⚡ Short, snappy responses that pack a punch — no essays here, bestie
+
+### 🧠💾 **Conversational Memory**
+- 📝 Remembers your chat history (yes, *everything* — be careful 👀)
+- 🔗 Maintains context across conversations
+- 🎯 Smart follow-ups based on previous interactions — she never forgets
+
+### 🎨👛 **Custom Floating Avatar**
+- 🪟 Transparent floating window (always on top — like your anxiety lol)
+- 👜 Custom purse/wallet icon design
+- 👀 Animated eyes that follow your cursor — *always watching*
+- 🎭 Dynamic expressions based on mood
+- 🖱️ Draggable anywhere on your screen
+
+### 🗑️💀 **"The Great Escape" Feature**
+- ☝️ Drag avatar near the menu bar to reveal trash can
+- 🗑️ Drop in trash to quit (the *only* way to close it — good luck! 😈)
+- 🎪 Adds a fun, mischievous interaction
+
+### 👁️🔮 **Vision-Based Behavior Monitoring** *(Planned — she's evolving 🧬)*
+- 🔑 Gemini API key slot is included in the config for future vision features
+- 🚀 Planned capabilities:
+  - 👀 Detecting when you look away from the screen — *busted!*
+  - 😊😤😐 Emotion recognition (happy, frustrated, confused)
+  - 🧐 Focus level tracking — no more zoning out!
+  - 📱 Phone usage detection — *put that phone DOWN* 📵
+
+### 🔥🆕 **MCP Code Monitor** (Cursor IDE Integration) ✨ NEW! ✨
+- 👁️ **Watches your terminal for code execution results**
+- 💀 **Auto-roasts you when you mess up!**
+  - 🔥🔥🔥 **2+ errors**: Full savage roast mode — *prepare to be destroyed*
+  - 😏 **1 error**: Light sass and sarcasm — *you're getting there, sweetie*
+  - 💅✨ **Success**: Sassy compliment with attitude — *slay!*
+- 🖥️ Integrates with Cursor IDE workflow
+- ⚡ Real-time feedback via Ivanna's voice
+
+## 🛠️⚙️ Tech Stack — *The Secret Sauce*
+
+- **Language**: Swift 6.2 🦅
+- **Framework**: AppKit (native macOS) 🍎
+- **AI & Voice Services** 🤖🎙️:
+  - [OpenAI GPT-4o](https://platform.openai.com/) — Conversational AI (the brains 🧠)
+  - [Gemini](https://aistudio.google.com/) — Vision & behavior analysis *(planned — she's getting eyes 👁️)*
+  - [ElevenLabs Speech-to-Text](https://elevenlabs.io/) — Voice recognition (the ears 👂)
+  - [ElevenLabs Text-to-Speech](https://elevenlabs.io/) — Voice synthesis with Ivanna's voice (the mouth 👄)
+- **Audio & Video**: AVFoundation (NSSound, AVAudioRecorder, AVCaptureSession) 🎬
+
+## 🚀💨 Quick Start — *Let's Get This Party Started*
+
+### 📋 Prerequisites
+
+1. 🍎 **macOS 13.0+** (developed on macOS 26.0.1 beta)
+2. 🔧 **Xcode Command Line Tools** installed
+3. 🔑 **API Keys** (gotta pay to play 💸):
+   - OpenAI API key ([Get one here](https://platform.openai.com/account/api-keys)) 🧠
+   - ElevenLabs API key ([Get one here](https://elevenlabs.io/)) 🎙️
+   - Gemini API key ([Get one here](https://aistudio.google.com/app/apikey)) 👁️
+
+### 🏗️ Installation
+
+1. **Clone the repository** 📦:
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Quick Start](#quick-start)
@@ -128,8 +215,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
    cd TalkBack
    ```
 
-2. **Configure API Keys**:
-
+2. **Configure API Keys** 🔐:
+   
    Copy the template and add your keys:
    ```bash
    cp config.swift.template config.swift
@@ -144,8 +231,8 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
        static let geminiAPIKey = "YOUR_GEMINI_API_KEY_HERE"
    }
    ```
-
-   > **Note**: `config.swift` is gitignored so your keys stay local. Never commit real API keys.
+   
+   > ⚠️ **Note**: `config.swift` is gitignored so your keys stay local. Never commit real API keys. *Seriously. Don't.* 🙅‍♂️
 
 3. **Compile the app** 🔨:
    ```bash
@@ -154,6 +241,33 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
      -target arm64-apple-macosx13.0
    ```
 
+4. **Run TalkBack** 🎉:
+   ```bash
+   ./ConversationalTalkBack
+   ```
+   > 🎊 *Congrats, you've just unleashed chaos on your desktop!*
+
+## 🎮🕹️ How to Use — *It's Showtime, Baby!*
+
+### 🏁 Basic Usage
+
+1. 🚀 **Start the App**: Run `./ConversationalTalkBack`
+2. 📸 **Grant Camera Permission**: Allow camera access when prompted (required for vision monitoring)
+3. 🗣️ **Talk to TalkBack**:
+   - 👆 **Click and HOLD** the avatar
+   - 🎤 **Speak** your message
+   - ✋ **Release** to send
+4. 👂 **Listen**: TalkBack responds with Ivanna's voice and attitude
+5. 🖱️ **Drag**: Move the avatar anywhere on your screen
+6. 🗑️ **Quit**: Drag avatar near the menu bar → drop in trash can *(if you dare 😈)*
+
+### 🔥💻 MCP Code Monitoring (Cursor IDE Integration)
+
+TalkBack can watch your terminal and roast you when your code fails! 🍿 Here's how:
+
+1. 🟢 **Start TalkBack** (it automatically monitors `/tmp/talkback_message.json`)
+
+2. 🏃 **Run your code through the monitor**:
 4. **Run TalkBack** 🏃‍♂️💨:
    ```bash
    ./ConversationalTalkBack
@@ -202,6 +316,20 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
    python3 cursor_code_monitor.py run 'swift your_code.swift'
    ```
 
+3. 🎭 **TalkBack will roast you based on errors**:
+   - ✅🎉 **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
+   - 😏🤭 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
+   - 🔥💀 **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
+
+4. 🧪 **Example test**:
+   ```bash
+   # This will trigger a savage roast 🔥🔥🔥
+   python3 cursor_code_monitor.py run 'python3 broken_code.py'
+   
+   # TalkBack will speak the roast with Ivanna's voice! 🗣️💅
+   ```
+
+## 📂🗂️ Project Structure — *What's Under the Hood*
 3. **TalkBack will roast you based on errors**:
    - **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling!"
    - **1 error**: "ONE error? Cute. At least you're almost there, sweetheart."
@@ -245,6 +373,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
 
 ### 🧠 OpenAI GPT-4o
 - **Endpoint**: `https://api.openai.com/v1/chat/completions`
+- **Model**: `gpt-4o`
 - **Model**: `gpt-4o` 🚀
 - **Temperature**: 0.9 (cranked up for maximum sass 🌶️)
 - **Max Tokens**: 80 (short, snappy replies — ain't nobody got time for essays 💅)
