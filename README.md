@@ -1,3 +1,4 @@
+# TalkBack - Annoying But Useful AI Companion
 # 🗣️💥 TalkBack — Your Annoying But Useful AI Companion 🤖✨
 
 > *"Did I ask for your opinion? No. Am I giving it anyway? Absolutely."* — TalkBack, probably
@@ -304,6 +305,7 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
    python3 cursor_code_monitor.py run 'python3 your_working_script.py'
 
    
+   # Test with successful code (will get sassy compliment)
    # Test with successful code (will get sassy compliment )
    python3 cursor_code_monitor.py run 'python3 your_working_script.py'
 
@@ -316,6 +318,10 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
    python3 cursor_code_monitor.py run 'swift your_code.swift'
    ```
 
+3. **TalkBack will roast you based on errors**:
+   - **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling!"
+   - **1 error**: "ONE error? Cute. At least you're almost there, sweetheart."
+   - **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed?"
 3. 🎭 **TalkBack will roast you based on errors**:
    - ✅🎉 **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
    - 😏🤭 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
