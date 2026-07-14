@@ -35,7 +35,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
-- [✍️ Authors](#️-authors)
+- [Authors](#authors)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 ![macOS](https://img.shields.io/badge/macOS-26.0+-blue.svg)
