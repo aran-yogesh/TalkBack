@@ -2,6 +2,9 @@
 
 Thanks to everyone who has contributed to TalkBack! 🎉
 
+## Creator
+
+- **Yogesh Mahendran** ([@aran-yogesh](https://github.com/aran-yogesh)) — Creator & Lead Developer
 ## Maintainers
 
 - **Aran Yogesh** ([@aran-yogesh](https://github.com/aran-yogesh))

@@ -33,6 +33,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [📝 Development Notes](#-development-notes)
 - [🔮 Future Features](#-future-features)
 - [🤝 Contributing](#-contributing)
+- [👥 Contributors](CONTRIBUTORS.md)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
 - [✍️ Authors](#️-authors)
@@ -453,6 +454,9 @@ Contributions are welcome! We don't bite (TalkBack might, though 😈). Feel fre
 - 🔀 Submit pull requests (we love free labor— er, *collaboration* 😏)
 - 📝 Improve documentation (you're reading it, so clearly it needs help 😂)
 
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of contributors and detailed contribution guidelines.
+
+## 📄 License
 ## License
 
 ## 📄 License — The Legal Stuff 📜⚖️
