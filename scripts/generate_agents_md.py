@@ -19,7 +19,9 @@ def _tests_list(root: Path) -> list[str]:
     d = root / "tests"
     if not d.is_dir():
         return []
-    return sorted(str(p.relative_to(root)) for p in d.glob("test_*.py") if p.is_file())
+    return sorted(
+        f"tests/{p.name}" for p in d.glob("test_*.py") if p.is_file()
+    )
 
 
 def _mcp_check_commands(root: Path) -> list[str]:
@@ -64,7 +66,11 @@ def build_markdown(root: Path) -> str:
         "\n".join(f"- `{n}`" for n in shell_scripts)
         or "- _(none)_"
     )
-    tests_bullets = "\n".join(f"- `{t}`" for t in test_modules) or "- _(no `tests/test_*.py` found)_"
+    tests_bullets = (
+        "\n".join(f"- `{m}`" for m in test_modules)
+        if test_modules
+        else "- _(no `tests/test_*.py` found)_"
+    )
     mcp_lines = "\n".join(_mcp_check_commands(root))
 
     return f"""# Agent Guide

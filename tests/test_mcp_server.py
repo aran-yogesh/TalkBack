@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 import unittest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, mock_open, patch
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -336,7 +336,7 @@ class TestTriggerTalkbackSpeech(unittest.TestCase):
         with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as f:
             _ = f.name
 
-        with patch("cursor_mcp_server.open", unittest.mock.mock_open()) as mocked:
+        with patch("cursor_mcp_server.open", mock_open()) as mocked:
             run_async(trigger_talkback_speech("test prompt", "roast"))
             mocked.assert_called_once_with("/tmp/talkback_message.yaml", "w")
 
