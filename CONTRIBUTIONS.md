@@ -1,3 +1,8 @@
+# 🤝 Contributing to TalkBack 🗣️💥
+
+> _"So you want to contribute? Bold move. I respect that."_ — TalkBack 💅
+
+First off — **THANK YOU** for even considering contributing! 🎉🥳🫶 Whether you're fixing a typo or adding a whole new feature, you're officially part of the chaos now. Welcome aboard! 🚀🎪
 # 🤝💥 Contributing to TalkBack — *Welcome to the Sass Squad!*
 
 > *"Oh, you want to contribute? How delightfully ambitious of you."* — TalkBack 💅
@@ -8,6 +13,40 @@ First off — **THANK YOU** for even thinking about contributing! 🎉🫶 Wheth
 
 ## 📑 Table of Contents
 
+- [🧭 Code of Conduct](#-code-of-conduct)
+- [🏁 Getting Started](#-getting-started)
+- [🐛 Reporting Bugs](#-reporting-bugs)
+- [💡 Suggesting Features](#-suggesting-features)
+- [🔀 Pull Requests](#-pull-requests)
+- [🎨 Code Style](#-code-style)
+- [🧪 Testing](#-testing)
+- [📝 Documentation](#-documentation)
+- [🏷️ Commit Messages](#️-commit-messages)
+- [🎖️ Recognition](#️-recognition)
+- [❓ Questions?](#-questions)
+
+---
+
+## 🧭 Code of Conduct — Don't Be a Jerk 🙅‍♂️
+
+It's simple:
+- 🤝 Be respectful and kind
+- 🧠 Assume good intentions
+- 💬 Communicate clearly
+- 🚫 No harassment, trolling, or general tomfoolery (the bad kind)
+- 🎉 Have fun! This is a sassy AI project, not a courtroom
+
+> TalkBack may be rude, but *we* are not. Keep it classy, folks. 🎩✨
+
+---
+
+## 🏁 Getting Started — Your Adventure Begins Here 🗺️
+
+### 1. Fork the Repo 🍴
+
+Click that shiny **Fork** button at the top right. You know you want to. 😏
+
+### 2. Clone Your Fork 📥
 - [🌟 Why Contribute?](#-why-contribute)
 - [🚀 Getting Started](#-getting-started)
 - [🔀 How to Submit Changes](#-how-to-submit-changes)
