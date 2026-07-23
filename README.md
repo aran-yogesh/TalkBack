@@ -456,6 +456,8 @@ Contributions are welcome! We don't bite (TalkBack might, though 😈). Feel fre
 
 See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of contributors and detailed contribution guidelines.
 
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of contributors.
+
 ## 📄 License
 ## License
 
