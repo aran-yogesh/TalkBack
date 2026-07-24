@@ -5,16 +5,13 @@ This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
 import time
-from pathlib import Path
 from typing import Any
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
 
 # Maximum size for prompt and output fields in TalkBack messages (5KB)
 MAX_PROMPT_SIZE_BYTES = 5 * 1024
