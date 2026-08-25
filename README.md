@@ -319,6 +319,10 @@ TalkBack can watch your terminal and roast you when your code fails! Here's how 
    python3 cursor_code_monitor.py run 'swift your_code.swift'
    ```
 
+3. 🍿 **TalkBack will roast you based on errors**:
+   - ✅🎉 **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling! 💅✨"
+   - 😏🤏 **1 error**: "ONE error? Cute. At least you're almost there, sweetheart. 😏"
+   - 🔥💀☠️ **2+ errors**: "Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"
 3. **TalkBack will roast you based on errors**:
    - **0 errors**: "Oh wow, it ACTUALLY worked? Color me shocked, darling!"
    - **1 error**: "ONE error? Cute. At least you're almost there, sweetheart."

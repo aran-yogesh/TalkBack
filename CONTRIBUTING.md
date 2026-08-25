@@ -1,3 +1,11 @@
+# 🤝 Contributing to TalkBack 🗣️💥
+
+> *"Oh, you want to contribute? How brave. How foolish. How... exciting!"* — TalkBack 💅✨
+
+First off — THANK YOU for even considering contributing! 🎉🥳🫶
+You're already cooler than 99% of people. *(TalkBack said that, not me.)* 😏
+
+---
 # Contributing to TalkBack 🤝💅✨
 
 > *"Oh, you want to contribute? How delightfully ambitious of you."* — TalkBack 😏
