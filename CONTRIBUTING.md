@@ -1,191 +1,190 @@
-# 🎤💅 Contributing to TalkBack ✨🔥
+# 🤝 Contributing to TalkBack 🗣️💥
 
-> *"Oh, you want to contribute? How adorable. Let me tell you how this works, sweetheart."* — TalkBack
+> *"Oh, you want to contribute? How brave. How foolish. How... exciting!"* — TalkBack 💅✨
 
-First off — THANK YOU for even considering contributing to this beautiful mess! 🥹🎉 Whether you're here to squash bugs 🐛, add features 🚀, or just make TalkBack even sassier 💁‍♀️, you're in the right place.
-
-Let's get you set up before I start judging your code. 😏
-
----
-
-## 📜 Code of Conduct 🤝
-
-We keep it simple around here:
-
-- 🫶 **Be kind** — We roast *code* here, not people
-- 🧠 **Be constructive** — If you're gonna critique, bring solutions
-- 🌍 **Be inclusive** — TalkBack speaks multiple languages, and so should our community
-- 🚫 **No toxicity** — Save the sass for the AI, not each other
-- 🗑️ Violators will be dragged to the menu bar and dropped in the trash can 😈
+First off — THANK YOU for even considering contributing! 🎉🥳🫶
+You're already cooler than 99% of people. *(TalkBack said that, not me.)* 😏
 
 ---
+# Contributing to TalkBack 🤝💅✨
 
-## 🐛 Reporting Bugs 💀
+> *"Oh, you want to contribute? How delightfully ambitious of you."* — TalkBack 😏
 
-Found a bug? I *probably* did it on purpose. It's called ✨ *personality* ✨
+First off, THANK YOU for even considering contributing! 🎉🥳 Whether you're fixing a bug 🐛, adding a feature 🚀, or just fixing a typo (we won't judge... much 😏), you're awesome and we appreciate you! ❤️🙌
 
-...but if it's actually broken, here's what to do:
+## 📑 Table of Contents
 
-1. 🔍 **Search existing issues** first — maybe someone already caught it
-2. 📝 **Open a new issue** with:
-   - 🏷️ A clear, descriptive title
-   - 🔄 Steps to reproduce (be specific!)
-   - 🤔 What you *expected* to happen
-   - 💥 What *actually* happened
-   - 🖥️ Your macOS version and Swift version
-   - 📋 Any relevant terminal output or error messages
-3. 🏷️ **Label it** `bug` if you can
+- [🏁 Getting Started](#-getting-started)
+- [🐛 Reporting Bugs](#-reporting-bugs)
+- [💡 Suggesting Features](#-suggesting-features)
+- [🔀 Submitting Pull Requests](#-submitting-pull-requests)
+- [🧑‍💻 Development Setup](#-development-setup)
+- [📏 Code Style](#-code-style)
+- [🧪 Testing](#-testing)
+- [📝 Documentation](#-documentation)
+- [🎭 The Vibe Check](#-the-vibe-check)
+- [💬 Need Help?](#-need-help)
 
-> *Pro tip: Screenshots and terminal logs make bug reports 10x better* 📸
+## 🏁 Getting Started — Welcome to the Party 🎪🎊
 
----
+1. 🍴 **Fork the repo** (hit that fork button like it owes you money 💰)
+2. 📥 **Clone your fork**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/TalkBack.git
+   cd TalkBack
+   ```
+3. 🌿 **Create a branch** (name it something cool, not `fix-stuff` 😤):
+   ```bash
+   git checkout -b feat/my-awesome-feature
+   ```
+4. 🔧 **Make your changes** (the fun part! 🎨)
+5. ✅ **Test your changes** (the less fun but very important part 🧪)
+6. 🚀 **Push and open a PR** (see below for details 👇)
 
-## 💡 Suggesting Features 🚀
+## 🐛 Reporting Bugs — Something Broke? Spill the Tea ☕🫖
 
-Got an idea to make TalkBack even more unhinged? I'm *always* listening 👁️👁️
+Found a bug? Don't panic! 😱 (Okay, maybe panic a little 😅)
 
-We love ideas like:
-- 🎭 New personality modes or sass levels
-- 🎤 Voice and interaction improvements
-- 👁️ Vision monitoring features
-- 🔥 New roast categories for the MCP monitor
-- 🌍 Language support additions
-- 🎨 Avatar customization options
+Open an issue and include:
 
-Open an issue with the `enhancement` label and tell us your wildest dreams! 💭✨
+- 📝 **What happened** (the drama 🎭)
+- 🤔 **What you expected** (the dream ✨)
+- 🖥️ **Your environment** (macOS version, Swift version, etc.)
+- 📸 **Screenshots/logs** if possible (receipts! 🧾)
+- 🔄 **Steps to reproduce** (so we can suffer too 💀)
 
----
+**Bug report template:**
+```
+🐛 Bug: [Short description]
+📍 Where: [Which file/feature]
+🔄 Steps: [How to reproduce]
+🤔 Expected: [What should happen]
+😱 Actual: [What actually happened]
+🖥️ Environment: [macOS version, Swift version]
+```
 
-## 🔀 Submitting Pull Requests 🛠️
+## 💡 Suggesting Features — Got Ideas? We're All Ears 👂✨
 
-Ready to write some code? Here's the game plan:
+Have a brilliant idea? 🧠💡 We love those! Open an issue with:
 
-### Step 1: Fork & Clone 🍴
+- 🎯 **What** you want (be specific, not "make it better" 😂)
+- 🤷 **Why** it would be cool (convince us! 🎤)
+- 🎨 **How** you envision it working (bonus points for mockups 🏆)
+- 🌶️ **Sass level** — how sassy should this feature be? (the answer is always "very" 💅)
+
+## 🔀 Submitting Pull Requests — Show Us What You Got 🎪🔥
+
+### The PR Checklist ✅
+
+Before you submit, make sure you've:
+
+- [ ] 🌿 Created a branch from `main`
+- [ ] 🧪 Tested your changes (seriously, please 🙏)
+- [ ] 📝 Updated docs if needed
+- [ ] 🔑 NOT committed any API keys (we WILL find you 🕵️)
+- [ ] 🎨 Followed the existing code style
+- [ ] ✍️ Written a clear PR description
+
+### PR Title Format 📋
+
+Use this format so we know what's up at a glance 👀:
+
+```
+feat: add laser eyes to avatar 🔴🔴
+fix: stop TalkBack from roasting too hard 🔥➡️🕯️
+docs: add more emojis because why not 🎉
+chore: update dependencies 📦
+```
+
+### PR Description Template 📝
+
+```markdown
+## What does this PR do? 🤔
+[Explain your changes — keep it short and sweet 🍬]
+
+## Why? 💡
+[Why is this needed? What problem does it solve?]
+
+## How to test 🧪
+[Steps to verify your changes work]
+
+## Screenshots 📸 (if applicable)
+[Show us the goods! 👀]
+```
+
+## 🧑‍💻 Development Setup — Get Your Hands Dirty 🔧🛠️
+
+### Prerequisites 📋
+
+- macOS 13.0+ 🍎
+- Xcode Command Line Tools 🔨
+- Swift 6.2 🦅
+- Python 3.x 🐍 (for MCP tools)
+- API keys (OpenAI, ElevenLabs) 🔑
+
+### Setup Steps 🪜
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/TalkBack.git
+# Clone and enter the repo 📥
+git clone https://github.com/aran-yogesh/TalkBack.git
 cd TalkBack
-```
 
-### Step 2: Branch Out 🌿
-```bash
-git checkout -b feat/your-amazing-feature
-```
-
-Branch naming prefixes:
-- `feat/` — New features ✨
-- `fix/` — Bug fixes 🐛
-- `docs/` — Documentation updates 📝
-- `chore/` — Maintenance stuff 🧹
-
-### Step 3: Do Your Thing 💻
-Write your code! Make it clean, make it work, make it ✨ *sparkle* ✨
-
-### Step 4: Test It 🧪
-```bash
-python3 -m pytest tests/ -v
-```
-Make sure nothing's broken. TalkBack breaks enough things on her own. 😅
-
-### Step 5: Commit with Style 💅
-```bash
-git commit -m "feat: add even more sass to responses 🔥"
-```
-
-Keep commits concise and descriptive. Conventional commits preferred:
-- `feat:` — New feature
-- `fix:` — Bug fix
-- `docs:` — Documentation only
-- `chore:` — Maintenance
-- `test:` — Adding/updating tests
-
-### Step 6: Push & PR 🚀
-```bash
-git push origin feat/your-amazing-feature
-```
-
-Then open a Pull Request with:
-- ✅ A clear description of what you changed and *why*
-- 🧪 How you tested it
-- 📸 Screenshots if it's visual
-
-### PR Checklist ✅
-- [ ] 🧪 Tests pass
-- [ ] 📝 Docs updated (if needed)
-- [ ] 🎨 Code follows existing style
-- [ ] 🔑 No API keys or secrets committed (seriously, don't 🙅‍♀️)
-
----
-
-## 🏗️ Development Setup 🔧
-
-### Prerequisites
-- 🍎 **macOS 13.0+** (developed on macOS 26.0.1 beta)
-- 🦅 **Swift 6.2** with Xcode Command Line Tools
-- 🐍 **Python 3** (for MCP tools and tests)
-- 🔑 API keys — see [API_KEY_SETUP.md](API_KEY_SETUP.md) for details
-
-### Quick Setup
-```bash
+# Set up your config 🔐
 cp config.swift.template config.swift
-# Add your API keys to config.swift (and DON'T commit it! 🙅‍♀️)
-```
+# Edit config.swift with your API keys ✏️
 
-### Build & Run
-```bash
+# Compile 🔨
 swiftc -o ConversationalTalkBack ConversationalTalkBack.swift \
   -framework Cocoa -framework Foundation -framework AVFoundation \
   -target arm64-apple-macosx13.0
 
+# Run it! 🚀
 ./ConversationalTalkBack
 ```
 
-Check out [QUICK_START.md](QUICK_START.md) and [MCP_SETUP.md](MCP_SETUP.md) for more details! 📚
+## 📏 Code Style — Keep It Clean, Keep It Sassy 🧹💅
+
+- **Swift**: Follow standard Swift conventions 🦅
+- **Python**: PEP 8 style guide 🐍
+- **Comments**: Keep them useful, not obvious (no `// increment i by 1` please 🙄)
+- **Naming**: Be descriptive! `handleVoiceInput()` > `doStuff()` 📛
+- **Emojis in code comments**: Encouraged! (okay maybe not, but in docs? ABSOLUTELY 🎉)
+
+## 🧪 Testing — Trust but Verify 🔍
+
+- Test your changes before submitting 🧪
+- Run the MCP connection test: `python3 test_mcp_connection.py` 🔌
+- Run the test suite: `python3 -m pytest tests/` 🏃‍♂️
+- If you add a new feature, add tests for it too! (we believe in you 💪)
+- Manual testing is also valid — just describe what you tested in your PR 📝
+
+## 📝 Documentation — Words Matter Too 📖✍️
+
+- Update `README.md` if you change user-facing behavior 📄
+- Keep docs fun and emoji-rich (you're reading the proof 😎)
+- Make sure command snippets are copy-paste ready 📋
+- If you add new files, update the Project Structure table 📂
+
+## 🎭 The Vibe Check — Our Community Values 🌈🤗
+
+We're building something fun here, so let's keep it that way! 🎪
+
+- 🤝 **Be kind** — We're all here to learn and build cool stuff
+- 🧠 **Be constructive** — Feedback should help, not hurt
+- 🎉 **Have fun** — This is a sassy AI companion, not a tax return
+- 💅 **Embrace the sass** — But keep it playful, never mean
+- 🌍 **Be inclusive** — Everyone is welcome, no exceptions
+- 🚫 **No jerks** — Seriously, don't be one. TalkBack has enough attitude for all of us 😏
+
+## 💬 Need Help? — We Got You 🫂
+
+Stuck? Confused? Existential crisis about your code? 😵‍💫
+
+- 💬 Open an issue and ask! No question is too silly 🤪
+- 📖 Check the [README](README.md) for setup guides
+- 🔑 Check [API_KEY_SETUP.md](API_KEY_SETUP.md) for API key help
+- 🔌 Check [MCP_SETUP.md](MCP_SETUP.md) for MCP integration help
 
 ---
 
-## 🎨 Code Style Guidelines 💅
-
-Keep it clean, keep it readable, keep it *sassy*:
-
-- 🦅 **Swift**: Follow standard Swift conventions. Descriptive names, proper access control
-- 🐍 **Python**: PEP 8 vibes. Clean imports, docstrings where helpful
-- 📝 **Comments**: Only when the code isn't self-explanatory. `x` is not a variable name, it's a cry for help 😭
-- 🏗️ **Structure**: Match the existing patterns in the codebase
-- 🔑 **Secrets**: NEVER hardcode API keys. Use `config.swift` (it's gitignored for a reason!) 🔒
-
----
-
-## 🧪 Testing Guidelines 🔬
-
-We have tests! Use them! Love them!
-
-```bash
-python3 -m pytest tests/ -v
-```
-
-Test files:
-- 🧪 `tests/test_code_monitor.py` — Code monitor tests
-- 🔌 `tests/test_mcp_server.py` — MCP server tests
-- 📄 `tests/test_yaml_utils.py` — YAML utility tests
-
-When adding new features:
-- ✅ Add tests for new functionality
-- 🔄 Make sure existing tests still pass
-- 🎯 Aim for clear, focused test cases
-
----
-
-## 🎉 Thank You! 🥳
-
-Seriously, you're awesome for contributing! 🫶 Every bug fix, feature, and docs improvement makes TalkBack sassier and better.
-
-> *"I guess you're not completely useless after all. Welcome to the team, darling."* 💅✨ — TalkBack
-
-Now go write some code before I start roasting your commit history 🔥💀
-
----
-
-<p align="center">
-  <b>Made with 💻, ☕, and an unreasonable amount of sass</b><br>
-  <i>TalkBack: She didn't ask for contributors, but she's glad you're here.</i> 😏🤖
-</p>
+*Thanks for contributing! You're officially cooler than 99% of developers 😎🏆. Now go make TalkBack even sassier! 💅🔥✨*
