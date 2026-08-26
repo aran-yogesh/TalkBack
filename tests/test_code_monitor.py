@@ -7,9 +7,8 @@ Covers: yaml_scalar, to_yaml, error counting, response type logic, file I/O
 import os
 import sys
 import tempfile
-import time
 import unittest
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import patch
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -136,8 +135,8 @@ class TestToYaml(unittest.TestCase):
         result = to_yaml({"outer": {"inner": 1}}, indent=0)
         lines = result.strip().split("\n")
         # inner key should be indented more than outer key
-        outer_line = next(l for l in lines if "outer" in l)
-        inner_line = next(l for l in lines if "inner" in l)
+        outer_line = next(x for x in lines if "outer" in x)
+        inner_line = next(x for x in lines if "inner" in x)
         self.assertGreater(len(inner_line) - len(inner_line.lstrip()),
                            len(outer_line) - len(outer_line.lstrip()))
 
@@ -336,7 +335,6 @@ class TestSendToTalkback(unittest.TestCase):
         self.assertIn("sassy_success", content)
 
     def test_file_contains_timestamp(self):
-        before = time.time()
         self.monitor.send_to_talkback("output", 0, True)
         content = self._read_message()
         # timestamp key should be present
