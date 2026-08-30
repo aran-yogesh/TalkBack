@@ -41,3 +41,4 @@ config.swift
 *.wav
 recording.*
 
+__pycache__/
