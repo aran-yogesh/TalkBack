@@ -41,3 +41,10 @@ config.swift
 *.wav
 recording.*
 
+# Swift Package Manager
+.build/
+Package.resolved
+
+# Node
+node_modules/
+
