@@ -110,13 +110,10 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         """Count errors in terminal output"""
         error_patterns = [
             r'error:',
-            r'Error:',
-            r'ERROR:',
             r'compilation failed',
             r'build failed',
             r'test failed',
             r'exception',
-            r'Exception',
             r'Traceback',
             r'SyntaxError',
             r'TypeError',
