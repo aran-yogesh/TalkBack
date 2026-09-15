@@ -15,14 +15,14 @@ source .venv/bin/activate
 
 # Check if MCP is installed
 echo "🔍 Checking MCP installation..."
-python -c "import mcp; print('✅ MCP package is installed!')" || {
+python3 -c "import mcp; print('✅ MCP package is installed!')" || {
     echo "❌ MCP package not found. Installing..."
-    pip install mcp
+    pip3 install mcp
 }
 
 # Test MCP server
 echo "🧪 Testing MCP server..."
-python test_mcp_connection.py
+python3 test_mcp_connection.py
 
 # Check if message file was created
 if [ -f "/tmp/talkback_message.json" ]; then

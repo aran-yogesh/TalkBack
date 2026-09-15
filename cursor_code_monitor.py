@@ -170,7 +170,6 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         print(f"🔍 Monitoring command: {command}")
         
         try:
-            # Run command and capture output
             result = subprocess.run(
                 command,
                 shell=True,
