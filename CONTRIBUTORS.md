@@ -1,6 +1,6 @@
 # Contributors
 
-Thanks to everyone who has contributed to TalkBack! 🎉
+Thanks to everyone who has contributed to TalkBack!
 
 ## Creator
 
@@ -8,7 +8,4 @@ Thanks to everyone who has contributed to TalkBack! 🎉
 
 ## How to Contribute
 
-Interested in contributing? Check out the [Contributing](#-contributing) section in the [README](README.md) to get started.
-
-All contributors are welcome — whether you're fixing bugs, suggesting features, submitting pull requests, or improving documentation.
-All contributions — bug reports, feature suggestions, pull requests, and documentation improvements — are welcome and appreciated!
+Interested in contributing? Check out the [Contributing](README.md#-contributing) section in the README for ways to get involved.
