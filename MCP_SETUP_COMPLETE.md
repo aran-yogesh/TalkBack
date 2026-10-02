@@ -1,6 +1,6 @@
-# 🚀 Complete MCP Integration Setup Guide
+# Complete MCP Integration Setup Guide
 
-## ✅ **Step 1: Verify MCP Server**
+## **Step 1: Verify MCP Server**
 Your MCP server is ready! Test it:
 
 ```bash
@@ -9,7 +9,7 @@ source .venv/bin/activate
 python test_mcp_connection.py
 ```
 
-## ✅ **Step 2: Configure Cursor IDE**
+## **Step 2: Configure Cursor IDE**
 
 ### **Option A: Let Cursor Auto-Start (Recommended)**
 1. **Quit Cursor completely**
@@ -30,7 +30,7 @@ python test_mcp_connection.py
 2. **Ignore the initial JSON errors** - they stop when Cursor connects
 3. **Start Cursor** - it will connect to your running server
 
-## ✅ **Step 3: Test the Integration**
+## **Step 3: Test the Integration**
 
 ### **Test 1: Basic Connection**
 ```bash
@@ -47,7 +47,7 @@ python test_mcp_connection.py
    ```bash
    # This should trigger a success message
    echo "Hello World"
-   
+
    # This should trigger an error roast
    python -c "print('This will work')"
    python -c "print(undefined_variable)"  # This will fail
@@ -59,15 +59,15 @@ python test_mcp_connection.py
 tail -f /tmp/talkback_message.json
 ```
 
-## 🎯 **How It Works**
+## **How It Works**
 
 1. **Cursor runs commands** in terminal
 2. **MCP server detects** execution results
 3. **Server writes** to `/tmp/talkback_message.json`
 4. **TalkBack reads** the file and responds with voice
-5. **You get roasted** for errors or praised for success! 🔥
+5. **You get roasted** for errors or praised for success!
 
-## 🔧 **Troubleshooting**
+## **Troubleshooting**
 
 ### **If MCP server won't start:**
 ```bash
@@ -89,15 +89,15 @@ pip install mcp
 2. Verify TalkBack is running
 3. Check console output for errors
 
-## 🎉 **Success Indicators**
+## **Success Indicators**
 
-- ✅ MCP server starts without errors
-- ✅ Cursor connects to MCP server
-- ✅ `/tmp/talkback_message.json` gets created
-- ✅ TalkBack speaks when you run code
-- ✅ You get roasted for errors! 🔥
+- MCP server starts without errors
+- Cursor connects to MCP server
+- `/tmp/talkback_message.json` gets created
+- TalkBack speaks when you run code
+- You get roasted for errors!
 
-## 🚀 **Next Steps**
+## **Next Steps**
 
 Once this is working, you can:
 - **Enhance error detection** for specific languages
@@ -105,4 +105,4 @@ Once this is working, you can:
 - **Integrate with file watching** for real-time feedback
 - **Add calendar integration** for student email features
 
-Your coding assistant is ready to roast you! 🎈🔥
+Your coding assistant is ready to roast you!
