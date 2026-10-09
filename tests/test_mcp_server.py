@@ -6,18 +6,16 @@ Covers: yaml_scalar, to_yaml, resource reading, tool call logic,
 """
 
 import asyncio
-import json
 import os
 import sys
 import tempfile
 import time
 import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, mock_open, patch
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import cursor_mcp_server as mcp_module
 from cursor_mcp_server import (
     execution_results,
     handle_call_tool,
@@ -336,14 +334,14 @@ class TestTriggerTalkbackSpeech(unittest.TestCase):
 
     def test_writes_yaml_file(self):
         with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as f:
-            tmp_path = f.name
+            _ = f.name
 
-        with patch("cursor_mcp_server.open", unittest.mock.mock_open()) as mocked:
+        with patch("cursor_mcp_server.open", mock_open()) as mocked:
             run_async(trigger_talkback_speech("test prompt", "roast"))
             mocked.assert_called_once_with("/tmp/talkback_message.yaml", "w")
 
     def test_real_file_written(self):
-        tmp_path = tempfile.mktemp(suffix=".yaml")
+        _ = tempfile.mktemp(suffix=".yaml")
         original_open = open
 
         written_content = {}
