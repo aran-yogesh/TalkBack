@@ -1,8 +1,8 @@
-# 🔐 API Key Configuration Guide
+# API Key Configuration Guide
 
 This document explains how TalkBack handles API keys.
 
-## 📍 Where Are API Keys Stored?
+## Where Are API Keys Stored?
 
 API keys are now stored in a `Config` struct at the **top of each Swift file** (around line 8):
 
@@ -10,7 +10,7 @@ API keys are now stored in a `Config` struct at the **top of each Swift file** (
 - `ConversationalTalkBack.swift` - Main avatar app
 - `GeminiVisionTest.swift` - Standalone vision test tool
 
-## 🔧 How to Update Your API Keys
+## How to Update Your API Keys
 
 ### 1. Edit the Config Struct
 
@@ -21,15 +21,15 @@ struct Config {
     static let openAIAPIKey: String = {
         return "YOUR_OPENAI_API_KEY_HERE"  // ← Replace this
     }()
-    
+
     static let elevenLabsAPIKey: String = {
         return "YOUR_ELEVENLABS_API_KEY_HERE"  // ← Replace this
     }()
-    
+
     static let elevenLabsVoiceID: String = {
         return "cgSgspJ2msm6clMCkdW9" // Ivanna's voice (keep this)
     }()
-    
+
     static let geminiAPIKey: String = {
         return "YOUR_GEMINI_API_KEY_HERE"  // ← Replace this
     }()
@@ -52,9 +52,9 @@ After updating your API keys, recompile:
 swiftc -O -target arm64-apple-macosx13.0 ConversationalTalkBack.swift -o ConversationalTalkBack
 ```
 
-## 🚨 Security Warning
+## Security Warning
 
-⚠️ **NEVER commit your actual API keys to GitHub!**
+**NEVER commit your actual API keys to GitHub!**
 
 The current API keys in the codebase are **placeholders** (or belong to the original developer for testing).
 
@@ -63,12 +63,11 @@ The current API keys in the codebase are **placeholders** (or belong to the orig
 1. Replace all real API keys with `YOUR_*_API_KEY_HERE` placeholders
 2. Or use a separate `config.swift` file (already added to `.gitignore`)
 
-## 📝 Alternative: Using config.swift (Recommended for Development)
+## Alternative: Using config.swift (Recommended for Development)
 
 For local development, you can create a separate `config.swift` file:
 
-1. **Copy the template**:
-   ```bash
+1. **Copy the template**: ```bash
    cp config.swift.template config.swift
    ```
 
@@ -76,20 +75,19 @@ For local development, you can create a separate `config.swift` file:
 
 3. **This file is gitignored** - it won't be committed to GitHub
 
-4. **Compile with both files**:
-   ```bash
+4. **Compile with both files**: ```bash
    swiftc -O -target arm64-apple-macosx13.0 config.swift ConversationalTalkBack.swift -o ConversationalTalkBack
    ```
 
-## 🎯 Current Setup (as of latest commit)
+## Current Setup (as of latest commit)
 
 The repo currently has:
-- ✅ **Embedded Config struct** in each Swift file
-- ✅ **config.swift** and **config.swift.template** files
-- ✅ **Updated .gitignore** to exclude `config.swift`
-- ✅ **README.md** with setup instructions
+- **Embedded Config struct** in each Swift file
+- **config.swift** and **config.swift.template** files
+- **Updated .gitignore** to exclude `config.swift`
+- **README.md** with setup instructions
 
-## 📚 Files Modified
+## Files Modified
 
 1. **ConversationalTalkBack.swift**
    - Added `Config` struct at the top
@@ -115,6 +113,6 @@ The repo currently has:
 
 ---
 
-**Last Updated**: October 19, 2025  
-**Status**: ✅ All API keys properly configured
+**Last Updated**: October 19, 2025
+**Status**: All API keys properly configured
 

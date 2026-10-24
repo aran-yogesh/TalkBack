@@ -4,7 +4,7 @@ Intentionally broken code to test TalkBack roasting
 """
 
 # Error 1: NameError - undefined variable
-print(undefined_variable)
+print(undefined_variable)  # noqa: F821
 
 # Error 2: TypeError - string + int
 result = "hello" + 5

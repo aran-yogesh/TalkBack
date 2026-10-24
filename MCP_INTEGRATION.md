@@ -1,14 +1,14 @@
-# MCP Integration Guide 🔥
+# MCP Integration Guide
 
 ## Overview
 
-TalkBack now includes **MCP (Model Context Protocol) Code Monitoring** that watches your terminal for code execution results and automatically roasts you when your code fails! 
+TalkBack now includes **MCP (Model Context Protocol) Code Monitoring** that watches your terminal for code execution results and automatically roasts you when your code fails!
 
 This feature seamlessly integrates with your Cursor IDE workflow without disturbing any existing functionality.
 
 ---
 
-## 🎯 How It Works
+## How It Works
 
 ### Architecture
 
@@ -50,26 +50,23 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 
 ---
 
-## 🔥 Roast Levels
+## Roast Levels
 
-### Level 1: Sassy Success (0 errors) 💅
-**Trigger**: Code runs perfectly  
-**System Prompt**: Backhanded compliment energy  
-**Example Response**: *"Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now. 💅✨"*
-
-### Level 2: Minor Sass (1 error) 😏
-**Trigger**: Exactly 1 error detected  
-**System Prompt**: Light sarcasm, not too harsh  
-**Example Response**: *"ONE error? Cute. At least you're almost there, sweetheart. 😏"*
-
-### Level 3: FULL ROAST MODE (2+ errors) 🔥💀
-**Trigger**: 2 or more errors detected  
-**System Prompt**: SAVAGE code reviewer with NO MERCY  
-**Example Response**: *"Oh HONEY, what is this hot mess? Did you code this with your eyes closed? 🔥💀"*
-
+### Level 1: Sassy Success (0 errors)
+**Trigger**: Code runs perfectly
+**System Prompt**: Backhanded compliment energy
+**Example Response**: *"Oh wow, it ACTUALLY worked? Color me shocked, darling! Don't get cocky now."*
+### Level 2: Minor Sass (1 error)
+**Trigger**: Exactly 1 error detected
+**System Prompt**: Light sarcasm, not too harsh
+**Example Response**: *"ONE error? Cute. At least you're almost there, sweetheart."*
+### Level 3: FULL ROAST MODE (2+ errors)
+**Trigger**: 2 or more errors detected
+**System Prompt**: SAVAGE code reviewer with NO MERCY
+**Example Response**: *"Oh HONEY, what is this hot mess? Did you code this with your eyes closed?"*
 ---
 
-## 📂 Files Added/Modified
+## Files Added/Modified
 
 ### New Files:
 - **`test_mcp_roast.py`**: Simple MCP test script (no dependencies needed)
@@ -82,16 +79,14 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 - **`MCP_INTEGRATION.md`**: This documentation file
 
 ### Modified Files:
-- **`ConversationalTalkBack.swift`**: 
-  - Added MCP monitoring variables (`mcpMonitorTimer`, `lastMCPMessageTime`, `mcpMessageFile`)
+- **`ConversationalTalkBack.swift`**: - Added MCP monitoring variables (`mcpMonitorTimer`, `lastMCPMessageTime`, `mcpMessageFile`)
   - Added `startMCPMonitoring()` function
   - Added `checkForMCPMessages()` function
   - Added `generateRoastResponse(prompt:type:)` function
   - Added `askOpenAIForRoast(prompt:systemPrompt:)` function
   - Updated startup message to mention MCP monitoring
 
-- **`README.md`**:
-  - Added MCP Code Monitor feature section
+- **`README.md`**: - Added MCP Code Monitor feature section
   - Added usage instructions for MCP testing
   - Added examples for all 3 roast levels
 
@@ -102,7 +97,7 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Start TalkBack
 ```bash
@@ -111,8 +106,8 @@ This feature seamlessly integrates with your Cursor IDE workflow without disturb
 
 You'll see in the startup output:
 ```
-🔥 MCP MONITORING ACTIVE! (Watching Cursor terminal for errors)
-🔥 WATCHING YOUR CODE! (I'll roast you if 2+ errors)
+MCP MONITORING ACTIVE! (Watching Cursor terminal for errors)
+WATCHING YOUR CODE! (I'll roast you if 2+ errors)
 ```
 
 ### 2. Test with Success (0 errors)
@@ -120,25 +115,25 @@ You'll see in the startup output:
 python3 test_mcp_roast.py 'echo Success!'
 ```
 
-TalkBack will respond with a sassy compliment! 💅
+TalkBack will respond with a sassy compliment!
 
 ### 3. Test with 1 Error
 ```bash
 python3 test_mcp_roast.py 'python3 -c "print(undefined_var)"'
 ```
 
-TalkBack will give you light sass! 😏
+TalkBack will give you light sass!
 
 ### 4. Test with Multiple Errors (FULL ROAST)
 ```bash
 python3 test_mcp_roast.py 'python3 broken_code.py'
 ```
 
-TalkBack will ROAST YOU HARD! 🔥💀
+TalkBack will ROAST YOU HARD!
 
 ---
 
-## 🎯 Integration with Your Workflow
+## Integration with Your Workflow
 
 ### Method 1: Wrap Your Commands
 Instead of running:
@@ -205,7 +200,7 @@ In Cursor, you can create custom tasks in `.vscode/tasks.json`:
 
 ---
 
-## 🔧 Technical Details
+## Technical Details
 
 ### Error Detection Patterns
 The MCP monitor looks for these error patterns in terminal output:
@@ -224,9 +219,9 @@ Each roast level has a custom system prompt:
 
 **Roast (2+ errors)**:
 ```
-You are TalkBack, a SAVAGE code reviewer with NO MERCY! 
+You are TalkBack, a SAVAGE code reviewer with NO MERCY!
 The user's code just FAILED with 2+ errors.
-Your job: ROAST THEM HARD but be funny about it. 
+Your job: ROAST THEM HARD but be funny about it.
 Use dramatic language, emojis, and sass.
 Make them laugh while feeling the burn.
 Keep it under 40 words but make it HURT (in a fun way).
@@ -234,15 +229,15 @@ Keep it under 40 words but make it HURT (in a fun way).
 
 **Minor Sass (1 error)**:
 ```
-You are TalkBack, a sassy code reviewer. 
-The user got 1 error. 
+You are TalkBack, a sassy code reviewer.
+The user got 1 error.
 Give them a little attitude but not too harsh.
 Be witty and sarcastic. Keep it under 30 words.
 ```
 
 **Sassy Success (0 errors)**:
 ```
-You are TalkBack, a sassy AI. 
+You are TalkBack, a sassy AI.
 The user's code ran successfully!
 Say "okay you made it this time" but with MAJOR attitude and sass.
 Backhanded compliment energy.
@@ -251,7 +246,7 @@ Keep it under 30 words. Be dramatic.
 
 ---
 
-## 💡 Tips & Best Practices
+## Tips & Best Practices
 
 1. **Always Have TalkBack Running**: Start it at the beginning of your coding session
 2. **Use for Quick Tests**: Perfect for rapid iteration and debugging
@@ -261,12 +256,12 @@ Keep it under 30 words. Be dramatic.
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### TalkBack not roasting?
 1. Check if TalkBack is running: `ps aux | grep ConversationalTalkBack`
 2. Verify the JSON file is being created: `cat /tmp/talkback_message.json`
-3. Check TalkBack terminal output for "📬 New MCP message" logs
+3. Check TalkBack terminal output for "New MCP message" logs
 
 ### Roasts are too harsh/mild?
 - Edit the `generateRoastResponse` function in `ConversationalTalkBack.swift`
@@ -279,37 +274,37 @@ Keep it under 30 words. Be dramatic.
 
 ---
 
-## 🎉 Examples in Action
+## Examples in Action
 
 ```bash
 # Test 1: Python with syntax error
 $ python3 test_mcp_roast.py 'python3 -c "print(hello"'
-📊 Command finished: 1 errors, success=False
-✅ Sent to TalkBack: minor_sass (errors: 1)
-🎤 TalkBack should roast you in 3... 2... 1... 🔥
+Command finished: 1 errors, success=False
+Sent to TalkBack: minor_sass (errors: 1)
+TalkBack should roast you in 3... 2... 1...
 
-TalkBack (Ivanna): "Aww, ONE error? How precious! You're thisclose, sweetie. 😏"
+TalkBack (Ivanna): "Aww, ONE error? How precious! You're thisclose, sweetie."
 
 # Test 2: Successful execution
 $ python3 test_mcp_roast.py 'echo "Hello World"'
-📊 Command finished: 0 errors, success=True
-✅ Sent to TalkBack: sassy_success (errors: 0)
-🎤 TalkBack should roast you in 3... 2... 1... 🔥
+Command finished: 0 errors, success=True
+Sent to TalkBack: sassy_success (errors: 0)
+TalkBack should roast you in 3... 2... 1...
 
-TalkBack (Ivanna): "Oh WOW, it actually worked?! Mark the calendar, folks! Don't let it go to your head. 💅✨"
+TalkBack (Ivanna): "Oh WOW, it actually worked?! Mark the calendar, folks! Don't let it go to your head."
 
 # Test 3: Multiple errors (FULL ROAST)
 $ python3 test_mcp_roast.py 'python3 broken_code.py'
-📊 Command finished: 5 errors, success=False
-✅ Sent to TalkBack: roast (errors: 5)
-🎤 TalkBack should roast you in 3... 2... 1... 🔥
+Command finished: 5 errors, success=False
+Sent to TalkBack: roast (errors: 5)
+TalkBack should roast you in 3... 2... 1...
 
-TalkBack (Ivanna): "Oh HONEY NO. FIVE errors?! Did you just smash your keyboard and call it code? This is a HOT MESS EXPRESS! 🔥💀🚂"
+TalkBack (Ivanna): "Oh HONEY NO. FIVE errors?! Did you just smash your keyboard and call it code? This is a HOT MESS EXPRESS!"
 ```
 
 ---
 
-## 🚧 Future Enhancements
+## Future Enhancements
 
 Potential improvements for the MCP integration:
 
@@ -322,21 +317,21 @@ Potential improvements for the MCP integration:
 
 ---
 
-## 📝 License
+## License
 
 Same as TalkBack main project - MIT License
 
 ---
 
-## 🙏 Credits
+## Credits
 
 - **MCP Concept**: Inspired by Model Context Protocol for AI integrations
 - **Roasting AI**: Powered by OpenAI GPT-4o-mini
 - **Voice**: ElevenLabs Ivanna voice
-- **Attitude**: 100% TalkBack original sass 💅
+- **Attitude**: 100% TalkBack original sass
 
 ---
 
-**Have fun coding, and may your errors be few and your roasts be savage! 🔥😎**
+**Have fun coding, and may your errors be few and your roasts be savage!**
 
 
