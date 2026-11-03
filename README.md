@@ -4,12 +4,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 
 ## Table of Contents
 
-- [🎯 Features](#-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [🎮 How to Use](#-how-to-use)
-- [📂 Project Structure](#-project-structure)
-- [📋 API Endpoints Used](#-api-endpoints-used)
+
 - [🎭 Personality](#-personality)
 - [🐛 Troubleshooting](#-troubleshooting)
 - [📝 Development Notes](#-development-notes)
@@ -17,7 +12,7 @@ A mischievous macOS floating avatar that acts as your sassy, helpful (but pushy)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [🙏 Acknowledgments](#-acknowledgments)
-- [✍️ Authors](#️-authors)
+- [Authors](#authors)
 - [💬 Questions or Feedback?](#-questions-or-feedback)
 
 
@@ -293,9 +288,9 @@ MIT License - feel free to use, modify, and distribute.
 - **ElevenLabs** for Speech-to-Text and Text-to-Speech APIs
 - **Ivanna** for the sassy voice that brings TalkBack to life
 
-## ✍️ Authors
+## Authors
 
-- 🚀 **Yogesh Mahendran** — Creator & Lead Developer
+- 🧑‍💻 **Yogesh Mahendran** — Creator & Lead Developer
 
 ## 💬 Questions or Feedback?
 

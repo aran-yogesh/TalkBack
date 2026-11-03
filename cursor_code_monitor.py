@@ -5,16 +5,45 @@ This script monitors terminal output and linter errors, then sends to TalkBack
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
 import time
-from pathlib import Path
 from typing import Any
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+# Maximum size for prompt and output fields in TalkBack messages (5KB)
+MAX_PROMPT_SIZE_BYTES = 5 * 1024
+ROAST_ERROR_THRESHOLD = 2
+
+
+def validate_message_fields(message: dict[str, Any]) -> dict[str, Any]:
+    """Validate and enforce size limits on TalkBack message fields.
+
+    - prompt: truncated to MAX_PROMPT_SIZE_BYTES if oversized
+    - type: must be a valid response type, rejected otherwise
+    - error_count: must be non-negative, rejected otherwise
+    """
+    valid_types = {"roast", "minor_sass", "sassy_success"}
+
+    if "type" in message and message["type"] not in valid_types:
+        raise ValueError(
+            f"invalid response type '{message['type']}',"
+            f"must be one of {valid_types}"
+        )
+
+    if "error_count" in message and message["error_count"] < 0:
+        raise ValueError("error_count must be non-negative")
+
+    # Truncate prompt if it exceeds the size limit
+    if "prompt" in message and message["prompt"] is not None:
+        encoded = message["prompt"].encode("utf-8")
+        if len(encoded) > MAX_PROMPT_SIZE_BYTES:
+            truncated = encoded[:MAX_PROMPT_SIZE_BYTES].decode("utf-8", errors="ignore")
+            message["prompt"] = truncated
+
+    return message
 
 
 def yaml_scalar(value: Any) -> str:
@@ -76,7 +105,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         self.talkback_message_file = talkback_message_file
         self.last_error_count = 0
         self.monitoring = True
-        
+
     def count_errors_in_output(self, output: str) -> int:
         """Count errors in terminal output"""
         error_patterns = [
@@ -96,18 +125,18 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             r'ImportError',
             r'ModuleNotFoundError',
         ]
-        
+
         error_count = 0
         for pattern in error_patterns:
             error_count += len(re.findall(pattern, output, re.IGNORECASE))
-        
+
         return error_count
-    
+
     def send_to_talkback(self, output: str, error_count: int, success: bool):
         """Send code execution results to TalkBack"""
-        
+
         # Determine response type
-        if error_count >= 2:
+        if error_count >= ROAST_ERROR_THRESHOLD:
             response_type = "roast"
             prompt = f"ROAST ME! My code failed with {error_count} errors! Here's what happened: {output[:500]}"
         elif error_count == 1:
@@ -116,7 +145,7 @@ class CodeExecutionMonitor(FileSystemEventHandler):
         else:
             response_type = "sassy_success"
             prompt = "My code ran successfully! Tell me 'okay you made it this time' but with major attitude!"
-        
+
         # Create message for TalkBack
         message = {
             "prompt": prompt,
@@ -125,20 +154,21 @@ class CodeExecutionMonitor(FileSystemEventHandler):
             "error_count": error_count,
             "success": success
         }
-        
+        message = validate_message_fields(message)
+
         # Write to file that TalkBack monitors
         try:
             with open(self.talkback_message_file, "w") as f:
                 f.write(to_yaml(message))
-            
-            print(f"✅ Sent to TalkBack: {response_type} (errors: {error_count})")
+
+            print(f"Sent to TalkBack: {response_type} (errors: {error_count})")
         except Exception as e:
-            print(f"❌ Error sending to TalkBack: {e}")
-    
+            print(f"Error sending to TalkBack: {e}")
+
     def monitor_terminal_command(self, command: str):
         """Run a command and monitor its output"""
-        print(f"🔍 Monitoring command: {command}")
-        
+        print(f"Monitoring command: {command}")
+
         try:
             # Run command and capture output
             result = subprocess.run(
@@ -148,54 +178,54 @@ class CodeExecutionMonitor(FileSystemEventHandler):
                 text=True,
                 timeout=30
             )
-            
+
             output = result.stdout + result.stderr
             error_count = self.count_errors_in_output(output)
             success = result.returncode == 0 and error_count == 0
-            
-            print(f"📊 Command finished: {error_count} errors, success={success}")
-            print(f"📄 Output preview: {output[:200]}")
-            
+
+            print(f"Command finished: {error_count} errors, success={success}")
+            print(f"Output preview: {output[:200]}")
+
             # Send to TalkBack
             self.send_to_talkback(output, error_count, success)
-            
+
         except subprocess.TimeoutExpired:
-            print("⏱️  Command timed out")
+            print("Command timed out")
             self.send_to_talkback("Command timed out!", 1, False)
         except Exception as e:
-            print(f"❌ Error running command: {e}")
+            print(f"Error running command: {e}")
             self.send_to_talkback(str(e), 1, False)
 
 def main():
-    print("🤖 TalkBack Cursor Monitor Started!")
+    print("TalkBack Cursor Monitor Started!")
     print("   - Monitoring your code execution")
     print("   - Will trigger TalkBack roasts on errors")
     print("")
-    
+
     monitor = CodeExecutionMonitor()
-    
+
     # Example usage - you can customize this
-    print("📝 Usage examples:")
+    print("Usage examples:")
     print("   1. Run Python: python cursor_code_monitor.py run 'python your_script.py'")
     print("   2. Run Swift: python cursor_code_monitor.py run 'swift your_file.swift'")
     print("   3. Run tests: python cursor_code_monitor.py run 'npm test'")
     print("")
-    
+
     if len(sys.argv) > 2 and sys.argv[1] == "run":
         command = " ".join(sys.argv[2:])
         monitor.monitor_terminal_command(command)
     else:
-        print("💡 Tip: Run this script with 'run' followed by your command")
+        print("Tip: Run this script with 'run' followed by your command")
         print("   Example: python cursor_code_monitor.py run 'python test.py'")
         print("")
-        print("🎤 TalkBack is watching... Ready to roast! 🔥")
-        
+        print("TalkBack is watching... Ready to roast!")
+
         # Keep running to monitor (you can extend this with file watching)
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
-            print("\n👋 Monitor stopped")
+            print("\n Monitor stopped")
 
 if __name__ == "__main__":
     main()
