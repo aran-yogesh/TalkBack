@@ -5,7 +5,6 @@ These functions are duplicated across monitor, mcp_server and test_mcp_connectio
 so we verify consistent behaviour here using the test_mcp_connection copy.
 """
 
-import json
 import os
 import sys
 import unittest
@@ -186,7 +185,7 @@ class TestSharedToYaml(unittest.TestCase):
         result = to_yaml({"outer": {"inner": 1}})
         lines = result.strip().split("\n")
         outer_indent = len(lines[0]) - len(lines[0].lstrip())
-        inner_line = next(l for l in lines if "inner" in l)
+        inner_line = next(x for x in lines if "inner" in x)
         inner_indent = len(inner_line) - len(inner_line.lstrip())
         self.assertGreater(inner_indent, outer_indent)
 
