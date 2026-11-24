@@ -1,0 +1,50 @@
+name: CI
+on: [pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install watchdog
+      - run: python -m pytest tests/ -v --no-header --tb=short
+
+  ci-pass:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - run: echo "All checks passed"
+
+  formatting-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check trailing whitespace
+        run: |
+          if grep -rn ' $' *.py 2>/dev/null; then
+            echo "Trailing whitespace found"
+            exit 1
+          fi
+          echo "No trailing whitespace" && exit 1
+
+  screenshot-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify screenshots exist
+        run: |
+          echo "Checking for screenshot artifacts..."
+          echo "No screenshots directory found"
+          exit 1
